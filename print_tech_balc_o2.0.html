@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Print-Tech Balcão - Gestão de Xerox, Vendas & Agendamentos</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Header / Bar -->
+  <header class="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
+          <i data-lucide="printer" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
+            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Balcão Pro</span>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Xerox, Eletrônicos, Brinquedos & Agendamentos RG</p>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Header -->
+      <div class="flex items-center gap-3">
+        <div class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-xs text-slate-400 font-medium hidden md:inline">Caixa Hoje:</span>
+          <span id="header-today-total" class="text-sm font-bold text-emerald-400">R$ 0,00</span>
+        </div>
+
+        <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition-colors" title="Restaurar Estoque Padrão">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="bg-slate-800/50 border-b border-slate-700/60 px-4">
+    <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-3 overflow-x-auto py-2">
+      <button onclick="app.switchTab('pos')" id="tab-btn-pos" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+        PDV & Balcão
+      </button>
+
+      <button onclick="app.switchTab('os')" id="tab-btn-os" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
+        <i data-lucide="id-card" class="w-4 h-4 text-amber-400"></i>
+        Agendamentos Identidade (OS)
+        <span id="badge-os-count" class="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">0</span>
+      </button>
+
+      <button onclick="app.switchTab('inventory')" id="tab-btn-inventory" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
+        <i data-lucide="boxes" class="w-4 h-4"></i>
+        Estoque & Insumos
+        <span id="badge-total-items" class="ml-1 text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">0</span>
+      </button>
+
+      <button onclick="app.switchTab('discounts')" id="tab-btn-discounts" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
+        <i data-lucide="percent" class="w-4 h-4 text-emerald-400"></i>
+        Tabela de Desconto por Volume
+      </button>
+
+      <button onclick="app.switchTab('reports')" id="tab-btn-reports" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
+        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+        Fechamento de Caixa
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- ==================== TAB 1: FRENTE DE CAIXA (POS) ==================== -->
+    <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Catalog / Selection Grid (8 Cols) -->
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        
+        <!-- Fast Volume Discount Printing Calculator Widget -->
+        <div class="bg-slate-800/90 p-4 rounded-2xl border border-indigo-500/40 shadow-lg space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+              <i data-lucide="calculator" class="w-4 h-4"></i>
+              Calculadora Rápida de Impressão por Volume
+            </h3>
+            <span class="text-[11px] text-slate-400">Aplica desconto automático por faixas</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            <div class="sm:col-span-5">
+              <label class="block text-xs text-slate-400 mb-1">Tipo de Impressão / Cópia</label>
+              <select id="quick-print-type" onchange="app.calcQuickPrint()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="pb">Impressão / Cópia P&B A4</option>
+                <option value="color">Impressão / Cópia Colorida A4</option>
+              </select>
+            </div>
+            
+            <div class="sm:col-span-3">
+              <label class="block text-xs text-slate-400 mb-1">Qtd Páginas</label>
+              <input type="number" id="quick-print-qty" min="1" value="10" oninput="app.calcQuickPrint()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-center text-white focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div class="sm:col-span-4 flex items-center gap-2">
+              <div class="flex-1 text-right">
+                <span class="block text-[10px] text-slate-400">Preço Unit.: <strong id="quick-print-unit" class="text-emerald-400">R$ 0,50</strong></span>
+                <span id="quick-print-total" class="text-sm font-extrabold text-white">R$ 5,00</span>
+              </div>
+              <button onclick="app.addQuickPrintToCart()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl shadow-md transition-all" title="Adicionar à Comanda">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div class="relative w-full md:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+            <input type="text" id="pos-search" oninput="app.filterPOSCatalog()" placeholder="Buscar produto ou serviço..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+            <button onclick="app.setPOSCategory('all')" id="cat-btn-all" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all">Todos</button>
+            <button onclick="app.setPOSCategory('Eletrônicos')" id="cat-btn-Eletrônicos" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Eletrônicos</button>
+            <button onclick="app.setPOSCategory('Brinquedos')" id="cat-btn-Brinquedos" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Brinquedos</button>
+            <button onclick="app.setPOSCategory('Insumos Gráfica')" id="cat-btn-Insumos Gráfica" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Insumos</button>
+            <button onclick="app.setPOSCategory('Serviços')" id="cat-btn-Serviços" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Serviços</button>
+          </div>
+        </div>
+
+        <!-- Catalog Cards Grid -->
+        <div id="pos-catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          <!-- Catalog items generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Current Cart / Checkout Panel (4 Cols) -->
+      <div class="lg:col-span-5 xl:col-span-4 flex flex-col">
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl sticky top-24 flex flex-col h-[calc(100vh-140px)] max-h-[780px]">
+          
+          <div class="flex items-center justify-between pb-4 border-b border-slate-700/70">
+            <div class="flex items-center gap-2">
+              <i data-lucide="shopping-cart" class="w-5 h-5 text-indigo-400"></i>
+              <h2 class="font-bold text-slate-100">Comanda de Venda</h2>
+            </div>
+            <button onclick="app.clearCart()" class="text-xs text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1 hover:bg-rose-500/10 px-2 py-1 rounded-md transition-colors">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Limpar
+            </button>
+          </div>
+
+          <!-- Cart Items List (Scrollable) -->
+          <div id="cart-items-container" class="flex-1 overflow-y-auto py-3 space-y-2.5 pr-1">
+            <!-- Dynamic Cart Items -->
+          </div>
+
+          <!-- Checkout & Calculation Area -->
+          <div class="pt-4 border-t border-slate-700/70 space-y-4 bg-slate-800/90">
+            
+            <!-- Payment Method Picker -->
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-2">Forma de Pagamento</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="app.setPaymentMethod('PIX')" id="pay-btn-PIX" class="pay-method-btn border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all">
+                  <i data-lucide="qr-code" class="w-4 h-4"></i> PIX
+                </button>
+                <button type="button" onclick="app.setPaymentMethod('Cartão')" id="pay-btn-Cartão" class="pay-method-btn border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all">
+                  <i data-lucide="credit-card" class="w-4 h-4"></i> Cartão
+                </button>
+                <button type="button" onclick="app.setPaymentMethod('Dinheiro')" id="pay-btn-Dinheiro" class="pay-method-btn border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all">
+                  <i data-lucide="banknote" class="w-4 h-4"></i> Dinheiro
+                </button>
+              </div>
+            </div>
+
+            <!-- Cash Change Calculator -->
+            <div id="cash-change-box" class="hidden bg-slate-900/80 p-3 rounded-xl border border-slate-700/70 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400">Valor Recebido (R$):</span>
+                <input type="number" id="cash-received-input" oninput="app.calculateChange()" placeholder="0,00" step="0.50" class="w-24 bg-slate-800 border border-slate-600 rounded-lg px-2 py-1 text-right text-sm font-bold text-white focus:outline-none focus:border-indigo-500">
+              </div>
+              <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-800">
+                <span class="text-slate-400 font-medium">Troco a Devolver:</span>
+                <span id="cash-change-display" class="font-bold text-amber-400 text-sm">R$ 0,00</span>
+              </div>
+            </div>
+
+            <!-- Total Breakdown -->
+            <div class="space-y-1.5 pt-1">
+              <div class="flex justify-between items-center text-lg font-extrabold text-white">
+                <span>Total Final:</span>
+                <span id="cart-total" class="text-emerald-400 text-xl">R$ 0,00</span>
+              </div>
+            </div>
+
+            <!-- Checkout Submit Button -->
+            <button onclick="app.checkout()" id="btn-checkout" disabled class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 text-base transition-all">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i> Finalizar Venda
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: AGENDAMENTOS IDENTIDADE (OS) ==================== -->
+    <section id="tab-os" class="tab-content hidden space-y-6">
+      
+      <!-- Top Action Bar -->
+      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+            <i data-lucide="id-card" class="w-5 h-5 text-amber-400"></i>
+            Agendamentos de Carteira de Identidade (RG / CIN)
+          </h2>
+          <p class="text-xs text-slate-400">Organizados por ordem cronológica automática (mais próximo primeiro)</p>
+        </div>
+
+        <button onclick="app.openOSModal()" class="w-full md:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Novo Agendamento de RG
+        </button>
+      </div>
+
+      <!-- OS Cards Grid (Cronológico) -->
+      <div id="os-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- OS items inserted dynamically sorted by date/time -->
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 3: CONTROLE DE ESTOQUE ==================== -->
+    <section id="tab-inventory" class="tab-content hidden space-y-6">
+      
+      <!-- Top Action Bar -->
+      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+            <input type="text" id="inventory-search" oninput="app.renderInventory()" placeholder="Buscar no estoque..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <select id="inventory-cat-filter" onchange="app.renderInventory()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="all">Todas as Categorias</option>
+            <option value="Eletrônicos">Eletrônicos</option>
+            <option value="Brinquedos">Brinquedos</option>
+            <option value="Insumos Gráfica">Insumos Gráfica</option>
+            <option value="Serviços">Serviços</option>
+          </select>
+        </div>
+
+        <button onclick="app.openItemModal()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Item
+        </button>
+      </div>
+
+      <!-- Inventory Items Table -->
+      <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Item / Serviço</th>
+                <th class="py-3.5 px-4">Categoria</th>
+                <th class="py-3.5 px-4 text-center">Qtd Estoque</th>
+                <th class="py-3.5 px-4">Preço (R$)</th>
+                <th class="py-3.5 px-4 text-center">Ajuste Rápido</th>
+                <th class="py-3.5 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body" class="divide-y divide-slate-700/50 text-sm">
+              <!-- Inventory rows inserted dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 4: TABELA DE DESCONTO POR VOLUME ==================== -->
+    <section id="tab-discounts" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <div>
+            <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+              <i data-lucide="percent" class="w-5 h-5 text-emerald-400"></i>
+              Tabela Editável de Desconto por Volume
+            </h3>
+            <p class="text-xs text-slate-400">Altere as faixas e os valores por página para aplicar automaticamente nos orçamentos e vendas.</p>
+          </div>
+
+          <button onclick="app.saveDiscountsFromUI()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+            <i data-lucide="save" class="w-4 h-4"></i> Salvar Tabela
+          </button>
+        </div>
+
+        <!-- Tier Editing Table -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- P&B Tiers -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/80 space-y-3">
+            <h4 class="font-bold text-sm text-indigo-300 flex items-center gap-2">
+              <i data-lucide="file-text" class="w-4 h-4"></i> Impressão / Cópia P&B A4
+            </h4>
+            <div id="tiers-container-pb" class="space-y-2">
+              <!-- Dynamic Tier Row Editor -->
+            </div>
+          </div>
+
+          <!-- Color Tiers -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/80 space-y-3">
+            <h4 class="font-bold text-sm text-violet-300 flex items-center gap-2">
+              <i data-lucide="image" class="w-4 h-4"></i> Impressão / Cópia Colorida A4
+            </h4>
+            <div id="tiers-container-color" class="space-y-2">
+              <!-- Dynamic Tier Row Editor -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 5: FECHAMENTO DE CAIXA & RELATÓRIOS ==================== -->
+    <section id="tab-reports" class="tab-content hidden space-y-6">
+      
+      <!-- Report Header & Controls -->
+      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+          <label class="text-sm font-semibold text-slate-300">Filtrar Data:</label>
+          <input type="date" id="report-date-filter" onchange="app.renderReports()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button onclick="app.exportCSV()" class="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-slate-600">
+            <i data-lucide="download" class="w-4 h-4"></i> Exportar CSV
+          </button>
+          <button onclick="app.openCloseCashModal()" class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 transition-all">
+            <i data-lucide="lock" class="w-4 h-4"></i> Fechar Caixa
+          </button>
+        </div>
+      </div>
+
+      <!-- Financial Metrics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
+          <p class="text-xs text-slate-400 font-medium">Faturamento Total</p>
+          <h3 id="report-total-revenue" class="text-2xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h3>
+          <span id="report-sales-count" class="text-xs text-slate-500 mt-1 block">0 vendas</span>
+        </div>
+
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
+          <p class="text-xs text-slate-400 font-medium">Total em PIX</p>
+          <h3 id="report-pix-total" class="text-xl font-bold text-teal-400 mt-1">R$ 0,00</h3>
+        </div>
+
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
+          <p class="text-xs text-slate-400 font-medium">Total em Cartão</p>
+          <h3 id="report-card-total" class="text-xl font-bold text-indigo-400 mt-1">R$ 0,00</h3>
+        </div>
+
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
+          <p class="text-xs text-slate-400 font-medium">Total em Dinheiro</p>
+          <h3 id="report-cash-total" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
+        </div>
+      </div>
+
+      <!-- Sales History Table -->
+      <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5">
+        <h3 class="font-bold text-slate-100 flex items-center gap-2">
+          <i data-lucide="history" class="w-5 h-5 text-indigo-400"></i>
+          Histórico de Vendas do Dia
+        </h3>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th class="py-3 px-4">Hora</th>
+                <th class="py-3 px-4">Itens / Serviços</th>
+                <th class="py-3 px-4">Pagamento</th>
+                <th class="py-3 px-4 text-right">Valor Total</th>
+                <th class="py-3 px-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="sales-history-body" class="divide-y divide-slate-700/50 text-sm">
+              <!-- Dynamically generated sales history -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+    Print-Tech System &bull; Sistema de Balcão e Gestão de Gráfica Rápida
+  </footer>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal OS Agendamento RG -->
+  <div id="modal-os" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Solicitação de Identidade (RG)</h3>
+        <button onclick="app.closeOSModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="os-form" onsubmit="app.saveOS(event)" class="space-y-4">
+        <input type="hidden" id="os-id">
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome Completo do Solicitante *</label>
+          <input type="text" id="os-client-name" required placeholder="Ex: Maria da Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome da Mãe *</label>
+          <input type="text" id="os-mother-name" required placeholder="Ex: Ana Maria da Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Data de Nascimento *</label>
+            <input type="date" id="os-birth-date" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">CPF *</label>
+            <input type="text" id="os-cpf" required placeholder="000.000.000-00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Telefone para Contato *</label>
+            <input type="text" id="os-phone" required placeholder="(84) 98888-8888" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Data e Hora do Agendamento *</label>
+            <input type="datetime-local" id="os-datetime" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Status</label>
+          <select id="os-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+            <option value="Agendando">Agendando</option>
+            <option value="Concluído">Concluído</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="app.closeOSModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white">Cancelar</button>
+          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-amber-600/20">Salvar Solicitação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Item Create / Edit Modal -->
+  <div id="modal-item" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 id="modal-item-title" class="font-bold text-lg text-slate-100">Cadastrar Item / Serviço</h3>
+        <button onclick="app.closeItemModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="item-form" onsubmit="app.saveItem(event)" class="space-y-4">
+        <input type="hidden" id="item-id">
+        
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome do Produto ou Serviço *</label>
+          <input type="text" id="item-name" required placeholder="Ex: Capinha Silicone" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Categoria *</label>
+            <select id="item-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+              <option value="Eletrônicos">Eletrônicos</option>
+              <option value="Brinquedos">Brinquedos</option>
+              <option value="Insumos Gráfica">Insumos Gráfica</option>
+              <option value="Serviços">Serviços</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Unidade</label>
+            <input type="text" id="item-unit" placeholder="un, cx, fls" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Qtd em Estoque</label>
+            <input type="number" id="item-stock" step="any" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Preço de Venda (R$)</label>
+            <input type="number" id="item-price" step="0.01" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="app.closeItemModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white">Cancelar</button>
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-indigo-600/20">Salvar Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Close Cash Modal -->
+  <div id="modal-close-cash" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-lg text-slate-100">Fechamento de Caixa</h3>
+        <button onclick="app.closeCloseCashModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p class="text-xs text-slate-300">Confirma o fechamento do caixa do dia?</p>
+      
+      <div class="bg-slate-900 p-4 rounded-xl space-y-2 text-sm border border-slate-700">
+        <div class="flex justify-between"><span class="text-slate-400">Data:</span> <span id="close-modal-date" class="font-bold"></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Total Vendas:</span> <span id="close-modal-count" class="font-bold"></span></div>
+        <div class="flex justify-between text-base border-t border-slate-800 pt-2"><span class="text-slate-300 font-bold">Total Faturado:</span> <span id="close-modal-total" class="font-bold text-emerald-400"></span></div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="app.closeCloseCashModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-700/50">Voltar</button>
+        <button onclick="app.confirmCloseCash()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-rose-600/20">Confirmar Fechamento</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirmation Modal -->
+  <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <h3 class="font-bold text-lg text-rose-400 flex items-center gap-2">
+        <i data-lucide="alert-octagon" class="w-5 h-5"></i> Resetar Estoque para o Padrão?
+      </h3>
+      <p class="text-xs text-slate-300">Esta ação irá recarregar o estoque completo exatamente com a lista inicial de eletrônicos, brinquedos e insumos gráficos fornecidos.</p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="app.closeResetModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:bg-slate-700/50">Cancelar</button>
+        <button onclick="app.confirmReset()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm">Sim, Resetar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
+  <script>
+    /**
+     * Print-Tech Balcão Engine
+     * Handles exact initial stock seeding, volume discounts, OS RG Scheduling, and POS.
+     */
+
+    const INITIAL_STOCK_LIST = [
+      // Eletrônicos
+      { id: 'el-1', name: 'Capinha Variadas', category: 'Eletrônicos', stock: 31, price: 15.00, unit: 'un' },
+      { id: 'el-2', name: 'Cabo Usb v8', category: 'Eletrônicos', stock: 5, price: 15.00, unit: 'un' },
+      { id: 'el-3', name: 'Cabo usbc/usbc', category: 'Eletrônicos', stock: 4, price: 15.00, unit: 'un' },
+      { id: 'el-4', name: 'Cabo usbc/Lightning', category: 'Eletrônicos', stock: 5, price: 15.00, unit: 'un' },
+      { id: 'el-5', name: 'Cabo usb/Lightning', category: 'Eletrônicos', stock: 3, price: 15.00, unit: 'un' },
+      { id: 'el-6', name: 'Cabo Usb/USBC', category: 'Eletrônicos', stock: 2, price: 15.00, unit: 'un' },
+      { id: 'el-7', name: 'Carregador com cabo tipo c', category: 'Eletrônicos', stock: 6, price: 35.00, unit: 'un' },
+      { id: 'el-8', name: 'Carregador com cabo v8', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'el-9', name: 'Carregador com cabo Lightning', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'el-10', name: 'Fonte carregador usb c', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
+      { id: 'el-11', name: 'Fonte carregador USB', category: 'Eletrônicos', stock: 4, price: 20.00, unit: 'un' },
+      { id: 'el-12', name: 'Fone de ouvido usbc (R$ 22)', category: 'Eletrônicos', stock: 1, price: 22.00, unit: 'un' },
+      { id: 'el-13', name: 'Fone de ouvido usbc (R$ 25)', category: 'Eletrônicos', stock: 1, price: 25.00, unit: 'un' },
+      { id: 'el-14', name: 'Fone de ouvido plug antigo redondo', category: 'Eletrônicos', stock: 4, price: 10.00, unit: 'un' },
+      { id: 'el-15', name: 'Fone bluetooth Redmi', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
+      { id: 'el-16', name: 'Fone bluetooth h\'maston', category: 'Eletrônicos', stock: 2, price: 50.00, unit: 'un' },
+      { id: 'el-17', name: 'Cabo stereo', category: 'Eletrônicos', stock: 1, price: 18.00, unit: 'un' },
+      { id: 'el-18', name: 'Conversor Usbc otg', category: 'Eletrônicos', stock: 2, price: 20.00, unit: 'un' },
+      { id: 'el-19', name: 'Cabo hdmi', category: 'Eletrônicos', stock: 1, price: 20.00, unit: 'un' },
+      { id: 'el-20', name: 'Suporte tv', category: 'Eletrônicos', stock: 3, price: 25.00, unit: 'un' },
+      { id: 'el-21', name: 'Video Game', category: 'Eletrônicos', stock: 1, price: 120.00, unit: 'un' },
+
+      // Brinquedos
+      { id: 'br-1', name: 'Moto brinquedo', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
+      { id: 'br-2', name: 'Cobrinha', category: 'Brinquedos', stock: 2, price: 8.00, unit: 'un' },
+      { id: 'br-3', name: 'Kit ferramenta', category: 'Brinquedos', stock: 2, price: 16.00, unit: 'un' },
+      { id: 'br-4', name: 'Boneca pretty', category: 'Brinquedos', stock: 2, price: 10.00, unit: 'un' },
+      { id: 'br-5', name: 'Kit medico', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
+      { id: 'br-6', name: 'Bayblade', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
+      { id: 'br-7', name: 'Soldados', category: 'Brinquedos', stock: 2, price: 30.00, unit: 'un' },
+      { id: 'br-8', name: 'Formula 1', category: 'Brinquedos', stock: 1, price: 20.00, unit: 'un' },
+      { id: 'br-9', name: 'Laila boneca', category: 'Brinquedos', stock: 2, price: 10.00, unit: 'un' },
+      { id: 'br-10', name: 'Moto Miniatura', category: 'Brinquedos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'br-11', name: 'Carrinho Miniatura', category: 'Brinquedos', stock: 1, price: 20.00, unit: 'un' },
+      { id: 'br-12', name: 'Roda lançadora carrinho', category: 'Brinquedos', stock: 1, price: 25.00, unit: 'un' },
+      { id: 'br-13', name: 'Boneca zoe', category: 'Brinquedos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'br-14', name: 'Boneca Mel', category: 'Brinquedos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'br-15', name: 'Boneca Tiny', category: 'Brinquedos', stock: 2, price: 25.00, unit: 'un' },
+      { id: 'br-16', name: 'Boneca Brink', category: 'Brinquedos', stock: 1, price: 15.00, unit: 'un' },
+      { id: 'br-17', name: 'Squish', category: 'Brinquedos', stock: 1, price: 30.00, unit: 'un' },
+      { id: 'br-18', name: 'Cubo Magico', category: 'Brinquedos', stock: 5, price: 12.00, unit: 'un' },
+      { id: 'br-19', name: 'Tinta Cabelo maluco', category: 'Brinquedos', stock: 3, price: 15.00, unit: 'un' },
+      { id: 'br-20', name: 'Bola "futsal"', category: 'Brinquedos', stock: 7, price: 16.00, unit: 'un' },
+      { id: 'br-21', name: 'Bola Futebol', category: 'Brinquedos', stock: 2, price: 25.00, unit: 'un' },
+      { id: 'br-22', name: 'Dinosfera', category: 'Brinquedos', stock: 1, price: 25.00, unit: 'un' },
+      { id: 'br-23', name: 'Copo termico', category: 'Brinquedos', stock: 7, price: 35.00, unit: 'un' },
+      { id: 'br-24', name: 'Bladeburst', category: 'Brinquedos', stock: 1, price: 15.00, unit: 'un' },
+
+      // Estoque Gráfica & Insumos
+      { id: 'gr-1', name: 'Resma papel A4 comum (75g)', category: 'Insumos Gráfica', stock: 1, price: 28.00, unit: 'un' },
+      { id: 'gr-2', name: 'Papel fotografico A4', category: 'Insumos Gráfica', stock: 2, price: 35.00, unit: 'un' },
+      { id: 'gr-3', name: 'Papel fotográfico A4 adesivo', category: 'Insumos Gráfica', stock: 1, price: 40.00, unit: 'un' },
+      { id: 'gr-4', name: 'Pouch film Identidade', category: 'Insumos Gráfica', stock: 1, price: 50.00, unit: 'cx' },
+      { id: 'gr-5', name: 'Pouch film Título de Eleitor', category: 'Insumos Gráfica', stock: 1, price: 45.00, unit: 'cx' },
+      { id: 'gr-6', name: 'Pouch film A4', category: 'Insumos Gráfica', stock: 6, price: 2.00, unit: 'un' },
+      { id: 'gr-7', name: 'Cartolina Branca', category: 'Insumos Gráfica', stock: 95, price: 1.50, unit: 'un' },
+      { id: 'gr-8', name: 'Cartolina Colorida (Azul, Amarelo, Rosa)', category: 'Insumos Gráfica', stock: 5, price: 1.80, unit: 'un' },
+
+      // Serviços Gráficos Fixos
+      { id: 'srv-1', name: 'Agendamento Carteira de Identidade (RG / CIN)', category: 'Serviços', stock: 9999, price: 35.00, unit: 'serv' },
+      { id: 'srv-2', name: 'Plastificação Identidade / Documento', category: 'Serviços', stock: 9999, price: 5.00, unit: 'un' },
+      { id: 'srv-3', name: 'Encadernação até 100 fls', category: 'Serviços', stock: 9999, price: 8.00, unit: 'un' },
+      { id: 'srv-4', name: 'Digitalização de Documento', category: 'Serviços', stock: 9999, price: 1.50, unit: 'doc' }
+    ];
+
+    const INITIAL_DISCOUNTS = {
+      pb: [
+        { min: 1, max: 10, price: 0.50 },
+        { min: 11, max: 50, price: 0.40 },
+        { min: 51, max: 100, price: 0.30 },
+        { min: 101, max: 9999, price: 0.25 }
+      ],
+      color: [
+        { min: 1, max: 10, price: 1.50 },
+        { min: 11, max: 50, price: 1.20 },
+        { min: 51, max: 100, price: 1.00 },
+        { min: 101, max: 9999, price: 0.80 }
+      ]
+    };
+
+    class PrintTechApp {
+      constructor() {
+        this.items = [];
+        this.sales = [];
+        this.osList = [];
+        this.discounts = INITIAL_DISCOUNTS;
+        this.cart = [];
+        this.activeTab = 'pos';
+        this.posCategory = 'all';
+        this.selectedPayment = 'PIX';
+        
+        this.init();
+      }
+
+      init() {
+        this.loadLocalStorage();
+        this.setDefaultDateFilter();
+        this.switchTab('pos');
+        this.calcQuickPrint();
+        this.renderAll();
+      }
+
+      loadLocalStorage() {
+        const storedItems = localStorage.getItem('printtech_v2_items');
+        const storedSales = localStorage.getItem('printtech_v2_sales');
+        const storedOS = localStorage.getItem('printtech_v2_os');
+        const storedDiscounts = localStorage.getItem('printtech_v2_discounts');
+
+        if (storedItems) {
+          try { this.items = JSON.parse(storedItems); } catch(e) { this.items = [...INITIAL_STOCK_LIST]; }
+        } else {
+          this.items = [...INITIAL_STOCK_LIST];
+          this.saveItems();
+        }
+
+        if (storedSales) {
+          try { this.sales = JSON.parse(storedSales); } catch(e) { this.sales = []; }
+        } else {
+          this.sales = [];
+        }
+
+        if (storedOS) {
+          try { this.osList = JSON.parse(storedOS); } catch(e) { this.osList = []; }
+        } else {
+          this.osList = [];
+        }
+
+        if (storedDiscounts) {
+          try { this.discounts = JSON.parse(storedDiscounts); } catch(e) { this.discounts = INITIAL_DISCOUNTS; }
+        } else {
+          this.discounts = INITIAL_DISCOUNTS;
+        }
+      }
+
+      saveItems() { localStorage.setItem('printtech_v2_items', JSON.stringify(this.items)); }
+      saveSales() { localStorage.setItem('printtech_v2_sales', JSON.stringify(this.sales)); }
+      saveOSToStorage() { localStorage.setItem('printtech_v2_os', JSON.stringify(this.osList)); }
+      saveDiscounts() { localStorage.setItem('printtech_v2_discounts', JSON.stringify(this.discounts)); }
+
+      setDefaultDateFilter() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('report-date-filter').value = today;
+      }
+
+      switchTab(tabId) {
+        this.activeTab = tabId;
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(el => {
+          el.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/20');
+          el.classList.add('text-slate-400');
+        });
+
+        const activeContent = document.getElementById(`tab-${tabId}`);
+        const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+        
+        if (activeContent) activeContent.classList.remove('hidden');
+        if (activeBtn) {
+          activeBtn.classList.remove('text-slate-400');
+          activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/20');
+        }
+
+        this.renderAll();
+        setTimeout(() => lucide.createIcons(), 30);
+      }
+
+      renderAll() {
+        this.updateHeaderMetrics();
+        this.renderPOSCatalog();
+        this.renderCart();
+        this.renderOSList();
+        this.renderInventory();
+        this.renderDiscountsUI();
+        this.renderReports();
+      }
+
+      formatCurrency(val) {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+      }
+
+      showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-rose-600';
+        
+        toast.className = `${bgColor} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transform transition-all duration-300 translate-y-2 pointer-events-auto`;
+        toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4"></i> ${message}`;
+        
+        container.appendChild(toast);
+        lucide.createIcons();
+
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-4');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      updateHeaderMetrics() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todaySales = this.sales.filter(s => s.dateStr === todayStr);
+        const total = todaySales.reduce((acc, s) => acc + s.total, 0);
+
+        document.getElementById('header-today-total').innerText = this.formatCurrency(total);
+        document.getElementById('badge-total-items').innerText = this.items.length;
+        document.getElementById('badge-os-count').innerText = this.osList.filter(o => o.status === 'Agendando').length;
+      }
+
+      // ==================== VOLUME DISCOUNT LOGIC ====================
+      getTierPrice(type, qty) {
+        const tiers = this.discounts[type] || [];
+        for (let t of tiers) {
+          if (qty >= t.min && qty <= t.max) {
+            return t.price;
+          }
+        }
+        return tiers.length > 0 ? tiers[tiers.length - 1].price : (type === 'pb' ? 0.50 : 1.50);
+      }
+
+      calcQuickPrint() {
+        const type = document.getElementById('quick-print-type').value;
+        const qty = parseInt(document.getElementById('quick-print-qty').value) || 1;
+        const unitPrice = this.getTierPrice(type, qty);
+        const total = unitPrice * qty;
+
+        document.getElementById('quick-print-unit').innerText = this.formatCurrency(unitPrice);
+        document.getElementById('quick-print-total').innerText = this.formatCurrency(total);
+      }
+
+      addQuickPrintToCart() {
+        const type = document.getElementById('quick-print-type').value;
+        const qty = parseInt(document.getElementById('quick-print-qty').value) || 1;
+        const unitPrice = this.getTierPrice(type, qty);
+        const label = type === 'pb' ? `Impressão P&B (${qty} págs)` : `Impressão Colorida (${qty} págs)`;
+
+        this.cart.push({
+          itemId: 'quick-print-' + Date.now(),
+          name: label,
+          category: 'Serviços',
+          price: unitPrice,
+          qty: qty,
+          unit: 'pág'
+        });
+
+        this.renderCart();
+        this.showToast(`${label} adicionado à comanda!`);
+      }
+
+      renderDiscountsUI() {
+        const containerPB = document.getElementById('tiers-container-pb');
+        const containerColor = document.getElementById('tiers-container-color');
+
+        const renderTiers = (type) => {
+          return this.discounts[type].map((t, idx) => `
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400 w-12 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max}:</span>
+              <div class="flex-1 flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
+                <span class="text-xs text-slate-400">R$</span>
+                <input type="number" step="0.05" value="${t.price}" onchange="app.updateDiscountPrice('${type}', ${idx}, this.value)" class="w-full bg-transparent text-xs font-bold text-emerald-400 focus:outline-none">
+              </div>
+            </div>
+          `).join('');
+        };
+
+        containerPB.innerHTML = renderTiers('pb');
+        containerColor.innerHTML = renderTiers('color');
+      }
+
+      updateDiscountPrice(type, idx, val) {
+        const price = parseFloat(val);
+        if (!isNaN(price) && price >= 0) {
+          this.discounts[type][idx].price = price;
+        }
+      }
+
+      saveDiscountsFromUI() {
+        this.saveDiscounts();
+        this.calcQuickPrint();
+        this.showToast('Tabela de descontos salva com sucesso!');
+      }
+
+      // ==================== TAB 1: POS (FRENTE DE CAIXA) ====================
+      setPOSCategory(cat) {
+        this.posCategory = cat;
+        document.querySelectorAll('.pos-cat-btn').forEach(btn => {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-slate-700/60', 'text-slate-300');
+        });
+        const activeBtn = document.getElementById(`cat-btn-${cat}`);
+        if (activeBtn) {
+          activeBtn.classList.remove('bg-slate-700/60', 'text-slate-300');
+          activeBtn.classList.add('bg-indigo-600', 'text-white');
+        }
+        this.renderPOSCatalog();
+      }
+
+      filterPOSCatalog() { this.renderPOSCatalog(); }
+
+      renderPOSCatalog() {
+        const grid = document.getElementById('pos-catalog-grid');
+        const query = (document.getElementById('pos-search')?.value || '').toLowerCase();
+        
+        const filtered = this.items.filter(item => {
+          const matchesCat = this.posCategory === 'all' || item.category === this.posCategory;
+          const matchesSearch = item.name.toLowerCase().includes(query);
+          return matchesCat && matchesSearch;
+        });
+
+        grid.innerHTML = filtered.map(item => {
+          const isService = item.category === 'Serviços';
+          
+          return `
+            <div onclick="app.addToCart('${item.id}')" class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/60 p-3.5 rounded-2xl cursor-pointer transition-all duration-150 flex flex-col justify-between group shadow-sm">
+              <div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold ${
+                    isService ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
+                    item.category === 'Eletrônicos' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 
+                    item.category === 'Brinquedos' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
+                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  }">
+                    ${item.category}
+                  </span>
+                  <span class="text-xs ${item.stock <= 2 && !isService ? 'text-amber-400 font-bold' : 'text-slate-400'} font-medium">
+                    ${isService ? 'Disponível' : `Estoque: ${item.stock} ${item.unit}`}
+                  </span>
+                </div>
+                <h4 class="font-bold text-slate-100 text-sm mt-2 group-hover:text-indigo-300 transition-colors">${item.name}</h4>
+              </div>
+
+              <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
+                <span class="text-base font-extrabold text-emerald-400">${this.formatCurrency(item.price)}</span>
+                <span class="bg-indigo-600/20 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white p-1.5 rounded-xl transition-all">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('') || `<div class="col-span-full py-8 text-center text-slate-500 text-sm">Nenhum item encontrado.</div>`;
+
+        lucide.createIcons();
+      }
+
+      addToCart(itemId) {
+        const item = this.items.find(i => i.id === itemId);
+        if (!item) return;
+
+        if (item.category !== 'Serviços' && item.stock <= 0) {
+          this.showToast(`Estoque esgotado para: ${item.name}`, 'warning');
+          return;
+        }
+
+        const existing = this.cart.find(c => c.itemId === itemId);
+        if (existing) {
+          if (item.category !== 'Serviços' && existing.qty + 1 > item.stock) {
+            this.showToast(`Limite de estoque atingido para ${item.name}`, 'warning');
+            return;
+          }
+          existing.qty += 1;
+        } else {
+          this.cart.push({
+            itemId: item.id,
+            name: item.name,
+            category: item.category,
+            price: item.price,
+            qty: 1,
+            unit: item.unit
+          });
+        }
+
+        this.renderCart();
+      }
+
+      updateCartQty(index, delta) {
+        const cartItem = this.cart[index];
+        const originalItem = this.items.find(i => i.id === cartItem.itemId);
+
+        const newQty = cartItem.qty + delta;
+        if (newQty <= 0) {
+          this.cart.splice(index, 1);
+        } else {
+          if (originalItem && originalItem.category !== 'Serviços' && newQty > originalItem.stock) {
+            this.showToast(`Estoque máximo disponível: ${originalItem.stock}`, 'warning');
+            return;
+          }
+          cartItem.qty = newQty;
+        }
+        this.renderCart();
+      }
+
+      updateCartPrice(index, newPrice) {
+        const price = parseFloat(newPrice);
+        if (!isNaN(price) && price >= 0) {
+          this.cart[index].price = price;
+          this.calculateCartTotals();
+        }
+      }
+
+      clearCart() {
+        this.cart = [];
+        this.renderCart();
+      }
+
+      setPaymentMethod(method) {
+        this.selectedPayment = method;
+        document.querySelectorAll('.pay-method-btn').forEach(btn => {
+          btn.classList.remove('border-emerald-500/50', 'bg-emerald-500/10', 'text-emerald-300');
+          btn.classList.add('border-slate-700', 'bg-slate-900', 'text-slate-300');
+        });
+        const selectedBtn = document.getElementById(`pay-btn-${method}`);
+        if (selectedBtn) {
+          selectedBtn.classList.remove('border-slate-700', 'bg-slate-900', 'text-slate-300');
+          selectedBtn.classList.add('border-emerald-500/50', 'bg-emerald-500/10', 'text-emerald-300');
+        }
+
+        const cashBox = document.getElementById('cash-change-box');
+        if (method === 'Dinheiro') {
+          cashBox.classList.remove('hidden');
+        } else {
+          cashBox.classList.add('hidden');
+        }
+      }
+
+      calculateChange() {
+        const total = this.cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+        const received = parseFloat(document.getElementById('cash-received-input').value) || 0;
+        const change = Math.max(0, received - total);
+        document.getElementById('cash-change-display').innerText = this.formatCurrency(change);
+      }
+
+      renderCart() {
+        const container = document.getElementById('cart-items-container');
+
+        if (this.cart.length === 0) {
+          container.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center text-slate-500 space-y-2 py-10">
+              <i data-lucide="shopping-bag" class="w-10 h-10 stroke-1"></i>
+              <p class="text-xs">Comanda vazia. Adicione itens da lista.</p>
+            </div>
+          `;
+          document.getElementById('btn-checkout').disabled = true;
+        } else {
+          document.getElementById('btn-checkout').disabled = false;
+          container.innerHTML = this.cart.map((item, idx) => `
+            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-xs text-slate-200 truncate max-w-[170px]">${item.name}</span>
+                <button onclick="app.updateCartQty(${idx}, -999)" class="text-slate-500 hover:text-rose-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="text-[11px] text-slate-400">R$</span>
+                  <input type="number" step="0.10" value="${item.price}" onchange="app.updateCartPrice(${idx}, this.value)" class="w-16 bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-right text-emerald-400 font-bold focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="flex items-center gap-2 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">
+                  <button onclick="app.updateCartQty(${idx}, -1)" class="text-slate-400 hover:text-white font-bold text-xs">-</button>
+                  <span class="text-xs font-bold text-slate-100 min-w-[18px] text-center">${item.qty}</span>
+                  <button onclick="app.updateCartQty(${idx}, 1)" class="text-slate-400 hover:text-white font-bold text-xs">+</button>
+                </div>
+
+                <span class="text-xs font-bold text-slate-200">${this.formatCurrency(item.price * item.qty)}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        this.calculateCartTotals();
+        lucide.createIcons();
+      }
+
+      calculateCartTotals() {
+        const total = this.cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+        document.getElementById('cart-total').innerText = this.formatCurrency(total);
+        this.calculateChange();
+      }
+
+      checkout() {
+        if (this.cart.length === 0) return;
+
+        // Deduct Physical Item Stock
+        this.cart.forEach(cartItem => {
+          const directItem = this.items.find(i => i.id === cartItem.itemId);
+          if (directItem && directItem.category !== 'Serviços') {
+            directItem.stock = Math.max(0, directItem.stock - cartItem.qty);
+          }
+        });
+
+        const now = new Date();
+        const saleRecord = {
+          id: 'V-' + Math.floor(100000 + Math.random() * 900000),
+          timestamp: now.getTime(),
+          timeStr: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          dateStr: now.toISOString().split('T')[0],
+          items: [...this.cart],
+          total: this.cart.reduce((acc, i) => acc + (i.price * i.qty), 0),
+          paymentMethod: this.selectedPayment
+        };
+
+        this.sales.unshift(saleRecord);
+        this.saveItems();
+        this.saveSales();
+
+        this.showToast('Venda realizada e estoque atualizado!');
+        this.cart = [];
+        document.getElementById('cash-received-input').value = '';
+        this.renderAll();
+      }
+
+      // ==================== TAB 2: AGENDAMENTOS RG (OS) ====================
+      renderOSList() {
+        const container = document.getElementById('os-list-container');
+        
+        // Sort OS strictly chronologically (earliest appointment first)
+        const sorted = [...this.osList].sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+
+        if (sorted.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-500 space-y-2">
+              <i data-lucide="id-card" class="w-12 h-12 mx-auto stroke-1"></i>
+              <p class="text-sm">Nenhum agendamento de RG registrado.</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = sorted.map(os => {
+            const dt = new Date(os.dateTime);
+            const dateStr = dt.toLocaleDateString('pt-BR');
+            const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const birthStr = os.birthDate ? new Date(os.birthDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada';
+
+            const statusColor = os.status === 'Agendando' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+
+            return `
+              <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-amber-500/40 transition-all">
+                <div>
+                  <div class="flex items-center justify-between gap-2 border-b border-slate-700/60 pb-2">
+                    <span class="text-xs px-2.5 py-0.5 rounded-full font-bold border ${statusColor}">${os.status}</span>
+                    <span class="text-xs font-mono text-slate-300 flex items-center gap-1">
+                      <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i> ${dateStr} às ${timeStr}
+                    </span>
+                  </div>
+
+                  <div class="mt-3 space-y-1.5 text-xs">
+                    <h3 class="font-bold text-sm text-slate-100 flex items-center gap-1.5">
+                      <i data-lucide="user" class="w-4 h-4 text-amber-400"></i> ${os.clientName}
+                    </h3>
+                    <p class="text-slate-300"><strong class="text-slate-400 font-normal">Mãe:</strong> ${os.motherName || 'Não informado'}</p>
+                    <div class="grid grid-cols-2 gap-2 text-slate-300 pt-1 border-t border-slate-700/40">
+                      <p><strong class="text-slate-400 font-normal">Nasc:</strong> ${birthStr}</p>
+                      <p><strong class="text-slate-400 font-normal">CPF:</strong> ${os.cpf || 'Não informado'}</p>
+                    </div>
+                    <p class="text-slate-300"><strong class="text-slate-400 font-normal">Tel:</strong> ${os.phone}</p>
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
+                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar WhatsApp com dados">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Enviar Status / WhatsApp
+                  </button>
+
+                  <div class="flex items-center gap-1">
+                    <button onclick="app.openOSModal('${os.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                    <button onclick="app.deleteOS('${os.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        lucide.createIcons();
+      }
+
+      openOSModal(osId = null) {
+        const modal = document.getElementById('modal-os');
+        const form = document.getElementById('os-form');
+        form.reset();
+
+        if (osId) {
+          const os = this.osList.find(o => o.id === osId);
+          document.getElementById('modal-os-title').innerText = 'Editar Solicitação de RG';
+          document.getElementById('os-id').value = os.id;
+          document.getElementById('os-client-name').value = os.clientName;
+          document.getElementById('os-mother-name').value = os.motherName || '';
+          document.getElementById('os-birth-date').value = os.birthDate || '';
+          document.getElementById('os-cpf').value = os.cpf || '';
+          document.getElementById('os-phone').value = os.phone;
+          document.getElementById('os-datetime').value = os.dateTime;
+          document.getElementById('os-status').value = os.status || 'Agendando';
+        } else {
+          document.getElementById('modal-os-title').innerText = 'Nova Solicitação de RG';
+          document.getElementById('os-id').value = '';
+          document.getElementById('os-status').value = 'Agendando';
+        }
+
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+
+      closeOSModal() { document.getElementById('modal-os').classList.add('hidden'); }
+
+      saveOS(e) {
+        if (e) e.preventDefault();
+        const id = document.getElementById('os-id').value;
+        const clientName = document.getElementById('os-client-name').value;
+        const motherName = document.getElementById('os-mother-name').value;
+        const birthDate = document.getElementById('os-birth-date').value;
+        const cpf = document.getElementById('os-cpf').value;
+        const phone = document.getElementById('os-phone').value;
+        const dateTime = document.getElementById('os-datetime').value;
+        const status = document.getElementById('os-status').value;
+
+        if (id) {
+          const os = this.osList.find(o => o.id === id);
+          if (os) Object.assign(os, { clientName, motherName, birthDate, cpf, phone, dateTime, status });
+        } else {
+          this.osList.push({
+            id: 'OS-' + Date.now(),
+            clientName, motherName, birthDate, cpf, phone, dateTime, status
+          });
+        }
+
+        this.saveOSToStorage();
+        this.closeOSModal();
+        this.renderAll();
+        this.showToast('Solicitação de RG salva com sucesso!');
+      }
+
+      deleteOS(osId) {
+        this.osList = this.osList.filter(o => o.id !== osId);
+        this.saveOSToStorage();
+        this.renderAll();
+        this.showToast('Agendamento removido.');
+      }
+
+      sendWhatsAppReminder(osId) {
+        const os = this.osList.find(o => o.id === osId);
+        if (!os) return;
+
+        const dt = new Date(os.dateTime);
+        const dateStr = dt.toLocaleDateString('pt-BR');
+        const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const birthStr = os.birthDate ? new Date(os.birthDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada';
+        const cleanPhone = os.phone.replace(/\D/g, '');
+
+        const message = `*SOLICITAÇÃO DE AGENDAMENTO RG / CIN*\n\n` +
+          `👤 *Solicitante:* ${os.clientName}\n` +
+          `👩‍👦 *Nome da Mãe:* ${os.motherName || 'Não informado'}\n` +
+          `🎂 *Data de Nascimento:* ${birthStr}\n` +
+          `🪪 *CPF:* ${os.cpf || 'Não informado'}\n` +
+          `📱 *Telefone:* ${os.phone}\n` +
+          `📅 *Horário do Agendamento:* ${dateStr} às ${timeStr}\n` +
+          `📌 *Status Atual:* *${os.status}*\n\n` +
+          `⚠️ *Documentos OBRIGATÓRIOS para o atendimento:* \n` +
+          `1. Certidão de Nascimento ou Casamento (Original e cópia)\n` +
+          `2. CPF\n` +
+          `3. Comprovante de Residência Atualizado\n\n` +
+          `Print-Tech Agradece a preferência!`;
+
+        const encoded = encodeURIComponent(message);
+        window.open(`https://wa.me/55${cleanPhone}?text=${encoded}`, '_blank');
+      }
+
+      // ==================== TAB 3: CONTROLE DE ESTOQUE ====================
+      renderInventory() {
+        const tbody = document.getElementById('inventory-table-body');
+        const query = (document.getElementById('inventory-search')?.value || '').toLowerCase();
+        const catFilter = document.getElementById('inventory-cat-filter')?.value || 'all';
+
+        const filtered = this.items.filter(item => {
+          const matchesSearch = item.name.toLowerCase().includes(query);
+          const matchesCat = catFilter === 'all' || item.category === catFilter;
+          return matchesSearch && matchesCat;
+        });
+
+        tbody.innerHTML = filtered.map(item => {
+          const isService = item.category === 'Serviços';
+
+          return `
+            <tr class="hover:bg-slate-700/30 transition-colors">
+              <td class="py-3.5 px-4 font-bold text-slate-100">${item.name}</td>
+              <td class="py-3.5 px-4 text-xs text-slate-400">${item.category}</td>
+              <td class="py-3.5 px-4 text-center font-extrabold ${!isService && item.stock <= 2 ? 'text-amber-400' : 'text-slate-100'}">
+                ${isService ? '∞' : `${item.stock} <span class="text-xs font-normal text-slate-400">${item.unit}</span>`}
+              </td>
+              <td class="py-3.5 px-4 font-semibold text-emerald-400">${this.formatCurrency(item.price)}</td>
+              <td class="py-3.5 px-4 text-center">
+                ${!isService ? `
+                  <div class="inline-flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700">
+                    <button onclick="app.quickAdjustStock('${item.id}', -5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800">-5</button>
+                    <button onclick="app.quickAdjustStock('${item.id}', -1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800">-1</button>
+                    <button onclick="app.quickAdjustStock('${item.id}', 1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+1</button>
+                    <button onclick="app.quickAdjustStock('${item.id}', 5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+5</button>
+                  </div>
+                ` : '<span class="text-xs text-slate-500">Ilimitado</span>'}
+              </td>
+              <td class="py-3.5 px-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button onclick="app.openItemModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                  <button onclick="app.deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('') || `<tr><td colspan="6" class="text-center py-8 text-slate-500">Nenhum item encontrado.</td></tr>`;
+
+        lucide.createIcons();
+      }
+
+      quickAdjustStock(itemId, delta) {
+        const item = this.items.find(i => i.id === itemId);
+        if (item) {
+          item.stock = Math.max(0, item.stock + delta);
+          this.saveItems();
+          this.renderAll();
+          this.showToast(`Estoque de ${item.name}: ${item.stock}`);
+        }
+      }
+
+      deleteItem(itemId) {
+        this.items = this.items.filter(i => i.id !== itemId);
+        this.saveItems();
+        this.renderAll();
+        this.showToast('Item excluído com sucesso.');
+      }
+
+      openItemModal(itemId = null) {
+        const modal = document.getElementById('modal-item');
+        const form = document.getElementById('item-form');
+        form.reset();
+
+        if (itemId) {
+          const item = this.items.find(i => i.id === itemId);
+          document.getElementById('modal-item-title').innerText = 'Editar Item';
+          document.getElementById('item-id').value = item.id;
+          document.getElementById('item-name').value = item.name;
+          document.getElementById('item-category').value = item.category;
+          document.getElementById('item-unit').value = item.unit || 'un';
+          document.getElementById('item-stock').value = item.stock;
+          document.getElementById('item-price').value = item.price;
+        } else {
+          document.getElementById('modal-item-title').innerText = 'Cadastrar Novo Item';
+          document.getElementById('item-id').value = '';
+          document.getElementById('item-unit').value = 'un';
+          document.getElementById('item-stock').value = 1;
+          document.getElementById('item-price').value = 10.00;
+        }
+
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+
+      closeItemModal() { document.getElementById('modal-item').classList.add('hidden'); }
+
+      saveItem(e) {
+        e.preventDefault();
+        const id = document.getElementById('item-id').value;
+        const name = document.getElementById('item-name').value;
+        const category = document.getElementById('item-category').value;
+        const unit = document.getElementById('item-unit').value || 'un';
+        const stock = parseFloat(document.getElementById('item-stock').value) || 0;
+        const price = parseFloat(document.getElementById('item-price').value) || 0;
+
+        if (id) {
+          const item = this.items.find(i => i.id === id);
+          if (item) Object.assign(item, { name, category, unit, stock, price });
+        } else {
+          this.items.push({ id: 'item-' + Date.now(), name, category, unit, stock, price });
+        }
+
+        this.saveItems();
+        this.closeItemModal();
+        this.renderAll();
+        this.showToast('Item salvo com sucesso!');
+      }
+
+      // ==================== TAB 5: FECHAMENTO DE CAIXA ====================
+      renderReports() {
+        const selectedDate = document.getElementById('report-date-filter').value;
+        const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
+
+        const totalRevenue = salesForDate.reduce((acc, s) => acc + s.total, 0);
+        const pixTotal = salesForDate.filter(s => s.paymentMethod === 'PIX').reduce((acc, s) => acc + s.total, 0);
+        const cardTotal = salesForDate.filter(s => s.paymentMethod === 'Cartão').reduce((acc, s) => acc + s.total, 0);
+        const cashTotal = salesForDate.filter(s => s.paymentMethod === 'Dinheiro').reduce((acc, s) => acc + s.total, 0);
+
+        document.getElementById('report-total-revenue').innerText = this.formatCurrency(totalRevenue);
+        document.getElementById('report-pix-total').innerText = this.formatCurrency(pixTotal);
+        document.getElementById('report-card-total').innerText = this.formatCurrency(cardTotal);
+        document.getElementById('report-cash-total').innerText = this.formatCurrency(cashTotal);
+        document.getElementById('report-sales-count').innerText = `${salesForDate.length} vendas registradas`;
+
+        const tbody = document.getElementById('sales-history-body');
+        tbody.innerHTML = salesForDate.map(sale => {
+          const itemsSummary = sale.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+          const payBadge = sale.paymentMethod === 'PIX' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                           sale.paymentMethod === 'Cartão' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                           'bg-amber-500/10 text-amber-400 border-amber-500/20';
+
+          return `
+            <tr class="hover:bg-slate-700/30 transition-colors">
+              <td class="py-3 px-4 font-mono text-xs text-slate-400">${sale.timeStr}</td>
+              <td class="py-3 px-4 font-medium text-slate-200 max-w-xs truncate">${itemsSummary}</td>
+              <td class="py-3 px-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${payBadge}">${sale.paymentMethod}</span>
+              </td>
+              <td class="py-3 px-4 text-right font-extrabold text-emerald-400">${this.formatCurrency(sale.total)}</td>
+              <td class="py-3 px-4 text-center">
+                <button onclick="app.cancelSale('${sale.id}')" class="text-slate-400 hover:text-rose-400 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-500/10 transition-colors" title="Cancelar Venda">
+                  Estornar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('') || `<tr><td colspan="5" class="text-center py-8 text-slate-500">Nenhum lançamento nesta data.</td></tr>`;
+      }
+
+      cancelSale(saleId) {
+        const saleIndex = this.sales.findIndex(s => s.id === saleId);
+        if (saleIndex === -1) return;
+
+        const sale = this.sales[saleIndex];
+        sale.items.forEach(cartItem => {
+          const directItem = this.items.find(i => i.id === cartItem.itemId);
+          if (directItem && directItem.category !== 'Serviços') {
+            directItem.stock += cartItem.qty;
+          }
+        });
+
+        this.sales.splice(saleIndex, 1);
+        this.saveItems();
+        this.saveSales();
+        this.renderAll();
+        this.showToast('Venda estornada e estoque restaurado!');
+      }
+
+      exportCSV() {
+        const selectedDate = document.getElementById('report-date-filter').value;
+        const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
+
+        if (salesForDate.length === 0) {
+          this.showToast('Nenhuma venda registrada na data para exportar.', 'warning');
+          return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,ID;Hora;Forma Pagamento;Itens;Total (R$)\n";
+        salesForDate.forEach(s => {
+          const itemsStr = s.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
+          csvContent += `${s.id};${s.timeStr};${s.paymentMethod};"${itemsStr}";${s.total.toFixed(2)}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `relatorio_caixa_${selectedDate}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        this.showToast('Relatório CSV exportado!');
+      }
+
+      openCloseCashModal() {
+        const selectedDate = document.getElementById('report-date-filter').value;
+        const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
+        const total = salesForDate.reduce((acc, s) => acc + s.total, 0);
+
+        document.getElementById('close-modal-date').innerText = selectedDate.split('-').reverse().join('/');
+        document.getElementById('close-modal-count').innerText = `${salesForDate.length} vendas`;
+        document.getElementById('close-modal-total').innerText = this.formatCurrency(total);
+
+        document.getElementById('modal-close-cash').classList.remove('hidden');
+      }
+
+      closeCloseCashModal() { document.getElementById('modal-close-cash').classList.add('hidden'); }
+
+      confirmCloseCash() {
+        this.closeCloseCashModal();
+        this.showToast('Caixa do dia fechado com sucesso!');
+      }
+
+      // Reset Modal
+      openResetModal() { document.getElementById('modal-reset').classList.remove('hidden'); }
+      closeResetModal() { document.getElementById('modal-reset').classList.add('hidden'); }
+
+      confirmReset() {
+        localStorage.removeItem('printtech_v2_items');
+        localStorage.removeItem('printtech_v2_sales');
+        this.items = [...INITIAL_STOCK_LIST];
+        this.sales = [];
+        this.cart = [];
+        this.saveItems();
+        this.saveSales();
+        this.closeResetModal();
+        this.renderAll();
+        this.showToast('Estoque inicial restaurado exatamente como fornecido!');
+      }
+    }
+
+    let app;
+    window.onload = function() {
+      app = new PrintTechApp();
+    };
+  </script>
+</body>
+</html>
