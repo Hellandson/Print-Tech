@@ -39,21 +39,30 @@
   </script>
 
   <style>
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
+
+  <!-- Firebase Modular SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    window.FirebaseSDK = {
+      initializeApp,
+      getAuth,
+      signInAnonymously,
+      signInWithCustomToken,
+      onAuthStateChanged,
+      getFirestore,
+      doc,
+      setDoc,
+      onSnapshot
+    };
+  </script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
 
@@ -67,26 +76,66 @@
         </div>
         <div>
           <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
-            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Balcão Pro</span>
+            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Balcão Cloud Pro</span>
           </h1>
           <p class="text-xs text-slate-400 hidden sm:block">Xerox, Eletrônicos, Brinquedos & Agendamentos RG</p>
         </div>
       </div>
 
-      <!-- Quick Metrics Header -->
-      <div class="flex items-center gap-3">
-        <div class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="text-xs text-slate-400 font-medium hidden md:inline">Caixa Hoje:</span>
+      <!-- Quick Metrics & Cloud Status Header -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Status Indicator -->
+        <div id="cloud-status-pill" class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2">
+          <div id="cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
+          <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Conectando...</span>
+        </div>
+
+        <!-- Today's Total Cash -->
+        <div class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 hidden sm:flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium">Caixa Hoje:</span>
           <span id="header-today-total" class="text-sm font-bold text-emerald-400">R$ 0,00</span>
         </div>
 
-        <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition-colors" title="Restaurar Estoque Padrão">
-          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-        </button>
+        <!-- Action Tools Dropdown / Quick Buttons -->
+        <div class="flex items-center gap-1">
+          <button onclick="app.openSyncModal()" class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-slate-700/50 rounded-lg transition-colors" title="Opções de Sincronização & Nuvem">
+            <i data-lucide="cloud-cog" class="w-5 h-5"></i>
+          </button>
+          
+          <button onclick="app.exportJSONBackup()" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-lg transition-colors" title="Exportar Backup (.json)">
+            <i data-lucide="download" class="w-5 h-5"></i>
+          </button>
+
+          <label class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer" title="Importar Backup (.json)">
+            <i data-lucide="upload" class="w-5 h-5"></i>
+            <input type="file" accept=".json" onchange="app.importJSONBackup(event)" class="hidden">
+          </label>
+
+          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition-colors" title="Restaurar Estoque Padrão">
+            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
+
+  <!-- Migration Banner (Shows when iPhone has local data ready to push to cloud) -->
+  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 to-indigo-600 text-white px-4 py-2.5 shadow-lg border-b border-amber-500/40">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2">
+        <i data-lucide="smartphone-nfc" class="w-5 h-5 text-amber-200"></i>
+        <span><strong>Dados detectados no dispositivo local!</strong> Deseja enviar estes registros para a Nuvem para que apareçam no PC do balcão?</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3 py-1 rounded-lg hover:bg-slate-100 transition-colors">
+          📤 Enviar para Nuvem Agora
+        </button>
+        <button onclick="document.getElementById('migration-banner').classList.add('hidden')" class="text-white/80 hover:text-white font-semibold px-2 py-1">
+          Ignorar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Navigation Tabs -->
   <nav class="bg-slate-800/50 border-b border-slate-700/60 px-4">
@@ -301,9 +350,15 @@
           </select>
         </div>
 
-        <button onclick="app.openItemModal()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Item
-        </button>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button onclick="app.sendSupplierWhatsAppList()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20">
+            <i data-lucide="message-square" class="w-4 h-4"></i> Copiar Lista Reposição
+          </button>
+          
+          <button onclick="app.openItemModal()" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Item
+          </button>
+        </div>
       </div>
 
       <!-- Inventory Items Table -->
@@ -455,6 +510,47 @@
 
   <!-- ==================== MODALS ==================== -->
 
+  <!-- Cloud Sync & Backup Modal -->
+  <div id="modal-sync" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+          <i data-lucide="cloud" class="w-5 h-5 text-indigo-400"></i>
+          Sincronização & Backup de Dados
+        </h3>
+        <button onclick="app.closeSyncModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200">Status da Nuvem:</span>
+            <span id="sync-modal-status-pill" class="px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400">Carregando...</span>
+          </div>
+          <p class="text-slate-400">Quando conectado, o aplicativo sincroniza vendas, estoque e agendamentos instantaneamente entre seu iPhone e o computador do balcão.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <button onclick="app.pushLocalToCloud()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-md">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+            <span>Enviar Dados para Nuvem</span>
+            <span class="text-[10px] text-indigo-200 font-normal">Subir do iPhone / PC</span>
+          </button>
+
+          <button onclick="app.exportJSONBackup()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-md">
+            <i data-lucide="file-json" class="w-5 h-5"></i>
+            <span>Exportar Arquivo JSON</span>
+            <span class="text-[10px] text-emerald-200 font-normal">Baixar cópia de segurança</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-700">
+        <button onclick="app.closeSyncModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal OS Agendamento RG -->
   <div id="modal-os" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
@@ -604,13 +700,8 @@
   <!-- Notification Toast Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
+  <!-- Application Engine with Dual Cloud Sync & Backup -->
   <script>
-    /**
-     * Print-Tech Balcão Engine
-     * Handles exact initial stock seeding, volume discounts, OS RG Scheduling, and POS.
-     */
-
     const INITIAL_STOCK_LIST = [
       // Eletrônicos
       { id: 'el-1', name: 'Capinha Variadas', category: 'Eletrônicos', stock: 31, price: 15.00, unit: 'un' },
@@ -704,15 +795,27 @@
         this.posCategory = 'all';
         this.selectedPayment = 'PIX';
         
+        // Cloud state flags
+        this.db = null;
+        this.auth = null;
+        this.cloudConnected = false;
+        this.isSyncingFromCloud = false;
+
         this.init();
       }
 
-      init() {
+      async init() {
         this.loadLocalStorage();
         this.setDefaultDateFilter();
         this.switchTab('pos');
         this.calcQuickPrint();
         this.renderAll();
+
+        // Check migration status
+        this.checkMigrationPrompt();
+
+        // Initialize Firebase Realtime Cloud Sync
+        this.initFirebaseSync();
       }
 
       loadLocalStorage() {
@@ -725,33 +828,206 @@
           try { this.items = JSON.parse(storedItems); } catch(e) { this.items = [...INITIAL_STOCK_LIST]; }
         } else {
           this.items = [...INITIAL_STOCK_LIST];
-          this.saveItems();
+          this.saveLocalStorage();
         }
 
         if (storedSales) {
           try { this.sales = JSON.parse(storedSales); } catch(e) { this.sales = []; }
-        } else {
-          this.sales = [];
         }
 
         if (storedOS) {
           try { this.osList = JSON.parse(storedOS); } catch(e) { this.osList = []; }
-        } else {
-          this.osList = [];
         }
 
         if (storedDiscounts) {
           try { this.discounts = JSON.parse(storedDiscounts); } catch(e) { this.discounts = INITIAL_DISCOUNTS; }
-        } else {
-          this.discounts = INITIAL_DISCOUNTS;
         }
       }
 
-      saveItems() { localStorage.setItem('printtech_v2_items', JSON.stringify(this.items)); }
-      saveSales() { localStorage.setItem('printtech_v2_sales', JSON.stringify(this.sales)); }
-      saveOSToStorage() { localStorage.setItem('printtech_v2_os', JSON.stringify(this.osList)); }
-      saveDiscounts() { localStorage.setItem('printtech_v2_discounts', JSON.stringify(this.discounts)); }
+      saveLocalStorage() {
+        localStorage.setItem('printtech_v2_items', JSON.stringify(this.items));
+        localStorage.setItem('printtech_v2_sales', JSON.stringify(this.sales));
+        localStorage.setItem('printtech_v2_os', JSON.stringify(this.osList));
+        localStorage.setItem('printtech_v2_discounts', JSON.stringify(this.discounts));
+      }
 
+      checkMigrationPrompt() {
+        const hasSalesOrOS = this.sales.length > 0 || this.osList.length > 0;
+        if (hasSalesOrOS) {
+          document.getElementById('migration-banner')?.classList.remove('hidden');
+        }
+      }
+
+      // ==================== FIREBASE CLOUD REALTIME SYNC ====================
+      async initFirebaseSync() {
+        if (!window.FirebaseSDK) {
+          this.setCloudStatus('offline', 'Modo Local');
+          return;
+        }
+
+        const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, setDoc, onSnapshot } = window.FirebaseSDK;
+
+        try {
+          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-balcao';
+          const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+          if (!firebaseConfig) {
+            this.setCloudStatus('offline', 'Modo Local');
+            return;
+          }
+
+          const app = initializeApp(firebaseConfig);
+          this.auth = getAuth(app);
+          this.db = getFirestore(app);
+
+          const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+          if (initialAuthToken) {
+            await signInWithCustomToken(this.auth, initialAuthToken);
+          } else {
+            await signInAnonymously(this.auth);
+          }
+
+          onAuthStateChanged(this.auth, (user) => {
+            if (!user) return;
+
+            const docRef = doc(this.db, 'artifacts', appId, 'public', 'data', 'storeState', 'mainState');
+
+            // Listen in real-time to Cloud changes
+            onSnapshot(docRef, (snapshot) => {
+              if (snapshot.exists()) {
+                const cloudData = snapshot.data();
+                if (cloudData) {
+                  this.isSyncingFromCloud = true;
+                  if (cloudData.items) this.items = cloudData.items;
+                  if (cloudData.sales) this.sales = cloudData.sales;
+                  if (cloudData.osList) this.osList = cloudData.osList;
+                  if (cloudData.discounts) this.discounts = cloudData.discounts;
+
+                  this.saveLocalStorage();
+                  this.renderAll();
+                  this.isSyncingFromCloud = false;
+                  this.setCloudStatus('online', 'Nuvem Conectada');
+                }
+              } else {
+                // Cloud document is empty, auto upload local state
+                this.pushLocalToCloud();
+              }
+            }, (error) => {
+              console.warn("Cloud sync warning:", error);
+              this.setCloudStatus('offline', 'Modo Local');
+            });
+          });
+
+        } catch (err) {
+          console.warn("Firebase Auth / Sync Error:", err);
+          this.setCloudStatus('offline', 'Modo Local');
+        }
+      }
+
+      setCloudStatus(type, text) {
+        const dot = document.getElementById('cloud-dot');
+        const label = document.getElementById('cloud-status-text');
+        const modalPill = document.getElementById('sync-modal-status-pill');
+
+        if (type === 'online') {
+          this.cloudConnected = true;
+          if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+          if (label) { label.className = "text-xs font-semibold text-emerald-400"; label.innerText = text; }
+          if (modalPill) { modalPill.className = "px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400"; modalPill.innerText = text; }
+        } else {
+          this.cloudConnected = false;
+          if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+          if (label) { label.className = "text-xs font-semibold text-amber-400"; label.innerText = text; }
+          if (modalPill) { modalPill.className = "px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400"; modalPill.innerText = text; }
+        }
+      }
+
+      async pushLocalToCloud() {
+        this.saveLocalStorage();
+        
+        if (this.db && this.auth && this.auth.currentUser) {
+          const { doc, setDoc } = window.FirebaseSDK;
+          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-balcao';
+          const docRef = doc(this.db, 'artifacts', appId, 'public', 'data', 'storeState', 'mainState');
+
+          try {
+            await setDoc(docRef, {
+              items: this.items,
+              sales: this.sales,
+              osList: this.osList,
+              discounts: this.discounts,
+              lastUpdated: Date.now()
+            });
+            this.setCloudStatus('online', 'Nuvem Conectada');
+            this.showToast('Dados sincronizados na Nuvem com sucesso!');
+            document.getElementById('migration-banner')?.classList.add('hidden');
+          } catch(e) {
+            console.error("Cloud push failed:", e);
+            this.showToast('Erro ao enviar dados para a nuvem.', 'warning');
+          }
+        } else {
+          this.showToast('Nuvem não configurada. Dados mantidos localmente.', 'warning');
+        }
+      }
+
+      saveAll() {
+        this.saveLocalStorage();
+        if (!this.isSyncingFromCloud && this.cloudConnected) {
+          this.pushLocalToCloud();
+        }
+      }
+
+      // ==================== JSON BACKUP & RESTORE ====================
+      exportJSONBackup() {
+        const backupData = {
+          appName: 'Print-Tech Balcão',
+          version: '2.5',
+          exportDate: new Date().toISOString(),
+          items: this.items,
+          sales: this.sales,
+          osList: this.osList,
+          discounts: this.discounts
+        };
+
+        const jsonStr = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup_printtech_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        this.showToast('Backup JSON exportado com sucesso!');
+      }
+
+      importJSONBackup(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const imported = JSON.parse(event.target.result);
+            if (imported.items && Array.isArray(imported.items)) this.items = imported.items;
+            if (imported.sales && Array.isArray(imported.sales)) this.sales = imported.sales;
+            if (imported.osList && Array.isArray(imported.osList)) this.osList = imported.osList;
+            if (imported.discounts) this.discounts = imported.discounts;
+
+            this.saveAll();
+            this.renderAll();
+            this.showToast('Backup JSON importado e sincronizado com sucesso!');
+          } catch (err) {
+            this.showToast('Arquivo JSON inválido!', 'error');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // UI Tab Helpers & Toast
       setDefaultDateFilter() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('report-date-filter').value = today;
@@ -818,6 +1094,9 @@
         document.getElementById('badge-total-items').innerText = this.items.length;
         document.getElementById('badge-os-count').innerText = this.osList.filter(o => o.status === 'Agendando').length;
       }
+
+      openSyncModal() { document.getElementById('modal-sync').classList.remove('hidden'); lucide.createIcons(); }
+      closeSyncModal() { document.getElementById('modal-sync').classList.add('hidden'); }
 
       // ==================== VOLUME DISCOUNT LOGIC ====================
       getTierPrice(type, qty) {
@@ -887,7 +1166,7 @@
       }
 
       saveDiscountsFromUI() {
-        this.saveDiscounts();
+        this.saveAll();
         this.calcQuickPrint();
         this.showToast('Tabela de descontos salva com sucesso!');
       }
@@ -1092,7 +1371,7 @@
       checkout() {
         if (this.cart.length === 0) return;
 
-        // Deduct Physical Item Stock
+        // Deduct Stock
         this.cart.forEach(cartItem => {
           const directItem = this.items.find(i => i.id === cartItem.itemId);
           if (directItem && directItem.category !== 'Serviços') {
@@ -1112,10 +1391,9 @@
         };
 
         this.sales.unshift(saleRecord);
-        this.saveItems();
-        this.saveSales();
+        this.saveAll();
 
-        this.showToast('Venda realizada e estoque atualizado!');
+        this.showToast('Venda realizada e sincronizada!');
         this.cart = [];
         document.getElementById('cash-received-input').value = '';
         this.renderAll();
@@ -1235,7 +1513,7 @@
           });
         }
 
-        this.saveOSToStorage();
+        this.saveAll();
         this.closeOSModal();
         this.renderAll();
         this.showToast('Solicitação de RG salva com sucesso!');
@@ -1243,7 +1521,7 @@
 
       deleteOS(osId) {
         this.osList = this.osList.filter(o => o.id !== osId);
-        this.saveOSToStorage();
+        this.saveAll();
         this.renderAll();
         this.showToast('Agendamento removido.');
       }
@@ -1326,7 +1604,7 @@
         const item = this.items.find(i => i.id === itemId);
         if (item) {
           item.stock = Math.max(0, item.stock + delta);
-          this.saveItems();
+          this.saveAll();
           this.renderAll();
           this.showToast(`Estoque de ${item.name}: ${item.stock}`);
         }
@@ -1334,9 +1612,26 @@
 
       deleteItem(itemId) {
         this.items = this.items.filter(i => i.id !== itemId);
-        this.saveItems();
+        this.saveAll();
         this.renderAll();
         this.showToast('Item excluído com sucesso.');
+      }
+
+      sendSupplierWhatsAppList() {
+        const lowStock = this.items.filter(i => i.category !== 'Serviços' && i.stock <= 2);
+        if (lowStock.length === 0) {
+          this.showToast('Nenhum item com estoque baixo no momento.', 'warning');
+          return;
+        }
+
+        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH*\n\nOlá! Preciso fazer o pedido dos seguintes itens para reposição:\n\n";
+        lowStock.forEach(i => {
+          msg += `▫️ *${i.name}* (Estoque atual: ${i.stock} ${i.unit})\n`;
+        });
+        msg += "\nPor favor, confirme a disponibilidade e valores!";
+
+        const encoded = encodeURIComponent(msg);
+        window.open(`https://wa.me/?text=${encoded}`, '_blank');
       }
 
       openItemModal(itemId = null) {
@@ -1383,7 +1678,7 @@
           this.items.push({ id: 'item-' + Date.now(), name, category, unit, stock, price });
         }
 
-        this.saveItems();
+        this.saveAll();
         this.closeItemModal();
         this.renderAll();
         this.showToast('Item salvo com sucesso!');
@@ -1443,8 +1738,7 @@
         });
 
         this.sales.splice(saleIndex, 1);
-        this.saveItems();
-        this.saveSales();
+        this.saveAll();
         this.renderAll();
         this.showToast('Venda estornada e estoque restaurado!');
       }
@@ -1500,14 +1794,15 @@
       confirmReset() {
         localStorage.removeItem('printtech_v2_items');
         localStorage.removeItem('printtech_v2_sales');
+        localStorage.removeItem('printtech_v2_os');
         this.items = [...INITIAL_STOCK_LIST];
         this.sales = [];
+        this.osList = [];
         this.cart = [];
-        this.saveItems();
-        this.saveSales();
+        this.saveAll();
         this.closeResetModal();
         this.renderAll();
-        this.showToast('Estoque inicial restaurado exatamente como fornecido!');
+        this.showToast('Estoque inicial restaurado!');
       }
     }
 
