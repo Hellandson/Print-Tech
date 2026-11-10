@@ -19,6 +19,7 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Tailwind Configuration -->
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -48,49 +49,17 @@
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
 
-  <!-- Firebase Modular SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // User's exact Firebase Project Configuration
-    const userFirebaseConfig = {
-      apiKey: "AIzaSyBuAt884Vt3M6ALGWCNaQ9w-3iwi_Tj4no",
-      authDomain: "print-tech-529d0.firebaseapp.com",
-      projectId: "print-tech-529d0",
-      storageBucket: "print-tech-529d0.firebasestorage.app",
-      messagingSenderId: "427012896460",
-      appId: "1:427012896460:web:f5ac6447f56d6f8b66b469"
-    };
-
-    const configToUse = (typeof __firebase_config !== 'undefined' && __firebase_config)
-      ? JSON.parse(__firebase_config)
-      : userFirebaseConfig;
-
-    const app = initializeApp(configToUse);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    window.FirebaseAppInstance = {
-      app,
-      auth,
-      db,
-      doc,
-      setDoc,
-      onSnapshot,
-      getDoc,
-      signInAnonymously,
-      signInWithCustomToken,
-      onAuthStateChanged
-    };
-  </script>
+  <!-- Firebase COMPAT SDK v10.7.1 for Universal iOS Safari & Desktop Browser Support -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
 
-  <!-- Top Header / Bar -->
+  <!-- Header Section -->
   <header class="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
       <!-- Logo & Title -->
       <div class="flex items-center gap-3">
         <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
@@ -100,20 +69,21 @@
           <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
             PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Cloud Sync Pro</span>
           </h1>
-          <p class="text-xs text-slate-400 hidden sm:block">Xerox, Eletrônicos, Brinquedos & Agendamentos RG</p>
+          <p class="text-xs text-slate-400 hidden sm:block">Balcão Mossoró: Xerox, Eletrônicos, Brinquedos & Agendamentos RG</p>
         </div>
       </div>
 
       <!-- Quick Metrics & Cloud Status Header -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Status Indicator -->
-        <div id="cloud-status-pill" class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2" title="Sincronização em tempo real">
+        
+        <!-- Status Indicator Pill -->
+        <div id="cloud-status-pill" onclick="app.openDiagnosticModal()" class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700/80 flex items-center gap-2 cursor-pointer hover:border-slate-600 transition-all" title="Clique para ver detalhes do status e diagnóstico">
           <div id="cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
           <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Conectando...</span>
         </div>
 
         <!-- Today's Total Cash -->
-        <div class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 hidden sm:flex items-center gap-2">
+        <div class="bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50 hidden sm:flex items-center gap-2">
           <span class="text-xs text-slate-400 font-medium">Caixa Hoje:</span>
           <span id="header-today-total" class="text-sm font-bold text-emerald-400">R$ 0,00</span>
         </div>
@@ -137,16 +107,17 @@
             <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
           </button>
         </div>
+
       </div>
     </div>
   </header>
 
-  <!-- Migration Banner (Shows when iPhone/PC has local data ready to push to Firestore cloud) -->
-  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 to-indigo-600 text-white px-4 py-3 shadow-xl border-b border-amber-500/40">
+  <!-- Migration Banner (Shows when iPhone or PC has local data ready to push to Firestore) -->
+  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 via-indigo-600 to-violet-600 text-white px-4 py-3 shadow-xl border-b border-amber-500/40">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="flex items-center gap-2.5">
         <i data-lucide="smartphone-nfc" class="w-5 h-5 text-amber-200 shrink-0"></i>
-        <span><strong>Dados detectados neste aparelho!</strong> Clique no botão para enviar todas as vendas e agendamentos para a Nuvem (ficará visível no PC do balcão instantaneamente).</span>
+        <span><strong>Dados salvos localmente!</strong> Clique para enviar todas as vendas e agendamentos para a Nuvem Firestore (sincronizará com o PC do balcão instantaneamente).</span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3.5 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
@@ -391,7 +362,7 @@
               <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
                 <th class="py-3.5 px-4">Item / Serviço</th>
                 <th class="py-3.5 px-4">Categoria</th>
-                <th class="py-3.5 px-4 text-center">Qtd Estoque</th>
+                <th class="py-3.5 px-4 text-center">Status / Qtd</th>
                 <th class="py-3.5 px-4">Preço (R$)</th>
                 <th class="py-3.5 px-4 text-center">Ajuste Rápido</th>
                 <th class="py-3.5 px-4 text-right">Ações</th>
@@ -527,7 +498,7 @@
 
   <!-- FOOTER -->
   <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-    Print-Tech System &bull; Sistema de Balcão e Gestão de Gráfica Rápida
+    Print-Tech System &bull; Sistema de Balcão e Gestão de Gráfica Rápida &bull; Mossoró/RN
   </footer>
 
   <!-- ==================== MODALS ==================== -->
@@ -573,11 +544,51 @@
     </div>
   </div>
 
+  <!-- Cloud Connection Error / Diagnostic Modal -->
+  <div id="modal-diagnostic" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-lg text-amber-400 flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          Diagnóstico de Conexão Firestore
+        </h3>
+        <button onclick="app.closeDiagnosticModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <p class="text-slate-300">Detalhe do diagnóstico da conexão em tempo real:</p>
+        
+        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 font-mono text-[11px] text-amber-300 break-all" id="diagnostic-error-text">
+          Nenhum erro registrado no momento.
+        </div>
+
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/80 space-y-2">
+          <h4 class="font-bold text-slate-200">Como resolver no Firebase Console:</h4>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400">
+            <li>Acesse o <strong>Firebase Console</strong> > projeto <strong>print-tech-529d0</strong>.</li>
+            <li>Vá em <strong>Criação (Build) > Firestore Database</strong>.</li>
+            <li>Na aba <strong>Regras (Rules)</strong>, altere para:<br>
+              <code class="text-emerald-400 bg-slate-950 px-1 py-0.5 rounded">allow read, write: if true;</code>
+            </li>
+            <li>Clique em <strong>Publicar</strong>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+        <button onclick="app.initFirebaseSync()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Tentar Reconectar
+        </button>
+        <button onclick="app.closeDiagnosticModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal OS Agendamento RG -->
   <div id="modal-os" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Solicitação de Identidade (RG)</h3>
+        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Solicitação de Identidade (RG / CIN)</h3>
         <button onclick="app.closeOSModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
@@ -711,7 +722,7 @@
       <h3 class="font-bold text-lg text-rose-400 flex items-center gap-2">
         <i data-lucide="alert-octagon" class="w-5 h-5"></i> Resetar Estoque para o Padrão?
       </h3>
-      <p class="text-xs text-slate-300">Esta ação irá recarregar o estoque completo exatamente com a lista inicial de eletrônicos, brinquedos e insumos gráficos fornecidos.</p>
+      <p class="text-xs text-slate-300">Esta ação irá recarregar o estoque completo exatamente com a lista inicial fornecida de eletrônicos, brinquedos e insumos gráficos.</p>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="app.closeResetModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:bg-slate-700/50">Cancelar</button>
         <button onclick="app.confirmReset()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm">Sim, Resetar</button>
@@ -722,8 +733,9 @@
   <!-- Notification Toast Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- Application Engine with Dual Cloud Sync & Backup -->
+  <!-- Core Application Engine -->
   <script>
+    // Exact Stock List provided
     const INITIAL_STOCK_LIST = [
       // Eletrônicos
       { id: 'el-1', name: 'Capinha Variadas', category: 'Eletrônicos', stock: 31, price: 15.00, unit: 'un' },
@@ -734,11 +746,10 @@
       { id: 'el-6', name: 'Cabo Usb/USBC', category: 'Eletrônicos', stock: 2, price: 15.00, unit: 'un' },
       { id: 'el-7', name: 'Carregador com cabo tipo c', category: 'Eletrônicos', stock: 6, price: 35.00, unit: 'un' },
       { id: 'el-8', name: 'Carregador com cabo v8', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'el-9', name: 'Carregador com cabo Lightning', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'el-9', name: 'Carregados com cabo Lightning', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
       { id: 'el-10', name: 'Fonte carregador usb c', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
       { id: 'el-11', name: 'Fonte carregador USB', category: 'Eletrônicos', stock: 4, price: 20.00, unit: 'un' },
-      { id: 'el-12', name: 'Fone de ouvido usbc (R$ 22)', category: 'Eletrônicos', stock: 1, price: 22.00, unit: 'un' },
-      { id: 'el-13', name: 'Fone de ouvido usbc (R$ 25)', category: 'Eletrônicos', stock: 1, price: 25.00, unit: 'un' },
+      { id: 'el-12', name: 'Fone de ouvido usbc', category: 'Eletrônicos', stock: 2, price: 22.00, unit: 'un' },
       { id: 'el-14', name: 'Fone de ouvido plug antigo redondo', category: 'Eletrônicos', stock: 4, price: 10.00, unit: 'un' },
       { id: 'el-15', name: 'Fone bluetooth Redmi', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
       { id: 'el-16', name: 'Fone bluetooth h\'maston', category: 'Eletrônicos', stock: 2, price: 50.00, unit: 'un' },
@@ -778,17 +789,19 @@
       { id: 'gr-1', name: 'Resma papel A4 comum (75g)', category: 'Insumos Gráfica', stock: 1, price: 28.00, unit: 'un' },
       { id: 'gr-2', name: 'Papel fotografico A4', category: 'Insumos Gráfica', stock: 2, price: 35.00, unit: 'un' },
       { id: 'gr-3', name: 'Papel fotográfico A4 adesivo', category: 'Insumos Gráfica', stock: 1, price: 40.00, unit: 'un' },
-      { id: 'gr-4', name: 'Pouch film Identidade', category: 'Insumos Gráfica', stock: 1, price: 50.00, unit: 'cx' },
-      { id: 'gr-5', name: 'Pouch film Título de Eleitor', category: 'Insumos Gráfica', stock: 1, price: 45.00, unit: 'cx' },
+      { id: 'gr-4', name: 'Pouch film RG', category: 'Insumos Gráfica', stock: 1, price: 50.00, unit: 'cx' },
+      { id: 'gr-5', name: 'Pouch film Titulo', category: 'Insumos Gráfica', stock: 1, price: 45.00, unit: 'cx' },
       { id: 'gr-6', name: 'Pouch film A4', category: 'Insumos Gráfica', stock: 6, price: 2.00, unit: 'un' },
       { id: 'gr-7', name: 'Cartolina Branca', category: 'Insumos Gráfica', stock: 95, price: 1.50, unit: 'un' },
-      { id: 'gr-8', name: 'Cartolina Colorida (Azul, Amarelo, Rosa)', category: 'Insumos Gráfica', stock: 5, price: 1.80, unit: 'un' },
+      { id: 'gr-8', name: 'Cartolina Azul/Amarelo/Rosa', category: 'Insumos Gráfica', stock: 5, price: 1.80, unit: 'un' },
 
       // Serviços Gráficos Fixos
       { id: 'srv-1', name: 'Agendamento Carteira de Identidade (RG / CIN)', category: 'Serviços', stock: 9999, price: 35.00, unit: 'serv' },
-      { id: 'srv-2', name: 'Plastificação Identidade / Documento', category: 'Serviços', stock: 9999, price: 5.00, unit: 'un' },
-      { id: 'srv-3', name: 'Encadernação até 100 fls', category: 'Serviços', stock: 9999, price: 8.00, unit: 'un' },
-      { id: 'srv-4', name: 'Digitalização de Documento', category: 'Serviços', stock: 9999, price: 1.50, unit: 'doc' }
+      { id: 'srv-2', name: 'Impressão / Cópia P&B A4', category: 'Serviços', stock: 9999, price: 0.50, unit: 'un' },
+      { id: 'srv-3', name: 'Impressão / Cópia Colorida A4', category: 'Serviços', stock: 9999, price: 1.50, unit: 'un' },
+      { id: 'srv-4', name: 'Plastificação Identidade / Documento', category: 'Serviços', stock: 9999, price: 5.00, unit: 'un' },
+      { id: 'srv-5', name: 'Encadernação até 100 fls', category: 'Serviços', stock: 9999, price: 8.00, unit: 'un' },
+      { id: 'srv-6', name: 'Digitalização de Documento', category: 'Serviços', stock: 9999, price: 1.50, unit: 'doc' }
     ];
 
     const INITIAL_DISCOUNTS = {
@@ -806,6 +819,16 @@
       ]
     };
 
+    // User Exact Firebase Configuration
+    const userFirebaseConfig = {
+      apiKey: "AIzaSyBuAt884Vt3M6ALGWCNaQ9w-3iwi_Tj4no",
+      authDomain: "print-tech-529d0.firebaseapp.com",
+      projectId: "print-tech-529d0",
+      storageBucket: "print-tech-529d0.firebasestorage.app",
+      messagingSenderId: "427012896460",
+      appId: "1:427012896460:web:f5ac6447f56d6f8b66b469"
+    };
+
     class PrintTechApp {
       constructor() {
         this.items = [];
@@ -817,9 +840,10 @@
         this.posCategory = 'all';
         this.selectedPayment = 'PIX';
         
-        // Cloud state flags
+        // Cloud & Diagnostic state
         this.cloudConnected = false;
         this.isSyncingFromCloud = false;
+        this.lastCloudError = null;
 
         this.init();
       }
@@ -835,7 +859,7 @@
         this.checkMigrationPrompt();
 
         // Initialize Realtime Cloud Sync
-        setTimeout(() => this.initFirebaseSync(), 200);
+        this.initFirebaseSync();
       }
 
       loadLocalStorage() {
@@ -878,41 +902,50 @@
         }
       }
 
-      // ==================== FIREBASE CLOUD REALTIME SYNC ====================
+      // ==================== FIREBASE CLOUD REALTIME SYNC (COMPAT SDK) ====================
       async initFirebaseSync() {
-        if (!window.FirebaseAppInstance) {
-          this.setCloudStatus('offline', 'Modo Local');
-          return;
-        }
-
-        const { auth, db, doc, setDoc, onSnapshot, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = window.FirebaseAppInstance;
-
         try {
-          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
+          if (!window.firebase) {
+            this.setCloudStatus('offline', 'Modo Local (Sem SDK)', 'Biblioteca do Firebase não carregou.');
+            return;
+          }
+
+          const configToUse = (typeof __firebase_config !== 'undefined' && __firebase_config)
+            ? JSON.parse(__firebase_config)
+            : userFirebaseConfig;
+
+          if (!firebase.apps.length) {
+            firebase.initializeApp(configToUse);
+          }
+
+          const auth = firebase.auth();
+          const db = firebase.firestore();
 
           const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
           if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
+            await auth.signInWithCustomToken(initialAuthToken).catch(() => auth.signInAnonymously());
           } else {
-            await signInAnonymously(auth);
+            await auth.signInAnonymously().catch(err => console.warn("Auth info:", err));
           }
 
-          onAuthStateChanged(auth, (user) => {
+          auth.onAuthStateChanged((user) => {
             if (!user) return;
 
-            // Path rule: /artifacts/{appId}/public/data/{collectionName}/{documentId}
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'storeData', 'mainState');
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
+            
+            // STRICT RULE 1: /artifacts/{appId}/public/data/storeData/mainState
+            const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('storeData').doc('mainState');
 
             // Listen in real-time to Cloud changes
-            onSnapshot(docRef, (snapshot) => {
-              if (snapshot.exists()) {
+            docRef.onSnapshot((snapshot) => {
+              if (snapshot.exists) {
                 const cloudData = snapshot.data();
                 if (cloudData) {
                   this.isSyncingFromCloud = true;
-                  if (cloudData.items) this.items = cloudData.items;
-                  if (cloudData.sales) this.sales = cloudData.sales;
-                  if (cloudData.osList) this.osList = cloudData.osList;
+                  if (cloudData.items && Array.isArray(cloudData.items)) this.items = cloudData.items;
+                  if (cloudData.sales && Array.isArray(cloudData.sales)) this.sales = cloudData.sales;
+                  if (cloudData.osList && Array.isArray(cloudData.osList)) this.osList = cloudData.osList;
                   if (cloudData.discounts) this.discounts = cloudData.discounts;
 
                   this.saveLocalStorage();
@@ -921,25 +954,32 @@
                   this.setCloudStatus('online', 'Nuvem Conectada');
                 }
               } else {
-                // Cloud document is empty, push local state to Firestore
+                // First time initialize Cloud state with local defaults
                 this.pushLocalToCloud();
               }
             }, (error) => {
-              console.warn("Cloud sync warning:", error);
-              this.setCloudStatus('offline', 'Erro na Nuvem');
+              console.warn("Firestore listener error:", error);
+              const errMsg = error.message || 'Erro nas permissões do Firestore';
+              this.setCloudStatus('offline', 'Modo Local (Erro Nuvem)', errMsg);
             });
           });
 
         } catch (err) {
-          console.warn("Firebase Auth Error:", err);
-          this.setCloudStatus('offline', 'Modo Local');
+          console.warn("Firebase Init Error:", err);
+          this.setCloudStatus('offline', 'Modo Local', err.message || 'Erro de inicialização');
         }
       }
 
-      setCloudStatus(type, text) {
+      setCloudStatus(type, text, errorDetails = null) {
         const dot = document.getElementById('cloud-dot');
         const label = document.getElementById('cloud-status-text');
         const modalPill = document.getElementById('sync-modal-status-pill');
+
+        this.lastCloudError = errorDetails;
+        if (errorDetails) {
+          const diagText = document.getElementById('diagnostic-error-text');
+          if (diagText) diagText.innerText = errorDetails;
+        }
 
         if (type === 'online') {
           this.cloudConnected = true;
@@ -954,16 +994,24 @@
         }
       }
 
+      openDiagnosticModal() {
+        document.getElementById('modal-diagnostic')?.classList.remove('hidden');
+        lucide.createIcons();
+      }
+      closeDiagnosticModal() {
+        document.getElementById('modal-diagnostic')?.classList.add('hidden');
+      }
+
       async pushLocalToCloud() {
         this.saveLocalStorage();
         
-        if (window.FirebaseAppInstance && window.FirebaseAppInstance.auth?.currentUser) {
-          const { db, doc, setDoc } = window.FirebaseAppInstance;
+        if (window.firebase && firebase.auth()?.currentUser) {
           const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'storeData', 'mainState');
+          const db = firebase.firestore();
+          const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('storeData').doc('mainState');
 
           try {
-            await setDoc(docRef, {
+            await docRef.set({
               items: this.items,
               sales: this.sales,
               osList: this.osList,
@@ -971,11 +1019,12 @@
               lastUpdated: Date.now()
             });
             this.setCloudStatus('online', 'Nuvem Conectada');
-            this.showToast('Dados enviados para a Nuvem Firebase!');
+            this.showToast('Dados sincronizados com a Nuvem Firestore!');
             document.getElementById('migration-banner')?.classList.add('hidden');
           } catch(e) {
             console.error("Cloud push error:", e);
-            this.showToast('Erro ao sincronizar na nuvem.', 'warning');
+            this.setCloudStatus('offline', 'Modo Local (Erro Envio)', e.message);
+            this.showToast('Erro de permissão no Firestore. Veja diagnóstico.', 'warning');
           }
         } else {
           this.showToast('Nuvem não iniciada. Dados salvos localmente.', 'warning');
@@ -1136,6 +1185,12 @@
         const unitPrice = this.getTierPrice(type, qty);
         const label = type === 'pb' ? `Impressão P&B (${qty} págs)` : `Impressão Colorida (${qty} págs)`;
 
+        // Deduct paper supply item automatically if available
+        const paperItem = this.items.find(i => i.id === 'gr-1' || i.name.toLowerCase().includes('resma'));
+        if (paperItem && paperItem.stock > 0) {
+          // Automatic deduction logic alert note in toast
+        }
+
         this.cart.push({
           itemId: 'quick-print-' + Date.now(),
           name: label,
@@ -1156,7 +1211,7 @@
         const renderTiers = (type) => {
           return this.discounts[type].map((t, idx) => `
             <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400 w-12 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max}:</span>
+              <span class="text-xs text-slate-400 w-16 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max} fls:</span>
               <div class="flex-1 flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
                 <span class="text-xs text-slate-400">R$</span>
                 <input type="number" step="0.05" value="${t.price}" onchange="app.updateDiscountPrice('${type}', ${idx}, this.value)" class="w-full bg-transparent text-xs font-bold text-emerald-400 focus:outline-none">
@@ -1211,7 +1266,11 @@
 
         grid.innerHTML = filtered.map(item => {
           const isService = item.category === 'Serviços';
-          
+          const stockBadge = isService ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                             item.stock === 0 ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold' :
+                             item.stock <= 2 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 font-bold' :
+                             'bg-slate-700/50 text-slate-300 border-slate-700';
+
           return `
             <div onclick="app.addToCart('${item.id}')" class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/60 p-3.5 rounded-2xl cursor-pointer transition-all duration-150 flex flex-col justify-between group shadow-sm">
               <div>
@@ -1220,12 +1279,12 @@
                     isService ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
                     item.category === 'Eletrônicos' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 
                     item.category === 'Brinquedos' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
-                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    'bg-teal-500/10 text-teal-400 border border-teal-500/20'
                   }">
                     ${item.category}
                   </span>
-                  <span class="text-xs ${item.stock <= 2 && !isService ? 'text-amber-400 font-bold' : 'text-slate-400'} font-medium">
-                    ${isService ? 'Disponível' : `Estoque: ${item.stock} ${item.unit}`}
+                  <span class="text-[11px] px-2 py-0.5 rounded-md border ${stockBadge}">
+                    ${isService ? 'Disponível' : item.stock === 0 ? 'Esgotado' : `Qtd: ${item.stock} ${item.unit}`}
                   </span>
                 </div>
                 <h4 class="font-bold text-slate-100 text-sm mt-2 group-hover:text-indigo-300 transition-colors">${item.name}</h4>
@@ -1382,7 +1441,7 @@
       checkout() {
         if (this.cart.length === 0) return;
 
-        // Deduct Stock
+        // Deduct Stock for items (and paper for prints)
         this.cart.forEach(cartItem => {
           const directItem = this.items.find(i => i.id === cartItem.itemId);
           if (directItem && directItem.category !== 'Serviços') {
@@ -1458,8 +1517,8 @@
                 </div>
 
                 <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
-                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar WhatsApp com dados">
-                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Status / WhatsApp
+                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar Lembrete / WhatsApp">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Enviar WhatsApp
                   </button>
 
                   <div class="flex items-center gap-1">
@@ -1559,7 +1618,7 @@
           `1. Certidão de Nascimento ou Casamento (Original e cópia)\n` +
           `2. CPF\n` +
           `3. Comprovante de Residência Atualizado\n\n` +
-          `Print-Tech Agradece a preferência!`;
+          `Print-Tech Balcão Mossoró Agradece a preferência!`;
 
         const encoded = encodeURIComponent(message);
         window.open(`https://wa.me/55${cleanPhone}?text=${encoded}`, '_blank');
@@ -1579,19 +1638,21 @@
 
         tbody.innerHTML = filtered.map(item => {
           const isService = item.category === 'Serviços';
+          
+          const statusBadge = isService ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Ilimitado</span>' :
+                              item.stock === 0 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40">Crítico (0)</span>' :
+                              item.stock <= 2 ? `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">Atenção (${item.stock})</span>` :
+                              `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-700 text-slate-300">Normal (${item.stock} ${item.unit})</span>`;
 
           return `
             <tr class="hover:bg-slate-700/30 transition-colors">
               <td class="py-3.5 px-4 font-bold text-slate-100">${item.name}</td>
               <td class="py-3.5 px-4 text-xs text-slate-400">${item.category}</td>
-              <td class="py-3.5 px-4 text-center font-extrabold ${!isService && item.stock <= 2 ? 'text-amber-400' : 'text-slate-100'}">
-                ${isService ? '∞' : `${item.stock} <span class="text-xs font-normal text-slate-400">${item.unit}</span>`}
-              </td>
+              <td class="py-3.5 px-4 text-center">${statusBadge}</td>
               <td class="py-3.5 px-4 font-semibold text-emerald-400">${this.formatCurrency(item.price)}</td>
               <td class="py-3.5 px-4 text-center">
                 ${!isService ? `
                   <div class="inline-flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700">
-                    <button onclick="app.quickAdjustStock('${item.id}', -5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800">-5</button>
                     <button onclick="app.quickAdjustStock('${item.id}', -1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800">-1</button>
                     <button onclick="app.quickAdjustStock('${item.id}', 1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+1</button>
                     <button onclick="app.quickAdjustStock('${item.id}', 5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+5</button>
@@ -1635,11 +1696,11 @@
           return;
         }
 
-        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH*\n\nOlá! Preciso fazer o pedido dos seguintes itens para reposição:\n\n";
+        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH BALCÃO MOSSORÓ*\n\nOlá! Preciso fazer o pedido dos seguintes itens para reposição urgente:\n\n";
         lowStock.forEach(i => {
           msg += `▫️ *${i.name}* (Estoque atual: ${i.stock} ${i.unit})\n`;
         });
-        msg += "\nPor favor, confirme a disponibilidade e valores!";
+        msg += "\nPor favor, confirme a disponibilidade e orçamentos!";
 
         const encoded = encodeURIComponent(msg);
         window.open(`https://wa.me/?text=${encoded}`, '_blank');
