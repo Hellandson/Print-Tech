@@ -3,23 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Print-Tech Balcão - Gestão de Xerox, Vendas & Agendamentos</title>
+  <title>Print-Tech Balcão - Gestão Gráfica & Vendas</title>
 
-  <!-- Apple Touch Icon for iOS Homescreen -->
+  <!-- Apple Touch Icon para iOS -->
   <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/printer.png">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <!-- Font Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Tailwind Configuration -->
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -27,15 +26,6 @@
         extend: {
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
           }
         }
       }
@@ -43,84 +33,76 @@
   </script>
 
   <style>
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
 
-  <!-- Firebase COMPAT SDK v10.7.1 for Universal iOS Safari & Desktop Browser Support -->
+  <!-- Firebase COMPAT SDK v10.7.1 (Standard App & Firestore ONLY - No Auth needed) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
 
-  <!-- Header Section -->
+  <!-- TOP HEADER / STATUS BAR -->
   <header class="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Logo & Title -->
+      <!-- Logo & System Title -->
       <div class="flex items-center gap-3">
-        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
-          <i data-lucide="printer" class="w-6 h-6 text-white"></i>
+        <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-print text-white text-xl"></i>
         </div>
         <div>
           <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
-            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Cloud Sync Pro</span>
+            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Balcão Pro</span>
           </h1>
-          <p class="text-xs text-slate-400 hidden sm:block">Balcão Mossoró: Xerox, Eletrônicos, Brinquedos & Agendamentos RG</p>
+          <p class="text-xs text-slate-400 hidden sm:block">Mossoró / RN &bull; Xerox, Eletrônicos & Agendamentos RG</p>
         </div>
       </div>
 
-      <!-- Quick Metrics & Cloud Status Header -->
+      <!-- Quick Status & Tools -->
       <div class="flex items-center gap-2 sm:gap-3">
-        
         <!-- Status Indicator Pill -->
-        <div id="cloud-status-pill" onclick="app.openDiagnosticModal()" class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700/80 flex items-center gap-2 cursor-pointer hover:border-slate-600 transition-all" title="Clique para ver detalhes do status e diagnóstico">
+        <div id="cloud-status-pill" class="bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50 flex items-center gap-2" title="Status de Sincronização em Tempo Real">
           <div id="cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
-          <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Conectando...</span>
+          <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Verificando...</span>
         </div>
 
-        <!-- Today's Total Cash -->
+        <!-- Today's Total Cash Header Pill -->
         <div class="bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50 hidden sm:flex items-center gap-2">
           <span class="text-xs text-slate-400 font-medium">Caixa Hoje:</span>
           <span id="header-today-total" class="text-sm font-bold text-emerald-400">R$ 0,00</span>
         </div>
 
-        <!-- Action Tools Quick Buttons -->
+        <!-- Quick Action Buttons -->
         <div class="flex items-center gap-1">
-          <button onclick="app.openSyncModal()" class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-slate-700/50 rounded-lg transition-colors" title="Opções de Sincronização & Nuvem">
-            <i data-lucide="cloud-cog" class="w-5 h-5"></i>
-          </button>
-          
-          <button onclick="app.exportJSONBackup()" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-lg transition-colors" title="Exportar Backup (.json)">
-            <i data-lucide="download" class="w-5 h-5"></i>
+          <button onclick="app.exportJSONBackup()" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Exportar Backup (.json)">
+            <i class="fa-solid fa-download"></i>
           </button>
 
-          <label class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer" title="Importar Backup (.json)">
-            <i data-lucide="upload" class="w-5 h-5"></i>
+          <label class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-700/50 rounded-xl transition-colors cursor-pointer" title="Importar Backup (.json)">
+            <i class="fa-solid fa-upload"></i>
             <input type="file" accept=".json" onchange="app.importJSONBackup(event)" class="hidden">
           </label>
 
-          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-lg transition-colors" title="Restaurar Estoque Padrão">
-            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Restaurar Estoque Padrão">
+            <i class="fa-solid fa-rotate-left"></i>
           </button>
         </div>
-
       </div>
     </div>
   </header>
 
-  <!-- Migration Banner (Shows when iPhone or PC has local data ready to push to Firestore) -->
-  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 via-indigo-600 to-violet-600 text-white px-4 py-3 shadow-xl border-b border-amber-500/40">
+  <!-- Migration Banner (Appears when device has un-synced LocalStorage) -->
+  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 via-indigo-600 to-purple-600 text-white px-4 py-2.5 shadow-xl border-b border-amber-500/40">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="flex items-center gap-2.5">
-        <i data-lucide="smartphone-nfc" class="w-5 h-5 text-amber-200 shrink-0"></i>
-        <span><strong>Dados salvos localmente!</strong> Clique para enviar todas as vendas e agendamentos para a Nuvem Firestore (sincronizará com o PC do balcão instantaneamente).</span>
+        <i class="fa-solid fa-cloud-arrow-up text-amber-200 text-base shrink-0"></i>
+        <span><strong>Dados localmente detectados neste aparelho!</strong> Clique no botão para sincronizar vendas e agendamentos com o computador do balcão.</span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3.5 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
+        <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
           📤 Enviar para Nuvem Agora
         </button>
         <button onclick="document.getElementById('migration-banner').classList.add('hidden')" class="text-white/80 hover:text-white font-semibold px-2 py-1">
@@ -130,55 +112,55 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs -->
+  <!-- NAVIGATION TABS -->
   <nav class="bg-slate-800/50 border-b border-slate-700/60 px-4">
-    <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-3 overflow-x-auto py-2">
+    <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-2 overflow-x-auto py-2">
       <button onclick="app.switchTab('pos')" id="tab-btn-pos" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+        <i class="fa-solid fa-cash-register"></i>
         PDV & Balcão
       </button>
 
       <button onclick="app.switchTab('os')" id="tab-btn-os" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
-        <i data-lucide="id-card" class="w-4 h-4 text-amber-400"></i>
+        <i class="fa-solid fa-id-card text-amber-400"></i>
         Agendamentos Identidade (OS)
         <span id="badge-os-count" class="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">0</span>
       </button>
 
       <button onclick="app.switchTab('inventory')" id="tab-btn-inventory" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
-        <i data-lucide="boxes" class="w-4 h-4"></i>
+        <i class="fa-solid fa-boxes-stacked"></i>
         Estoque & Insumos
         <span id="badge-total-items" class="ml-1 text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">0</span>
       </button>
 
       <button onclick="app.switchTab('discounts')" id="tab-btn-discounts" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
-        <i data-lucide="percent" class="w-4 h-4 text-emerald-400"></i>
+        <i class="fa-solid fa-percent text-emerald-400"></i>
         Tabela de Desconto por Volume
       </button>
 
       <button onclick="app.switchTab('reports')" id="tab-btn-reports" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
-        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+        <i class="fa-solid fa-chart-pie"></i>
         Fechamento de Caixa
       </button>
     </div>
   </nav>
 
-  <!-- Main Content Container -->
+  <!-- MAIN CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-    <!-- ==================== TAB 1: FRENTE DE CAIXA (POS) ==================== -->
+    <!-- ==================== TAB 1: PDV & BALCÃO ==================== -->
     <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- Catalog / Selection Grid (8 Cols) -->
+      <!-- Catalog & Volume Calculator Column (8 Cols) -->
       <div class="lg:col-span-7 xl:col-span-8 space-y-4">
         
-        <!-- Fast Volume Discount Printing Calculator Widget -->
+        <!-- Fast Volume Discount Printing Calculator -->
         <div class="bg-slate-800/90 p-4 rounded-2xl border border-indigo-500/40 shadow-lg space-y-3">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
-              <i data-lucide="calculator" class="w-4 h-4"></i>
+              <i class="fa-solid fa-calculator"></i>
               Calculadora Rápida de Impressão por Volume
             </h3>
-            <span class="text-[11px] text-slate-400">Desconto automático por faixas de quantidade</span>
+            <span class="text-[11px] text-slate-400">Desconto automático por quantidade</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
@@ -197,20 +179,20 @@
 
             <div class="sm:col-span-4 flex items-center gap-2">
               <div class="flex-1 text-right">
-                <span class="block text-[10px] text-slate-400">Preço Unit.: <strong id="quick-print-unit" class="text-emerald-400">R$ 0,50</strong></span>
+                <span class="block text-[10px] text-slate-400">Unit.: <strong id="quick-print-unit" class="text-emerald-400">R$ 0,50</strong></span>
                 <span id="quick-print-total" class="text-sm font-extrabold text-white">R$ 5,00</span>
               </div>
               <button onclick="app.addQuickPrintToCart()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl shadow-md transition-all" title="Adicionar à Comanda">
-                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                <i class="fa-solid fa-circle-plus text-lg"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Search & Filter Controls -->
+        <!-- Search & Category Filters -->
         <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
           <div class="relative w-full md:w-64">
-            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-400 text-xs"></i>
             <input type="text" id="pos-search" oninput="app.filterPOSCatalog()" placeholder="Buscar produto ou serviço..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
           </div>
 
@@ -223,32 +205,32 @@
           </div>
         </div>
 
-        <!-- Catalog Cards Grid -->
+        <!-- Catalog Grid -->
         <div id="pos-catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          <!-- Catalog items generated dynamically -->
+          <!-- Dynamically populated -->
         </div>
       </div>
 
-      <!-- Current Cart / Checkout Panel (4 Cols) -->
+      <!-- Cart / Checkout Panel (4 Cols) -->
       <div class="lg:col-span-5 xl:col-span-4 flex flex-col">
         <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl sticky top-24 flex flex-col h-[calc(100vh-140px)] max-h-[780px]">
           
           <div class="flex items-center justify-between pb-4 border-b border-slate-700/70">
             <div class="flex items-center gap-2">
-              <i data-lucide="shopping-cart" class="w-5 h-5 text-indigo-400"></i>
+              <i class="fa-solid fa-cart-shopping text-indigo-400"></i>
               <h2 class="font-bold text-slate-100">Comanda de Venda</h2>
             </div>
             <button onclick="app.clearCart()" class="text-xs text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1 hover:bg-rose-500/10 px-2 py-1 rounded-md transition-colors">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Limpar
+              <i class="fa-solid fa-trash-can"></i> Limpar
             </button>
           </div>
 
-          <!-- Cart Items List (Scrollable) -->
+          <!-- Cart Items Scrollable List -->
           <div id="cart-items-container" class="flex-1 overflow-y-auto py-3 space-y-2.5 pr-1">
-            <!-- Dynamic Cart Items -->
+            <!-- Dynamically populated -->
           </div>
 
-          <!-- Checkout & Calculation Area -->
+          <!-- Checkout & Change Area -->
           <div class="pt-4 border-t border-slate-700/70 space-y-4 bg-slate-800/90">
             
             <!-- Payment Method Picker -->
@@ -256,13 +238,13 @@
               <label class="block text-xs font-medium text-slate-400 mb-2">Forma de Pagamento</label>
               <div class="grid grid-cols-3 gap-2">
                 <button type="button" onclick="app.setPaymentMethod('PIX')" id="pay-btn-PIX" class="pay-method-btn border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all">
-                  <i data-lucide="qr-code" class="w-4 h-4"></i> PIX
+                  <i class="fa-solid fa-qrcode text-base"></i> PIX
                 </button>
                 <button type="button" onclick="app.setPaymentMethod('Cartão')" id="pay-btn-Cartão" class="pay-method-btn border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all">
-                  <i data-lucide="credit-card" class="w-4 h-4"></i> Cartão
+                  <i class="fa-solid fa-credit-card text-base"></i> Cartão
                 </button>
                 <button type="button" onclick="app.setPaymentMethod('Dinheiro')" id="pay-btn-Dinheiro" class="pay-method-btn border border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all">
-                  <i data-lucide="banknote" class="w-4 h-4"></i> Dinheiro
+                  <i class="fa-solid fa-money-bill-wave text-base"></i> Dinheiro
                 </button>
               </div>
             </div>
@@ -289,7 +271,7 @@
 
             <!-- Checkout Submit Button -->
             <button onclick="app.checkout()" id="btn-checkout" disabled class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 text-base transition-all">
-              <i data-lucide="check-circle-2" class="w-5 h-5"></i> Finalizar Venda
+              <i class="fa-solid fa-circle-check"></i> Finalizar Venda
             </button>
 
           </div>
@@ -298,27 +280,27 @@
 
     </section>
 
-    <!-- ==================== TAB 2: AGENDAMENTOS IDENTIDADE (OS) ==================== -->
+    <!-- ==================== TAB 2: AGENDAMENTOS RG (OS) ==================== -->
     <section id="tab-os" class="tab-content hidden space-y-6">
       
       <!-- Top Action Bar -->
       <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h2 class="font-bold text-lg text-slate-100 flex items-center gap-2">
-            <i data-lucide="id-card" class="w-5 h-5 text-amber-400"></i>
+            <i class="fa-solid fa-id-card text-amber-400"></i>
             Agendamentos de Carteira de Identidade (RG / CIN)
           </h2>
-          <p class="text-xs text-slate-400">Organizados por ordem cronológica automática (mais próximo primeiro)</p>
+          <p class="text-xs text-slate-400">Organizados por ordem cronológica automática (mais próximo no topo)</p>
         </div>
 
         <button onclick="app.openOSModal()" class="w-full md:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> Novo Agendamento de RG
+          <i class="fa-solid fa-plus-circle"></i> Novo Agendamento de RG
         </button>
       </div>
 
-      <!-- OS Cards Grid (Cronológico) -->
+      <!-- OS Cards Grid -->
       <div id="os-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- OS items inserted dynamically sorted by date/time -->
+        <!-- Dynamically populated OS cards -->
       </div>
 
     </section>
@@ -326,11 +308,11 @@
     <!-- ==================== TAB 3: CONTROLE DE ESTOQUE ==================== -->
     <section id="tab-inventory" class="tab-content hidden space-y-6">
       
-      <!-- Top Action Bar -->
+      <!-- Action Controls -->
       <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div class="relative flex-1 md:w-64">
-            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-400 text-xs"></i>
             <input type="text" id="inventory-search" oninput="app.renderInventory()" placeholder="Buscar no estoque..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
           </div>
 
@@ -345,16 +327,16 @@
 
         <div class="flex items-center gap-2 w-full md:w-auto">
           <button onclick="app.sendSupplierWhatsAppList()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20">
-            <i data-lucide="message-square" class="w-4 h-4"></i> Copiar Lista Reposição
+            <i class="fa-brands fa-whatsapp text-sm"></i> Copiar Lista Reposição
           </button>
           
           <button onclick="app.openItemModal()" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Item
+            <i class="fa-solid fa-plus-circle"></i> Cadastrar Item
           </button>
         </div>
       </div>
 
-      <!-- Inventory Items Table -->
+      <!-- Inventory Table -->
       <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -362,14 +344,15 @@
               <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
                 <th class="py-3.5 px-4">Item / Serviço</th>
                 <th class="py-3.5 px-4">Categoria</th>
-                <th class="py-3.5 px-4 text-center">Status / Qtd</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-4 text-center">Qtd Estoque</th>
                 <th class="py-3.5 px-4">Preço (R$)</th>
                 <th class="py-3.5 px-4 text-center">Ajuste Rápido</th>
                 <th class="py-3.5 px-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody id="inventory-table-body" class="divide-y divide-slate-700/50 text-sm">
-              <!-- Inventory rows inserted dynamically -->
+              <!-- Dynamically populated -->
             </tbody>
           </table>
         </div>
@@ -384,49 +367,46 @@
         <div class="flex items-center justify-between border-b border-slate-700 pb-3">
           <div>
             <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
-              <i data-lucide="percent" class="w-5 h-5 text-emerald-400"></i>
+              <i class="fa-solid fa-percent text-emerald-400"></i>
               Tabela Editável de Desconto por Volume
             </h3>
-            <p class="text-xs text-slate-400">Altere as faixas e os valores por página para aplicar automaticamente nos orçamentos e vendas.</p>
+            <p class="text-xs text-slate-400">Altere as faixas e valores por página para cálculo automático na comanda do balcão.</p>
           </div>
 
           <button onclick="app.saveDiscountsFromUI()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-            <i data-lucide="save" class="w-4 h-4"></i> Salvar Tabela
+            <i class="fa-solid fa-floppy-disk"></i> Salvar Tabela
           </button>
         </div>
 
-        <!-- Tier Editing Table -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
           <!-- P&B Tiers -->
           <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/80 space-y-3">
             <h4 class="font-bold text-sm text-indigo-300 flex items-center gap-2">
-              <i data-lucide="file-text" class="w-4 h-4"></i> Impressão / Cópia P&B A4
+              <i class="fa-solid fa-file-lines"></i> Impressão / Cópia P&B A4
             </h4>
             <div id="tiers-container-pb" class="space-y-2">
-              <!-- Dynamic Tier Row Editor -->
+              <!-- Dynamically populated -->
             </div>
           </div>
 
           <!-- Color Tiers -->
           <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/80 space-y-3">
             <h4 class="font-bold text-sm text-violet-300 flex items-center gap-2">
-              <i data-lucide="image" class="w-4 h-4"></i> Impressão / Cópia Colorida A4
+              <i class="fa-solid fa-image"></i> Impressão / Cópia Colorida A4
             </h4>
             <div id="tiers-container-color" class="space-y-2">
-              <!-- Dynamic Tier Row Editor -->
+              <!-- Dynamically populated -->
             </div>
           </div>
-
         </div>
       </div>
 
     </section>
 
-    <!-- ==================== TAB 5: FECHAMENTO DE CAIXA & RELATÓRIOS ==================== -->
+    <!-- ==================== TAB 5: FECHAMENTO DE CAIXA ==================== -->
     <section id="tab-reports" class="tab-content hidden space-y-6">
       
-      <!-- Report Header & Controls -->
+      <!-- Date Filter & Actions -->
       <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
           <label class="text-sm font-semibold text-slate-300">Filtrar Data:</label>
@@ -435,15 +415,15 @@
 
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <button onclick="app.exportCSV()" class="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-slate-600">
-            <i data-lucide="download" class="w-4 h-4"></i> Exportar CSV
+            <i class="fa-solid fa-file-csv"></i> Exportar CSV
           </button>
           <button onclick="app.openCloseCashModal()" class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 transition-all">
-            <i data-lucide="lock" class="w-4 h-4"></i> Fechar Caixa
+            <i class="fa-solid fa-lock"></i> Fechar Caixa
           </button>
         </div>
       </div>
 
-      <!-- Financial Metrics Cards -->
+      <!-- Financial Overview Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
           <p class="text-xs text-slate-400 font-medium">Faturamento Total</p>
@@ -467,10 +447,10 @@
         </div>
       </div>
 
-      <!-- Sales History Table -->
+      <!-- Sales Table -->
       <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5">
         <h3 class="font-bold text-slate-100 flex items-center gap-2">
-          <i data-lucide="history" class="w-5 h-5 text-indigo-400"></i>
+          <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
           Histórico de Vendas do Dia
         </h3>
 
@@ -486,7 +466,7 @@
               </tr>
             </thead>
             <tbody id="sales-history-body" class="divide-y divide-slate-700/50 text-sm">
-              <!-- Dynamically generated sales history -->
+              <!-- Dynamically populated -->
             </tbody>
           </table>
         </div>
@@ -496,100 +476,18 @@
 
   </main>
 
-  <!-- FOOTER -->
   <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-    Print-Tech System &bull; Sistema de Balcão e Gestão de Gráfica Rápida &bull; Mossoró/RN
+    Print-Tech Balcão &bull; Sistema Integrado de Balcão e Gestão Gráfica
   </footer>
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- Cloud Sync & Backup Modal -->
-  <div id="modal-sync" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
-          <i data-lucide="cloud" class="w-5 h-5 text-indigo-400"></i>
-          Sincronização & Backup de Dados
-        </h3>
-        <button onclick="app.closeSyncModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="space-y-3 text-xs text-slate-300">
-        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-200">Status da Nuvem Firebase:</span>
-            <span id="sync-modal-status-pill" class="px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400">Conectando...</span>
-          </div>
-          <p class="text-slate-400">Sua conta do Firebase <strong>print-tech-529d0</strong> sincroniza vendas, estoque e agendamentos instantaneamente entre seu iPhone e o computador do balcão.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <button onclick="app.pushLocalToCloud()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-md">
-            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
-            <span>Enviar Dados para Nuvem</span>
-            <span class="text-[10px] text-indigo-200 font-normal">Subir dados deste aparelho</span>
-          </button>
-
-          <button onclick="app.exportJSONBackup()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-md">
-            <i data-lucide="file-json" class="w-5 h-5"></i>
-            <span>Exportar Arquivo JSON</span>
-            <span class="text-[10px] text-emerald-200 font-normal">Baixar cópia de segurança</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="flex justify-end pt-2 border-t border-slate-700">
-        <button onclick="app.closeSyncModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cloud Connection Error / Diagnostic Modal -->
-  <div id="modal-diagnostic" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 class="font-bold text-lg text-amber-400 flex items-center gap-2">
-          <i data-lucide="shield-alert" class="w-5 h-5"></i>
-          Diagnóstico de Conexão Firestore
-        </h3>
-        <button onclick="app.closeDiagnosticModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="space-y-3 text-xs text-slate-300">
-        <p class="text-slate-300">Detalhe do diagnóstico da conexão em tempo real:</p>
-        
-        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 font-mono text-[11px] text-amber-300 break-all" id="diagnostic-error-text">
-          Nenhum erro registrado no momento.
-        </div>
-
-        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/80 space-y-2">
-          <h4 class="font-bold text-slate-200">Como resolver no Firebase Console:</h4>
-          <ol class="list-decimal list-inside space-y-1 text-slate-400">
-            <li>Acesse o <strong>Firebase Console</strong> > projeto <strong>print-tech-529d0</strong>.</li>
-            <li>Vá em <strong>Criação (Build) > Firestore Database</strong>.</li>
-            <li>Na aba <strong>Regras (Rules)</strong>, altere para:<br>
-              <code class="text-emerald-400 bg-slate-950 px-1 py-0.5 rounded">allow read, write: if true;</code>
-            </li>
-            <li>Clique em <strong>Publicar</strong>.</li>
-          </ol>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
-        <button onclick="app.initFirebaseSync()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Tentar Reconectar
-        </button>
-        <button onclick="app.closeDiagnosticModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal OS Agendamento RG -->
+  <!-- Modal OS (Solicitação RG) -->
   <div id="modal-os" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Solicitação de Identidade (RG / CIN)</h3>
-        <button onclick="app.closeOSModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Solicitação de Identidade (RG)</h3>
+        <button onclick="app.closeOSModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <form id="os-form" onsubmit="app.saveOS(event)" class="space-y-4">
@@ -643,12 +541,12 @@
     </div>
   </div>
 
-  <!-- Item Create / Edit Modal -->
+  <!-- Modal Cadastrar/Editar Item -->
   <div id="modal-item" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
         <h3 id="modal-item-title" class="font-bold text-lg text-slate-100">Cadastrar Item / Serviço</h3>
-        <button onclick="app.closeItemModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="app.closeItemModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <form id="item-form" onsubmit="app.saveItem(event)" class="space-y-4">
@@ -694,12 +592,12 @@
     </div>
   </div>
 
-  <!-- Close Cash Modal -->
+  <!-- Modal Fechamento de Caixa -->
   <div id="modal-close-cash" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
         <h3 class="font-bold text-lg text-slate-100">Fechamento de Caixa</h3>
-        <button onclick="app.closeCloseCashModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="app.closeCloseCashModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
       <p class="text-xs text-slate-300">Confirma o fechamento do caixa do dia?</p>
       
@@ -716,13 +614,13 @@
     </div>
   </div>
 
-  <!-- Reset Confirmation Modal -->
+  <!-- Modal Reset Confirm -->
   <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-rose-400 flex items-center gap-2">
-        <i data-lucide="alert-octagon" class="w-5 h-5"></i> Resetar Estoque para o Padrão?
+        <i class="fa-solid fa-triangle-exclamation"></i> Resetar Estoque para o Padrão?
       </h3>
-      <p class="text-xs text-slate-300">Esta ação irá recarregar o estoque completo exatamente com a lista inicial fornecida de eletrônicos, brinquedos e insumos gráficos.</p>
+      <p class="text-xs text-slate-300">Esta ação irá recarregar o estoque completo exatamente com a lista inicial de eletrônicos, brinquedos e insumos gráficos fornecidos.</p>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="app.closeResetModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:bg-slate-700/50">Cancelar</button>
         <button onclick="app.confirmReset()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm">Sim, Resetar</button>
@@ -730,12 +628,12 @@
     </div>
   </div>
 
-  <!-- Notification Toast Container -->
+  <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- Core Application Engine -->
+  <!-- APPLICATION ENGINE & DATABASE SCRIPT -->
   <script>
-    // Exact Stock List provided
+    // Exact initial inventory requested
     const INITIAL_STOCK_LIST = [
       // Eletrônicos
       { id: 'el-1', name: 'Capinha Variadas', category: 'Eletrônicos', stock: 31, price: 15.00, unit: 'un' },
@@ -746,10 +644,11 @@
       { id: 'el-6', name: 'Cabo Usb/USBC', category: 'Eletrônicos', stock: 2, price: 15.00, unit: 'un' },
       { id: 'el-7', name: 'Carregador com cabo tipo c', category: 'Eletrônicos', stock: 6, price: 35.00, unit: 'un' },
       { id: 'el-8', name: 'Carregador com cabo v8', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'el-9', name: 'Carregados com cabo Lightning', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
+      { id: 'el-9', name: 'Carregador com cabo Lightning', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
       { id: 'el-10', name: 'Fonte carregador usb c', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
       { id: 'el-11', name: 'Fonte carregador USB', category: 'Eletrônicos', stock: 4, price: 20.00, unit: 'un' },
-      { id: 'el-12', name: 'Fone de ouvido usbc', category: 'Eletrônicos', stock: 2, price: 22.00, unit: 'un' },
+      { id: 'el-12', name: 'Fone de ouvido usbc (R$ 22)', category: 'Eletrônicos', stock: 2, price: 22.00, unit: 'un' },
+      { id: 'el-13', name: 'Fone de ouvido usbc (R$ 25)', category: 'Eletrônicos', stock: 2, price: 25.00, unit: 'un' },
       { id: 'el-14', name: 'Fone de ouvido plug antigo redondo', category: 'Eletrônicos', stock: 4, price: 10.00, unit: 'un' },
       { id: 'el-15', name: 'Fone bluetooth Redmi', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
       { id: 'el-16', name: 'Fone bluetooth h\'maston', category: 'Eletrônicos', stock: 2, price: 50.00, unit: 'un' },
@@ -765,7 +664,7 @@
       { id: 'br-3', name: 'Kit ferramenta', category: 'Brinquedos', stock: 2, price: 16.00, unit: 'un' },
       { id: 'br-4', name: 'Boneca pretty', category: 'Brinquedos', stock: 2, price: 10.00, unit: 'un' },
       { id: 'br-5', name: 'Kit medico', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
-      { id: 'br-6', name: 'Bayblade', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
+      { id: 'br-6', name: 'Beyblade', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
       { id: 'br-7', name: 'Soldados', category: 'Brinquedos', stock: 2, price: 30.00, unit: 'un' },
       { id: 'br-8', name: 'Formula 1', category: 'Brinquedos', stock: 1, price: 20.00, unit: 'un' },
       { id: 'br-9', name: 'Laila boneca', category: 'Brinquedos', stock: 2, price: 10.00, unit: 'un' },
@@ -779,7 +678,7 @@
       { id: 'br-17', name: 'Squish', category: 'Brinquedos', stock: 1, price: 30.00, unit: 'un' },
       { id: 'br-18', name: 'Cubo Magico', category: 'Brinquedos', stock: 5, price: 12.00, unit: 'un' },
       { id: 'br-19', name: 'Tinta Cabelo maluco', category: 'Brinquedos', stock: 3, price: 15.00, unit: 'un' },
-      { id: 'br-20', name: 'Bola "futsal"', category: 'Brinquedos', stock: 7, price: 16.00, unit: 'un' },
+      { id: 'br-20', name: 'Bola Futsal', category: 'Brinquedos', stock: 7, price: 16.00, unit: 'un' },
       { id: 'br-21', name: 'Bola Futebol', category: 'Brinquedos', stock: 2, price: 25.00, unit: 'un' },
       { id: 'br-22', name: 'Dinosfera', category: 'Brinquedos', stock: 1, price: 25.00, unit: 'un' },
       { id: 'br-23', name: 'Copo termico', category: 'Brinquedos', stock: 7, price: 35.00, unit: 'un' },
@@ -789,19 +688,17 @@
       { id: 'gr-1', name: 'Resma papel A4 comum (75g)', category: 'Insumos Gráfica', stock: 1, price: 28.00, unit: 'un' },
       { id: 'gr-2', name: 'Papel fotografico A4', category: 'Insumos Gráfica', stock: 2, price: 35.00, unit: 'un' },
       { id: 'gr-3', name: 'Papel fotográfico A4 adesivo', category: 'Insumos Gráfica', stock: 1, price: 40.00, unit: 'un' },
-      { id: 'gr-4', name: 'Pouch film RG', category: 'Insumos Gráfica', stock: 1, price: 50.00, unit: 'cx' },
-      { id: 'gr-5', name: 'Pouch film Titulo', category: 'Insumos Gráfica', stock: 1, price: 45.00, unit: 'cx' },
+      { id: 'gr-4', name: 'Pouch film RG / Identidade', category: 'Insumos Gráfica', stock: 1, price: 50.00, unit: 'cx' },
+      { id: 'gr-5', name: 'Pouch film Título Eleitor', category: 'Insumos Gráfica', stock: 1, price: 45.00, unit: 'cx' },
       { id: 'gr-6', name: 'Pouch film A4', category: 'Insumos Gráfica', stock: 6, price: 2.00, unit: 'un' },
       { id: 'gr-7', name: 'Cartolina Branca', category: 'Insumos Gráfica', stock: 95, price: 1.50, unit: 'un' },
-      { id: 'gr-8', name: 'Cartolina Azul/Amarelo/Rosa', category: 'Insumos Gráfica', stock: 5, price: 1.80, unit: 'un' },
+      { id: 'gr-8', name: 'Cartolina Colorida (Azul/Amarelo/Rosa)', category: 'Insumos Gráfica', stock: 5, price: 1.80, unit: 'un' },
 
       // Serviços Gráficos Fixos
       { id: 'srv-1', name: 'Agendamento Carteira de Identidade (RG / CIN)', category: 'Serviços', stock: 9999, price: 35.00, unit: 'serv' },
-      { id: 'srv-2', name: 'Impressão / Cópia P&B A4', category: 'Serviços', stock: 9999, price: 0.50, unit: 'un' },
-      { id: 'srv-3', name: 'Impressão / Cópia Colorida A4', category: 'Serviços', stock: 9999, price: 1.50, unit: 'un' },
-      { id: 'srv-4', name: 'Plastificação Identidade / Documento', category: 'Serviços', stock: 9999, price: 5.00, unit: 'un' },
-      { id: 'srv-5', name: 'Encadernação até 100 fls', category: 'Serviços', stock: 9999, price: 8.00, unit: 'un' },
-      { id: 'srv-6', name: 'Digitalização de Documento', category: 'Serviços', stock: 9999, price: 1.50, unit: 'doc' }
+      { id: 'srv-2', name: 'Plastificação Identidade / Documento', category: 'Serviços', stock: 9999, price: 5.00, unit: 'un' },
+      { id: 'srv-3', name: 'Encadernação até 100 fls', category: 'Serviços', stock: 9999, price: 8.00, unit: 'un' },
+      { id: 'srv-4', name: 'Digitalização de Documento', category: 'Serviços', stock: 9999, price: 1.50, unit: 'doc' }
     ];
 
     const INITIAL_DISCOUNTS = {
@@ -819,8 +716,8 @@
       ]
     };
 
-    // User Exact Firebase Configuration
-    const userFirebaseConfig = {
+    // Firebase Hardcoded Configuration
+    const firebaseConfig = {
       apiKey: "AIzaSyBuAt884Vt3M6ALGWCNaQ9w-3iwi_Tj4no",
       authDomain: "print-tech-529d0.firebaseapp.com",
       projectId: "print-tech-529d0",
@@ -840,33 +737,30 @@
         this.posCategory = 'all';
         this.selectedPayment = 'PIX';
         
-        // Cloud & Diagnostic state
+        // Cloud Realtime State
         this.cloudConnected = false;
         this.isSyncingFromCloud = false;
-        this.lastCloudError = null;
+        this.db = null;
 
         this.init();
       }
 
-      async init() {
+      init() {
         this.loadLocalStorage();
         this.setDefaultDateFilter();
         this.switchTab('pos');
         this.calcQuickPrint();
         this.renderAll();
 
-        // Check local migration status
         this.checkMigrationPrompt();
-
-        // Initialize Realtime Cloud Sync
-        this.initFirebaseSync();
+        this.initFirebase();
       }
 
       loadLocalStorage() {
-        const storedItems = localStorage.getItem('printtech_v2_items');
-        const storedSales = localStorage.getItem('printtech_v2_sales');
-        const storedOS = localStorage.getItem('printtech_v2_os');
-        const storedDiscounts = localStorage.getItem('printtech_v2_discounts');
+        const storedItems = localStorage.getItem('printtech_v3_items');
+        const storedSales = localStorage.getItem('printtech_v3_sales');
+        const storedOS = localStorage.getItem('printtech_v3_os');
+        const storedDiscounts = localStorage.getItem('printtech_v3_discounts');
 
         if (storedItems) {
           try { this.items = JSON.parse(storedItems); } catch(e) { this.items = [...INITIAL_STOCK_LIST]; }
@@ -889,160 +783,109 @@
       }
 
       saveLocalStorage() {
-        localStorage.setItem('printtech_v2_items', JSON.stringify(this.items));
-        localStorage.setItem('printtech_v2_sales', JSON.stringify(this.sales));
-        localStorage.setItem('printtech_v2_os', JSON.stringify(this.osList));
-        localStorage.setItem('printtech_v2_discounts', JSON.stringify(this.discounts));
+        localStorage.setItem('printtech_v3_items', JSON.stringify(this.items));
+        localStorage.setItem('printtech_v3_sales', JSON.stringify(this.sales));
+        localStorage.setItem('printtech_v3_os', JSON.stringify(this.osList));
+        localStorage.setItem('printtech_v3_discounts', JSON.stringify(this.discounts));
       }
 
       checkMigrationPrompt() {
-        const hasSalesOrOS = this.sales.length > 0 || this.osList.length > 0;
-        if (hasSalesOrOS) {
+        const hasData = this.sales.length > 0 || this.osList.length > 0;
+        if (hasData) {
           document.getElementById('migration-banner')?.classList.remove('hidden');
         }
       }
 
-      // ==================== FIREBASE CLOUD REALTIME SYNC (COMPAT SDK) ====================
-      async initFirebaseSync() {
+      // Initialize Firebase Firestore without Auth requirement
+      initFirebase() {
         try {
-          if (!window.firebase) {
-            this.setCloudStatus('offline', 'Modo Local (Sem SDK)', 'Biblioteca do Firebase não carregou.');
-            return;
-          }
+          if (typeof firebase !== 'undefined' && firebase.apps) {
+            if (!firebase.apps.length) {
+              firebase.initializeApp(firebaseConfig);
+            }
+            this.db = firebase.firestore();
 
-          const configToUse = (typeof __firebase_config !== 'undefined' && __firebase_config)
-            ? JSON.parse(__firebase_config)
-            : userFirebaseConfig;
+            // Real-time synchronization on document 'mainState'
+            this.db.collection("print_tech_data").doc("mainState")
+              .onSnapshot((doc) => {
+                if (doc.exists) {
+                  const data = doc.data();
+                  if (data) {
+                    this.isSyncingFromCloud = true;
+                    if (data.items) this.items = data.items;
+                    if (data.sales) this.sales = data.sales;
+                    if (data.osList) this.osList = data.osList;
+                    if (data.discounts) this.discounts = data.discounts;
 
-          if (!firebase.apps.length) {
-            firebase.initializeApp(configToUse);
-          }
-
-          const auth = firebase.auth();
-          const db = firebase.firestore();
-
-          const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-          if (initialAuthToken) {
-            await auth.signInWithCustomToken(initialAuthToken).catch(() => auth.signInAnonymously());
-          } else {
-            await auth.signInAnonymously().catch(err => console.warn("Auth info:", err));
-          }
-
-          auth.onAuthStateChanged((user) => {
-            if (!user) return;
-
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
-            
-            // STRICT RULE 1: /artifacts/{appId}/public/data/storeData/mainState
-            const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('storeData').doc('mainState');
-
-            // Listen in real-time to Cloud changes
-            docRef.onSnapshot((snapshot) => {
-              if (snapshot.exists) {
-                const cloudData = snapshot.data();
-                if (cloudData) {
-                  this.isSyncingFromCloud = true;
-                  if (cloudData.items && Array.isArray(cloudData.items)) this.items = cloudData.items;
-                  if (cloudData.sales && Array.isArray(cloudData.sales)) this.sales = cloudData.sales;
-                  if (cloudData.osList && Array.isArray(cloudData.osList)) this.osList = cloudData.osList;
-                  if (cloudData.discounts) this.discounts = cloudData.discounts;
-
-                  this.saveLocalStorage();
-                  this.renderAll();
-                  this.isSyncingFromCloud = false;
-                  this.setCloudStatus('online', 'Nuvem Conectada');
+                    this.saveLocalStorage();
+                    this.renderAll();
+                    this.isSyncingFromCloud = false;
+                    this.setCloudStatus(true, 'Nuvem Conectada');
+                  }
+                } else {
+                  // Document doesn't exist yet, seed cloud from local
+                  this.pushLocalToCloud();
                 }
-              } else {
-                // First time initialize Cloud state with local defaults
-                this.pushLocalToCloud();
-              }
-            }, (error) => {
-              console.warn("Firestore listener error:", error);
-              const errMsg = error.message || 'Erro nas permissões do Firestore';
-              this.setCloudStatus('offline', 'Modo Local (Erro Nuvem)', errMsg);
-            });
-          });
-
-        } catch (err) {
-          console.warn("Firebase Init Error:", err);
-          this.setCloudStatus('offline', 'Modo Local', err.message || 'Erro de inicialização');
+              }, (err) => {
+                console.warn("Firestore error:", err);
+                this.setCloudStatus(false, 'Modo Local (LocalStorage)');
+              });
+          } else {
+            this.setCloudStatus(false, 'Modo Local (LocalStorage)');
+          }
+        } catch(e) {
+          console.warn("Firebase Init Exception:", e);
+          this.setCloudStatus(false, 'Modo Local (LocalStorage)');
         }
       }
 
-      setCloudStatus(type, text, errorDetails = null) {
+      setCloudStatus(isOnline, text) {
+        this.cloudConnected = isOnline;
         const dot = document.getElementById('cloud-dot');
         const label = document.getElementById('cloud-status-text');
-        const modalPill = document.getElementById('sync-modal-status-pill');
 
-        this.lastCloudError = errorDetails;
-        if (errorDetails) {
-          const diagText = document.getElementById('diagnostic-error-text');
-          if (diagText) diagText.innerText = errorDetails;
-        }
-
-        if (type === 'online') {
-          this.cloudConnected = true;
+        if (isOnline) {
           if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
           if (label) { label.className = "text-xs font-semibold text-emerald-400"; label.innerText = text; }
-          if (modalPill) { modalPill.className = "px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400"; modalPill.innerText = text; }
         } else {
-          this.cloudConnected = false;
           if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
           if (label) { label.className = "text-xs font-semibold text-amber-400"; label.innerText = text; }
-          if (modalPill) { modalPill.className = "px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400"; modalPill.innerText = text; }
         }
       }
 
-      openDiagnosticModal() {
-        document.getElementById('modal-diagnostic')?.classList.remove('hidden');
-        lucide.createIcons();
-      }
-      closeDiagnosticModal() {
-        document.getElementById('modal-diagnostic')?.classList.add('hidden');
-      }
-
-      async pushLocalToCloud() {
+      pushLocalToCloud() {
         this.saveLocalStorage();
-        
-        if (window.firebase && firebase.auth()?.currentUser) {
-          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
-          const db = firebase.firestore();
-          const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('storeData').doc('mainState');
-
-          try {
-            await docRef.set({
-              items: this.items,
-              sales: this.sales,
-              osList: this.osList,
-              discounts: this.discounts,
-              lastUpdated: Date.now()
-            });
-            this.setCloudStatus('online', 'Nuvem Conectada');
-            this.showToast('Dados sincronizados com a Nuvem Firestore!');
+        if (this.db) {
+          this.db.collection("print_tech_data").doc("mainState").set({
+            items: this.items,
+            sales: this.sales,
+            osList: this.osList,
+            discounts: this.discounts,
+            updatedAt: Date.now()
+          }).then(() => {
+            this.setCloudStatus(true, 'Nuvem Conectada');
+            this.showToast('Dados sincronizados com a Nuvem!');
             document.getElementById('migration-banner')?.classList.add('hidden');
-          } catch(e) {
-            console.error("Cloud push error:", e);
-            this.setCloudStatus('offline', 'Modo Local (Erro Envio)', e.message);
-            this.showToast('Erro de permissão no Firestore. Veja diagnóstico.', 'warning');
-          }
+          }).catch(err => {
+            console.warn("Push to cloud error:", err);
+            this.showToast('Nuvem offline. Salvo localmente.', 'warning');
+          });
         } else {
-          this.showToast('Nuvem não iniciada. Dados salvos localmente.', 'warning');
+          this.showToast('Modo Local ativo. Salvo no navegador.', 'warning');
         }
       }
 
       saveAll() {
         this.saveLocalStorage();
-        if (!this.isSyncingFromCloud && this.cloudConnected) {
+        if (!this.isSyncingFromCloud && this.cloudConnected && this.db) {
           this.pushLocalToCloud();
         }
       }
 
-      // ==================== JSON BACKUP & RESTORE ====================
+      // JSON Backup & Restore
       exportJSONBackup() {
-        const backupData = {
+        const data = {
           appName: 'Print-Tech Balcão',
-          version: '2.5',
           exportDate: new Date().toISOString(),
           items: this.items,
           sales: this.sales,
@@ -1050,8 +893,8 @@
           discounts: this.discounts
         };
 
-        const jsonStr = JSON.stringify(backupData, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const str = JSON.stringify(data, null, 2);
+        const blob = new Blob([str], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -1061,7 +904,7 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        this.showToast('Backup JSON exportado com sucesso!');
+        this.showToast('Backup JSON exportado!');
       }
 
       importJSONBackup(e) {
@@ -1072,22 +915,22 @@
         reader.onload = (event) => {
           try {
             const imported = JSON.parse(event.target.result);
-            if (imported.items && Array.isArray(imported.items)) this.items = imported.items;
-            if (imported.sales && Array.isArray(imported.sales)) this.sales = imported.sales;
-            if (imported.osList && Array.isArray(imported.osList)) this.osList = imported.osList;
+            if (imported.items) this.items = imported.items;
+            if (imported.sales) this.sales = imported.sales;
+            if (imported.osList) this.osList = imported.osList;
             if (imported.discounts) this.discounts = imported.discounts;
 
             this.saveAll();
             this.renderAll();
-            this.showToast('Backup JSON importado e sincronizado com sucesso!');
-          } catch (err) {
+            this.showToast('Backup JSON importado!');
+          } catch(err) {
             this.showToast('Arquivo JSON inválido!', 'error');
           }
         };
         reader.readAsText(file);
       }
 
-      // UI Tab Helpers & Toast
+      // UI Helpers
       setDefaultDateFilter() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('report-date-filter').value = today;
@@ -1111,7 +954,6 @@
         }
 
         this.renderAll();
-        setTimeout(() => lucide.createIcons(), 30);
       }
 
       renderAll() {
@@ -1132,12 +974,12 @@
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-rose-600';
-        
+        const icon = type === 'success' ? 'fa-circle-check' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
+
         toast.className = `${bgColor} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transform transition-all duration-300 translate-y-2 pointer-events-auto`;
-        toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4"></i> ${message}`;
-        
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+
         container.appendChild(toast);
-        lucide.createIcons();
 
         setTimeout(() => {
           toast.classList.add('opacity-0', 'translate-y-4');
@@ -1155,10 +997,7 @@
         document.getElementById('badge-os-count').innerText = this.osList.filter(o => o.status === 'Agendando').length;
       }
 
-      openSyncModal() { document.getElementById('modal-sync').classList.remove('hidden'); lucide.createIcons(); }
-      closeSyncModal() { document.getElementById('modal-sync').classList.add('hidden'); }
-
-      // ==================== VOLUME DISCOUNT LOGIC ====================
+      // Volume Discount Engine
       getTierPrice(type, qty) {
         const tiers = this.discounts[type] || [];
         for (let t of tiers) {
@@ -1185,19 +1024,16 @@
         const unitPrice = this.getTierPrice(type, qty);
         const label = type === 'pb' ? `Impressão P&B (${qty} págs)` : `Impressão Colorida (${qty} págs)`;
 
-        // Deduct paper supply item automatically if available
-        const paperItem = this.items.find(i => i.id === 'gr-1' || i.name.toLowerCase().includes('resma'));
-        if (paperItem && paperItem.stock > 0) {
-          // Automatic deduction logic alert note in toast
-        }
-
         this.cart.push({
           itemId: 'quick-print-' + Date.now(),
           name: label,
           category: 'Serviços',
           price: unitPrice,
           qty: qty,
-          unit: 'pág'
+          unit: 'pág',
+          isPrintJob: true,
+          printType: type,
+          pages: qty
         });
 
         this.renderCart();
@@ -1211,7 +1047,7 @@
         const renderTiers = (type) => {
           return this.discounts[type].map((t, idx) => `
             <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400 w-16 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max} fls:</span>
+              <span class="text-xs text-slate-400 w-16 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max}:</span>
               <div class="flex-1 flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
                 <span class="text-xs text-slate-400">R$</span>
                 <input type="number" step="0.05" value="${t.price}" onchange="app.updateDiscountPrice('${type}', ${idx}, this.value)" class="w-full bg-transparent text-xs font-bold text-emerald-400 focus:outline-none">
@@ -1220,8 +1056,8 @@
           `).join('');
         };
 
-        containerPB.innerHTML = renderTiers('pb');
-        containerColor.innerHTML = renderTiers('color');
+        if (containerPB) containerPB.innerHTML = renderTiers('pb');
+        if (containerColor) containerColor.innerHTML = renderTiers('color');
       }
 
       updateDiscountPrice(type, idx, val) {
@@ -1237,7 +1073,7 @@
         this.showToast('Tabela de descontos salva com sucesso!');
       }
 
-      // ==================== TAB 1: POS (FRENTE DE CAIXA) ====================
+      // TAB 1: POS Catalog
       setPOSCategory(cat) {
         this.posCategory = cat;
         document.querySelectorAll('.pos-cat-btn').forEach(btn => {
@@ -1256,6 +1092,8 @@
 
       renderPOSCatalog() {
         const grid = document.getElementById('pos-catalog-grid');
+        if (!grid) return;
+
         const query = (document.getElementById('pos-search')?.value || '').toLowerCase();
         
         const filtered = this.items.filter(item => {
@@ -1266,11 +1104,7 @@
 
         grid.innerHTML = filtered.map(item => {
           const isService = item.category === 'Serviços';
-          const stockBadge = isService ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                             item.stock === 0 ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold' :
-                             item.stock <= 2 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 font-bold' :
-                             'bg-slate-700/50 text-slate-300 border-slate-700';
-
+          
           return `
             <div onclick="app.addToCart('${item.id}')" class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/60 p-3.5 rounded-2xl cursor-pointer transition-all duration-150 flex flex-col justify-between group shadow-sm">
               <div>
@@ -1279,12 +1113,12 @@
                     isService ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
                     item.category === 'Eletrônicos' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 
                     item.category === 'Brinquedos' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
-                    'bg-teal-500/10 text-teal-400 border border-teal-500/20'
+                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                   }">
                     ${item.category}
                   </span>
-                  <span class="text-[11px] px-2 py-0.5 rounded-md border ${stockBadge}">
-                    ${isService ? 'Disponível' : item.stock === 0 ? 'Esgotado' : `Qtd: ${item.stock} ${item.unit}`}
+                  <span class="text-xs ${item.stock <= 2 && !isService ? 'text-amber-400 font-bold' : 'text-slate-400'} font-medium">
+                    ${isService ? 'Disponível' : `Estoque: ${item.stock} ${item.unit}`}
                   </span>
                 </div>
                 <h4 class="font-bold text-slate-100 text-sm mt-2 group-hover:text-indigo-300 transition-colors">${item.name}</h4>
@@ -1293,14 +1127,12 @@
               <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/50">
                 <span class="text-base font-extrabold text-emerald-400">${this.formatCurrency(item.price)}</span>
                 <span class="bg-indigo-600/20 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white p-1.5 rounded-xl transition-all">
-                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <i class="fa-solid fa-plus text-xs"></i>
                 </span>
               </div>
             </div>
           `;
         }).join('') || `<div class="col-span-full py-8 text-center text-slate-500 text-sm">Nenhum item encontrado.</div>`;
-
-        lucide.createIcons();
       }
 
       addToCart(itemId) {
@@ -1392,11 +1224,12 @@
 
       renderCart() {
         const container = document.getElementById('cart-items-container');
+        if (!container) return;
 
         if (this.cart.length === 0) {
           container.innerHTML = `
             <div class="h-full flex flex-col items-center justify-center text-slate-500 space-y-2 py-10">
-              <i data-lucide="shopping-bag" class="w-10 h-10 stroke-1"></i>
+              <i class="fa-solid fa-basket-shopping text-3xl"></i>
               <p class="text-xs">Comanda vazia. Adicione itens da lista.</p>
             </div>
           `;
@@ -1407,7 +1240,7 @@
             <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 flex flex-col gap-2">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-xs text-slate-200 truncate max-w-[170px]">${item.name}</span>
-                <button onclick="app.updateCartQty(${idx}, -999)" class="text-slate-500 hover:text-rose-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                <button onclick="app.updateCartQty(${idx}, -999)" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-xmark"></i></button>
               </div>
 
               <div class="flex items-center justify-between">
@@ -1429,7 +1262,6 @@
         }
 
         this.calculateCartTotals();
-        lucide.createIcons();
       }
 
       calculateCartTotals() {
@@ -1441,11 +1273,22 @@
       checkout() {
         if (this.cart.length === 0) return;
 
-        // Deduct Stock for items (and paper for prints)
+        // Deduct inventory items & paper insumos automatically
         this.cart.forEach(cartItem => {
+          // Direct item stock deduction
           const directItem = this.items.find(i => i.id === cartItem.itemId);
           if (directItem && directItem.category !== 'Serviços') {
             directItem.stock = Math.max(0, directItem.stock - cartItem.qty);
+          }
+
+          // Insumo deduction for print jobs
+          if (cartItem.isPrintJob && cartItem.pages) {
+            const paperResma = this.items.find(i => i.id === 'gr-1');
+            if (paperResma) {
+              // Deduct paper sheets (500 fls per resma ratio)
+              const resmaUsage = cartItem.pages / 500;
+              paperResma.stock = Math.max(0, Number((paperResma.stock - resmaUsage).toFixed(2)));
+            }
           }
         });
 
@@ -1463,23 +1306,24 @@
         this.sales.unshift(saleRecord);
         this.saveAll();
 
-        this.showToast('Venda registrada e sincronizada!');
+        this.showToast('Venda finalizada com sucesso!');
         this.cart = [];
         document.getElementById('cash-received-input').value = '';
         this.renderAll();
       }
 
-      // ==================== TAB 2: AGENDAMENTOS RG (OS) ====================
+      // TAB 2: Agendamentos Identidade (OS)
       renderOSList() {
         const container = document.getElementById('os-list-container');
-        
-        // Sort OS strictly chronologically (earliest appointment first)
+        if (!container) return;
+
+        // Strictly sorted by nearest appointment date/time first
         const sorted = [...this.osList].sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
 
         if (sorted.length === 0) {
           container.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500 space-y-2">
-              <i data-lucide="id-card" class="w-12 h-12 mx-auto stroke-1"></i>
+              <i class="fa-solid fa-id-card text-4xl"></i>
               <p class="text-sm">Nenhum agendamento de RG registrado.</p>
             </div>
           `;
@@ -1499,13 +1343,13 @@
                   <div class="flex items-center justify-between gap-2 border-b border-slate-700/60 pb-2">
                     <span class="text-xs px-2.5 py-0.5 rounded-full font-bold border ${statusColor}">${os.status}</span>
                     <span class="text-xs font-mono text-slate-300 flex items-center gap-1">
-                      <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i> ${dateStr} às ${timeStr}
+                      <i class="fa-regular fa-calendar-days text-amber-400"></i> ${dateStr} às ${timeStr}
                     </span>
                   </div>
 
                   <div class="mt-3 space-y-1.5 text-xs">
                     <h3 class="font-bold text-sm text-slate-100 flex items-center gap-1.5">
-                      <i data-lucide="user" class="w-4 h-4 text-amber-400"></i> ${os.clientName}
+                      <i class="fa-solid fa-user text-amber-400"></i> ${os.clientName}
                     </h3>
                     <p class="text-slate-300"><strong class="text-slate-400 font-normal">Mãe:</strong> ${os.motherName || 'Não informado'}</p>
                     <div class="grid grid-cols-2 gap-2 text-slate-300 pt-1 border-t border-slate-700/40">
@@ -1517,21 +1361,19 @@
                 </div>
 
                 <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
-                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar Lembrete / WhatsApp">
-                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Enviar WhatsApp
+                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar WhatsApp com Lembrete">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp / Doc Lista
                   </button>
 
                   <div class="flex items-center gap-1">
-                    <button onclick="app.openOSModal('${os.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                    <button onclick="app.deleteOS('${os.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                    <button onclick="app.openOSModal('${os.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="app.deleteOS('${os.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-trash-can"></i></button>
                   </div>
                 </div>
               </div>
             `;
           }).join('');
         }
-
-        lucide.createIcons();
       }
 
       openOSModal(osId = null) {
@@ -1557,7 +1399,6 @@
         }
 
         modal.classList.remove('hidden');
-        lucide.createIcons();
       }
 
       closeOSModal() { document.getElementById('modal-os').classList.add('hidden'); }
@@ -1586,7 +1427,7 @@
         this.saveAll();
         this.closeOSModal();
         this.renderAll();
-        this.showToast('Solicitação de RG salva com sucesso!');
+        this.showToast('Agendamento salvo com sucesso!');
       }
 
       deleteOS(osId) {
@@ -1606,27 +1447,29 @@
         const birthStr = os.birthDate ? new Date(os.birthDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada';
         const cleanPhone = os.phone.replace(/\D/g, '');
 
-        const message = `*SOLICITAÇÃO DE AGENDAMENTO RG / CIN*\n\n` +
+        const message = `*SOLICITAÇÃO DE AGENDAMENTO RG / CIN - PRINT-TECH*\n\n` +
           `👤 *Solicitante:* ${os.clientName}\n` +
           `👩‍👦 *Nome da Mãe:* ${os.motherName || 'Não informado'}\n` +
           `🎂 *Data de Nascimento:* ${birthStr}\n` +
           `🪪 *CPF:* ${os.cpf || 'Não informado'}\n` +
           `📱 *Telefone:* ${os.phone}\n` +
-          `📅 *Horário do Agendamento:* ${dateStr} às ${timeStr}\n` +
-          `📌 *Status Atual:* *${os.status}*\n\n` +
+          `📅 *Horário do Atendimento:* ${dateStr} às ${timeStr}\n` +
+          `📌 *Status:* *${os.status}*\n\n` +
           `⚠️ *Documentos OBRIGATÓRIOS para o atendimento:* \n` +
           `1. Certidão de Nascimento ou Casamento (Original e cópia)\n` +
           `2. CPF\n` +
           `3. Comprovante de Residência Atualizado\n\n` +
-          `Print-Tech Balcão Mossoró Agradece a preferência!`;
+          `Agradecemos a preferência!`;
 
         const encoded = encodeURIComponent(message);
         window.open(`https://wa.me/55${cleanPhone}?text=${encoded}`, '_blank');
       }
 
-      // ==================== TAB 3: CONTROLE DE ESTOQUE ====================
+      // TAB 3: Controle de Estoque
       renderInventory() {
         const tbody = document.getElementById('inventory-table-body');
+        if (!tbody) return;
+
         const query = (document.getElementById('inventory-search')?.value || '').toLowerCase();
         const catFilter = document.getElementById('inventory-cat-filter')?.value || 'all';
 
@@ -1638,17 +1481,25 @@
 
         tbody.innerHTML = filtered.map(item => {
           const isService = item.category === 'Serviços';
-          
-          const statusBadge = isService ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Ilimitado</span>' :
-                              item.stock === 0 ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40">Crítico (0)</span>' :
-                              item.stock <= 2 ? `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">Atenção (${item.stock})</span>` :
-                              `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-700 text-slate-300">Normal (${item.stock} ${item.unit})</span>`;
+
+          // Status indicator badges
+          let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Normal</span>';
+          if (!isService) {
+            if (item.stock <= 1) {
+              statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Crítico</span>';
+            } else if (item.stock <= 3) {
+              statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Atenção</span>';
+            }
+          }
 
           return `
             <tr class="hover:bg-slate-700/30 transition-colors">
               <td class="py-3.5 px-4 font-bold text-slate-100">${item.name}</td>
               <td class="py-3.5 px-4 text-xs text-slate-400">${item.category}</td>
-              <td class="py-3.5 px-4 text-center">${statusBadge}</td>
+              <td class="py-3.5 px-4 text-center">${isService ? '-' : statusBadge}</td>
+              <td class="py-3.5 px-4 text-center font-extrabold ${!isService && item.stock <= 2 ? 'text-amber-400' : 'text-slate-100'}">
+                ${isService ? '∞' : `${item.stock} <span class="text-xs font-normal text-slate-400">${item.unit}</span>`}
+              </td>
               <td class="py-3.5 px-4 font-semibold text-emerald-400">${this.formatCurrency(item.price)}</td>
               <td class="py-3.5 px-4 text-center">
                 ${!isService ? `
@@ -1657,19 +1508,17 @@
                     <button onclick="app.quickAdjustStock('${item.id}', 1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+1</button>
                     <button onclick="app.quickAdjustStock('${item.id}', 5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+5</button>
                   </div>
-                ` : '<span class="text-xs text-slate-500">Ilimitado</span>'}
+                ` : '<span class="text-xs text-slate-500">Serviço</span>'}
               </td>
               <td class="py-3.5 px-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <button onclick="app.openItemModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                  <button onclick="app.deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                  <button onclick="app.openItemModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button onclick="app.deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
               </td>
             </tr>
           `;
-        }).join('') || `<tr><td colspan="6" class="text-center py-8 text-slate-500">Nenhum item encontrado.</td></tr>`;
-
-        lucide.createIcons();
+        }).join('') || `<tr><td colspan="7" class="text-center py-8 text-slate-500">Nenhum item encontrado.</td></tr>`;
       }
 
       quickAdjustStock(itemId, delta) {
@@ -1686,21 +1535,21 @@
         this.items = this.items.filter(i => i.id !== itemId);
         this.saveAll();
         this.renderAll();
-        this.showToast('Item excluído com sucesso.');
+        this.showToast('Item excluído.');
       }
 
       sendSupplierWhatsAppList() {
-        const lowStock = this.items.filter(i => i.category !== 'Serviços' && i.stock <= 2);
+        const lowStock = this.items.filter(i => i.category !== 'Serviços' && i.stock <= 3);
         if (lowStock.length === 0) {
           this.showToast('Nenhum item com estoque baixo no momento.', 'warning');
           return;
         }
 
-        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH BALCÃO MOSSORÓ*\n\nOlá! Preciso fazer o pedido dos seguintes itens para reposição urgente:\n\n";
+        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH BALCÃO*\n\nOlá! Gostaria de cotar a reposição dos seguintes itens:\n\n";
         lowStock.forEach(i => {
-          msg += `▫️ *${i.name}* (Estoque atual: ${i.stock} ${i.unit})\n`;
+          msg += `▫️ *${i.name}* (Qtd atual: ${i.stock} ${i.unit})\n`;
         });
-        msg += "\nPor favor, confirme a disponibilidade e orçamentos!";
+        msg += "\nPor favor, informe disponibilidade e valores!";
 
         const encoded = encodeURIComponent(msg);
         window.open(`https://wa.me/?text=${encoded}`, '_blank');
@@ -1721,7 +1570,7 @@
           document.getElementById('item-stock').value = item.stock;
           document.getElementById('item-price').value = item.price;
         } else {
-          document.getElementById('modal-item-title').innerText = 'Cadastrar Novo Item';
+          document.getElementById('modal-item-title').innerText = 'Cadastrar Item';
           document.getElementById('item-id').value = '';
           document.getElementById('item-unit').value = 'un';
           document.getElementById('item-stock').value = 1;
@@ -1729,7 +1578,6 @@
         }
 
         modal.classList.remove('hidden');
-        lucide.createIcons();
       }
 
       closeItemModal() { document.getElementById('modal-item').classList.add('hidden'); }
@@ -1756,7 +1604,7 @@
         this.showToast('Item salvo com sucesso!');
       }
 
-      // ==================== TAB 5: FECHAMENTO DE CAIXA ====================
+      // TAB 5: Fechamento de Caixa
       renderReports() {
         const selectedDate = document.getElementById('report-date-filter').value;
         const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
@@ -1773,6 +1621,8 @@
         document.getElementById('report-sales-count').innerText = `${salesForDate.length} vendas registradas`;
 
         const tbody = document.getElementById('sales-history-body');
+        if (!tbody) return;
+
         tbody.innerHTML = salesForDate.map(sale => {
           const itemsSummary = sale.items.map(i => `${i.qty}x ${i.name}`).join(', ');
           const payBadge = sale.paymentMethod === 'PIX' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
@@ -1788,7 +1638,7 @@
               </td>
               <td class="py-3 px-4 text-right font-extrabold text-emerald-400">${this.formatCurrency(sale.total)}</td>
               <td class="py-3 px-4 text-center">
-                <button onclick="app.cancelSale('${sale.id}')" class="text-slate-400 hover:text-rose-400 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-500/10 transition-colors" title="Cancelar Venda">
+                <button onclick="app.cancelSale('${sale.id}')" class="text-slate-400 hover:text-rose-400 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-rose-500/10 transition-colors">
                   Estornar
                 </button>
               </td>
@@ -1802,6 +1652,7 @@
         if (saleIndex === -1) return;
 
         const sale = this.sales[saleIndex];
+        // Revert stock
         sale.items.forEach(cartItem => {
           const directItem = this.items.find(i => i.id === cartItem.itemId);
           if (directItem && directItem.category !== 'Serviços') {
@@ -1812,7 +1663,7 @@
         this.sales.splice(saleIndex, 1);
         this.saveAll();
         this.renderAll();
-        this.showToast('Venda estornada e estoque restaurado!');
+        this.showToast('Venda estornada e estoque devolvido!');
       }
 
       exportCSV() {
@@ -1856,7 +1707,7 @@
 
       confirmCloseCash() {
         this.closeCloseCashModal();
-        this.showToast('Caixa do dia fechado com sucesso!');
+        this.showToast('Caixa do dia fechado!');
       }
 
       // Reset Modal
@@ -1864,9 +1715,9 @@
       closeResetModal() { document.getElementById('modal-reset').classList.add('hidden'); }
 
       confirmReset() {
-        localStorage.removeItem('printtech_v2_items');
-        localStorage.removeItem('printtech_v2_sales');
-        localStorage.removeItem('printtech_v2_os');
+        localStorage.removeItem('printtech_v3_items');
+        localStorage.removeItem('printtech_v3_sales');
+        localStorage.removeItem('printtech_v3_os');
         this.items = [...INITIAL_STOCK_LIST];
         this.sales = [];
         this.osList = [];
