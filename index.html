@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Print-Tech Balcão - Gestão de Xerox, Vendas & Agendamentos</title>
+
+  <!-- Apple Touch Icon for iOS Homescreen -->
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/printer.png">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -49,18 +52,37 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    window.FirebaseSDK = {
-      initializeApp,
-      getAuth,
-      signInAnonymously,
-      signInWithCustomToken,
-      onAuthStateChanged,
-      getFirestore,
+    // User's exact Firebase Project Configuration
+    const userFirebaseConfig = {
+      apiKey: "AIzaSyBuAt884Vt3M6ALGWCNaQ9w-3iwi_Tj4no",
+      authDomain: "print-tech-529d0.firebaseapp.com",
+      projectId: "print-tech-529d0",
+      storageBucket: "print-tech-529d0.firebasestorage.app",
+      messagingSenderId: "427012896460",
+      appId: "1:427012896460:web:f5ac6447f56d6f8b66b469"
+    };
+
+    const configToUse = (typeof __firebase_config !== 'undefined' && __firebase_config)
+      ? JSON.parse(__firebase_config)
+      : userFirebaseConfig;
+
+    const app = initializeApp(configToUse);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.FirebaseAppInstance = {
+      app,
+      auth,
+      db,
       doc,
       setDoc,
-      onSnapshot
+      onSnapshot,
+      getDoc,
+      signInAnonymously,
+      signInWithCustomToken,
+      onAuthStateChanged
     };
   </script>
 </head>
@@ -76,7 +98,7 @@
         </div>
         <div>
           <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
-            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Balcão Cloud Pro</span>
+            PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Cloud Sync Pro</span>
           </h1>
           <p class="text-xs text-slate-400 hidden sm:block">Xerox, Eletrônicos, Brinquedos & Agendamentos RG</p>
         </div>
@@ -85,7 +107,7 @@
       <!-- Quick Metrics & Cloud Status Header -->
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- Status Indicator -->
-        <div id="cloud-status-pill" class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2">
+        <div id="cloud-status-pill" class="bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700/50 flex items-center gap-2" title="Sincronização em tempo real">
           <div id="cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
           <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Conectando...</span>
         </div>
@@ -96,7 +118,7 @@
           <span id="header-today-total" class="text-sm font-bold text-emerald-400">R$ 0,00</span>
         </div>
 
-        <!-- Action Tools Dropdown / Quick Buttons -->
+        <!-- Action Tools Quick Buttons -->
         <div class="flex items-center gap-1">
           <button onclick="app.openSyncModal()" class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-slate-700/50 rounded-lg transition-colors" title="Opções de Sincronização & Nuvem">
             <i data-lucide="cloud-cog" class="w-5 h-5"></i>
@@ -119,15 +141,15 @@
     </div>
   </header>
 
-  <!-- Migration Banner (Shows when iPhone has local data ready to push to cloud) -->
-  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 to-indigo-600 text-white px-4 py-2.5 shadow-lg border-b border-amber-500/40">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-      <div class="flex items-center gap-2">
-        <i data-lucide="smartphone-nfc" class="w-5 h-5 text-amber-200"></i>
-        <span><strong>Dados detectados no dispositivo local!</strong> Deseja enviar estes registros para a Nuvem para que apareçam no PC do balcão?</span>
+  <!-- Migration Banner (Shows when iPhone/PC has local data ready to push to Firestore cloud) -->
+  <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 to-indigo-600 text-white px-4 py-3 shadow-xl border-b border-amber-500/40">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2.5">
+        <i data-lucide="smartphone-nfc" class="w-5 h-5 text-amber-200 shrink-0"></i>
+        <span><strong>Dados detectados neste aparelho!</strong> Clique no botão para enviar todas as vendas e agendamentos para a Nuvem (ficará visível no PC do balcão instantaneamente).</span>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3 py-1 rounded-lg hover:bg-slate-100 transition-colors">
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3.5 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
           📤 Enviar para Nuvem Agora
         </button>
         <button onclick="document.getElementById('migration-banner').classList.add('hidden')" class="text-white/80 hover:text-white font-semibold px-2 py-1">
@@ -185,7 +207,7 @@
               <i data-lucide="calculator" class="w-4 h-4"></i>
               Calculadora Rápida de Impressão por Volume
             </h3>
-            <span class="text-[11px] text-slate-400">Aplica desconto automático por faixas</span>
+            <span class="text-[11px] text-slate-400">Desconto automático por faixas de quantidade</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
@@ -524,17 +546,17 @@
       <div class="space-y-3 text-xs text-slate-300">
         <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-200">Status da Nuvem:</span>
-            <span id="sync-modal-status-pill" class="px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400">Carregando...</span>
+            <span class="font-bold text-slate-200">Status da Nuvem Firebase:</span>
+            <span id="sync-modal-status-pill" class="px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400">Conectando...</span>
           </div>
-          <p class="text-slate-400">Quando conectado, o aplicativo sincroniza vendas, estoque e agendamentos instantaneamente entre seu iPhone e o computador do balcão.</p>
+          <p class="text-slate-400">Sua conta do Firebase <strong>print-tech-529d0</strong> sincroniza vendas, estoque e agendamentos instantaneamente entre seu iPhone e o computador do balcão.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <button onclick="app.pushLocalToCloud()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-md">
             <i data-lucide="upload-cloud" class="w-5 h-5"></i>
             <span>Enviar Dados para Nuvem</span>
-            <span class="text-[10px] text-indigo-200 font-normal">Subir do iPhone / PC</span>
+            <span class="text-[10px] text-indigo-200 font-normal">Subir dados deste aparelho</span>
           </button>
 
           <button onclick="app.exportJSONBackup()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-md">
@@ -796,8 +818,6 @@
         this.selectedPayment = 'PIX';
         
         // Cloud state flags
-        this.db = null;
-        this.auth = null;
         this.cloudConnected = false;
         this.isSyncingFromCloud = false;
 
@@ -811,11 +831,11 @@
         this.calcQuickPrint();
         this.renderAll();
 
-        // Check migration status
+        // Check local migration status
         this.checkMigrationPrompt();
 
-        // Initialize Firebase Realtime Cloud Sync
-        this.initFirebaseSync();
+        // Initialize Realtime Cloud Sync
+        setTimeout(() => this.initFirebaseSync(), 200);
       }
 
       loadLocalStorage() {
@@ -860,38 +880,29 @@
 
       // ==================== FIREBASE CLOUD REALTIME SYNC ====================
       async initFirebaseSync() {
-        if (!window.FirebaseSDK) {
+        if (!window.FirebaseAppInstance) {
           this.setCloudStatus('offline', 'Modo Local');
           return;
         }
 
-        const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, setDoc, onSnapshot } = window.FirebaseSDK;
+        const { auth, db, doc, setDoc, onSnapshot, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = window.FirebaseAppInstance;
 
         try {
-          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-balcao';
-          const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-
-          if (!firebaseConfig) {
-            this.setCloudStatus('offline', 'Modo Local');
-            return;
-          }
-
-          const app = initializeApp(firebaseConfig);
-          this.auth = getAuth(app);
-          this.db = getFirestore(app);
+          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
 
           const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
           if (initialAuthToken) {
-            await signInWithCustomToken(this.auth, initialAuthToken);
+            await signInWithCustomToken(auth, initialAuthToken);
           } else {
-            await signInAnonymously(this.auth);
+            await signInAnonymously(auth);
           }
 
-          onAuthStateChanged(this.auth, (user) => {
+          onAuthStateChanged(auth, (user) => {
             if (!user) return;
 
-            const docRef = doc(this.db, 'artifacts', appId, 'public', 'data', 'storeState', 'mainState');
+            // Path rule: /artifacts/{appId}/public/data/{collectionName}/{documentId}
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'storeData', 'mainState');
 
             // Listen in real-time to Cloud changes
             onSnapshot(docRef, (snapshot) => {
@@ -910,17 +921,17 @@
                   this.setCloudStatus('online', 'Nuvem Conectada');
                 }
               } else {
-                // Cloud document is empty, auto upload local state
+                // Cloud document is empty, push local state to Firestore
                 this.pushLocalToCloud();
               }
             }, (error) => {
               console.warn("Cloud sync warning:", error);
-              this.setCloudStatus('offline', 'Modo Local');
+              this.setCloudStatus('offline', 'Erro na Nuvem');
             });
           });
 
         } catch (err) {
-          console.warn("Firebase Auth / Sync Error:", err);
+          console.warn("Firebase Auth Error:", err);
           this.setCloudStatus('offline', 'Modo Local');
         }
       }
@@ -946,10 +957,10 @@
       async pushLocalToCloud() {
         this.saveLocalStorage();
         
-        if (this.db && this.auth && this.auth.currentUser) {
-          const { doc, setDoc } = window.FirebaseSDK;
-          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-balcao';
-          const docRef = doc(this.db, 'artifacts', appId, 'public', 'data', 'storeState', 'mainState');
+        if (window.FirebaseAppInstance && window.FirebaseAppInstance.auth?.currentUser) {
+          const { db, doc, setDoc } = window.FirebaseAppInstance;
+          const appId = typeof __app_id !== 'undefined' ? __app_id : 'print-tech-529d0';
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'storeData', 'mainState');
 
           try {
             await setDoc(docRef, {
@@ -960,14 +971,14 @@
               lastUpdated: Date.now()
             });
             this.setCloudStatus('online', 'Nuvem Conectada');
-            this.showToast('Dados sincronizados na Nuvem com sucesso!');
+            this.showToast('Dados enviados para a Nuvem Firebase!');
             document.getElementById('migration-banner')?.classList.add('hidden');
           } catch(e) {
-            console.error("Cloud push failed:", e);
-            this.showToast('Erro ao enviar dados para a nuvem.', 'warning');
+            console.error("Cloud push error:", e);
+            this.showToast('Erro ao sincronizar na nuvem.', 'warning');
           }
         } else {
-          this.showToast('Nuvem não configurada. Dados mantidos localmente.', 'warning');
+          this.showToast('Nuvem não iniciada. Dados salvos localmente.', 'warning');
         }
       }
 
@@ -1393,7 +1404,7 @@
         this.sales.unshift(saleRecord);
         this.saveAll();
 
-        this.showToast('Venda realizada e sincronizada!');
+        this.showToast('Venda registrada e sincronizada!');
         this.cart = [];
         document.getElementById('cash-received-input').value = '';
         this.renderAll();
@@ -1448,7 +1459,7 @@
 
                 <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
                   <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar WhatsApp com dados">
-                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Enviar Status / WhatsApp
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Status / WhatsApp
                   </button>
 
                   <div class="flex items-center gap-1">
