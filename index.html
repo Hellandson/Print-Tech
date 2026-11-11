@@ -86,7 +86,7 @@
             <input type="file" accept=".json" onchange="app.importJSONBackup(event)" class="hidden">
           </label>
 
-          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Restaurar Estoque Padrão">
+          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Restaurar Dados Iniciais do Backup">
             <i class="fa-solid fa-rotate-left"></i>
           </button>
         </div>
@@ -94,16 +94,16 @@
     </div>
   </header>
 
-  <!-- Migration Banner (Appears when device has un-synced LocalStorage) -->
+  <!-- Migration Banner -->
   <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 via-indigo-600 to-purple-600 text-white px-4 py-2.5 shadow-xl border-b border-amber-500/40">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="flex items-center gap-2.5">
         <i class="fa-solid fa-cloud-arrow-up text-amber-200 text-base shrink-0"></i>
-        <span><strong>Dados localmente detectados neste aparelho!</strong> Clique no botão para sincronizar vendas e agendamentos com o computador do balcão.</span>
+        <span><strong>Dados detectados no dispositivo!</strong> Clique no botão para sincronizar vendas, estoque e fila do RG com o banco de dados.</span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
-          📤 Enviar para Nuvem Agora
+          📤 Sincronizar com a Nuvem
         </button>
         <button onclick="document.getElementById('migration-banner').classList.add('hidden')" class="text-white/80 hover:text-white font-semibold px-2 py-1">
           Ignorar
@@ -122,7 +122,7 @@
 
       <button onclick="app.switchTab('os')" id="tab-btn-os" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
         <i class="fa-solid fa-id-card text-amber-400"></i>
-        Agendamentos Identidade (OS)
+        Fila de Espera RG / CIN
         <span id="badge-os-count" class="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">0</span>
       </button>
 
@@ -179,8 +179,8 @@
 
             <div class="sm:col-span-4 flex items-center gap-2">
               <div class="flex-1 text-right">
-                <span class="block text-[10px] text-slate-400">Unit.: <strong id="quick-print-unit" class="text-emerald-400">R$ 0,50</strong></span>
-                <span id="quick-print-total" class="text-sm font-extrabold text-white">R$ 5,00</span>
+                <span class="block text-[10px] text-slate-400">Unit.: <strong id="quick-print-unit" class="text-emerald-400">R$ 1,00</strong></span>
+                <span id="quick-print-total" class="text-sm font-extrabold text-white">R$ 10,00</span>
               </div>
               <button onclick="app.addQuickPrintToCart()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl shadow-md transition-all" title="Adicionar à Comanda">
                 <i class="fa-solid fa-circle-plus text-lg"></i>
@@ -280,7 +280,7 @@
 
     </section>
 
-    <!-- ==================== TAB 2: AGENDAMENTOS RG (OS) ==================== -->
+    <!-- ==================== TAB 2: AGENDAMENTOS RG / CIN (FILA DE ESPERA) ==================== -->
     <section id="tab-os" class="tab-content hidden space-y-6">
       
       <!-- Top Action Bar -->
@@ -288,13 +288,13 @@
         <div>
           <h2 class="font-bold text-lg text-slate-100 flex items-center gap-2">
             <i class="fa-solid fa-id-card text-amber-400"></i>
-            Agendamentos de Carteira de Identidade (RG / CIN)
+            Fila de Espera - Carteira de Identidade (RG / CIN)
           </h2>
-          <p class="text-xs text-slate-400">Organizados por ordem cronológica automática (mais próximo no topo)</p>
+          <p class="text-xs text-slate-400">Organizados por ordem de solicitação (primeiros a dar entrada ficam no topo da fila)</p>
         </div>
 
         <button onclick="app.openOSModal()" class="w-full md:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
-          <i class="fa-solid fa-plus-circle"></i> Novo Agendamento de RG
+          <i class="fa-solid fa-plus-circle"></i> Novo Registro na Fila
         </button>
       </div>
 
@@ -482,11 +482,11 @@
 
   <!-- ==================== MODALS ==================== -->
 
-  <!-- Modal OS (Solicitação RG) -->
+  <!-- Modal OS (Registro na Fila do RG) -->
   <div id="modal-os" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Solicitação de Identidade (RG)</h3>
+        <h3 id="modal-os-title" class="font-bold text-lg text-slate-100">Registro de Identidade (RG / CIN)</h3>
         <button onclick="app.closeOSModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
@@ -520,22 +520,17 @@
             <input type="text" id="os-phone" required placeholder="(84) 98888-8888" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Data e Hora do Agendamento *</label>
-            <input type="datetime-local" id="os-datetime" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+            <label class="block text-xs font-medium text-slate-300 mb-1">Status da Fila</label>
+            <select id="os-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+              <option value="Agendando">Agendando (Em Fila)</option>
+              <option value="Concluído">Concluído</option>
+            </select>
           </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Status</label>
-          <select id="os-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
-            <option value="Agendando">Agendando</option>
-            <option value="Concluído">Concluído</option>
-          </select>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="app.closeOSModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-amber-600/20">Salvar Solicitação</button>
+          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-amber-600/20">Salvar na Fila</button>
         </div>
       </form>
     </div>
@@ -618,12 +613,12 @@
   <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-rose-400 flex items-center gap-2">
-        <i class="fa-solid fa-triangle-exclamation"></i> Resetar Estoque para o Padrão?
+        <i class="fa-solid fa-triangle-exclamation"></i> Restaurar Dados Iniciais?
       </h3>
-      <p class="text-xs text-slate-300">Esta ação irá recarregar o estoque completo exatamente com a lista inicial de eletrônicos, brinquedos e insumos gráficos fornecidos.</p>
+      <p class="text-xs text-slate-300">Esta ação recarregará a base de dados fornecida no último backup JSON (itens, histórico de vendas e fila do RG).</p>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="app.closeResetModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:bg-slate-700/50">Cancelar</button>
-        <button onclick="app.confirmReset()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm">Sim, Resetar</button>
+        <button onclick="app.confirmReset()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm">Sim, Restaurar</button>
       </div>
     </div>
   </div>
@@ -633,90 +628,117 @@
 
   <!-- APPLICATION ENGINE & DATABASE SCRIPT -->
   <script>
-    // Exact initial inventory requested
+    // Embed original data from backup_printtech_2026-11-11.json
     const INITIAL_STOCK_LIST = [
-      // Eletrônicos
-      { id: 'el-1', name: 'Capinha Variadas', category: 'Eletrônicos', stock: 31, price: 15.00, unit: 'un' },
-      { id: 'el-2', name: 'Cabo Usb v8', category: 'Eletrônicos', stock: 5, price: 15.00, unit: 'un' },
-      { id: 'el-3', name: 'Cabo usbc/usbc', category: 'Eletrônicos', stock: 4, price: 15.00, unit: 'un' },
-      { id: 'el-4', name: 'Cabo usbc/Lightning', category: 'Eletrônicos', stock: 5, price: 15.00, unit: 'un' },
-      { id: 'el-5', name: 'Cabo usb/Lightning', category: 'Eletrônicos', stock: 3, price: 15.00, unit: 'un' },
-      { id: 'el-6', name: 'Cabo Usb/USBC', category: 'Eletrônicos', stock: 2, price: 15.00, unit: 'un' },
-      { id: 'el-7', name: 'Carregador com cabo tipo c', category: 'Eletrônicos', stock: 6, price: 35.00, unit: 'un' },
-      { id: 'el-8', name: 'Carregador com cabo v8', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'el-9', name: 'Carregador com cabo Lightning', category: 'Eletrônicos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'el-10', name: 'Fonte carregador usb c', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
-      { id: 'el-11', name: 'Fonte carregador USB', category: 'Eletrônicos', stock: 4, price: 20.00, unit: 'un' },
-      { id: 'el-12', name: 'Fone de ouvido usbc (R$ 22)', category: 'Eletrônicos', stock: 2, price: 22.00, unit: 'un' },
-      { id: 'el-13', name: 'Fone de ouvido usbc (R$ 25)', category: 'Eletrônicos', stock: 2, price: 25.00, unit: 'un' },
-      { id: 'el-14', name: 'Fone de ouvido plug antigo redondo', category: 'Eletrônicos', stock: 4, price: 10.00, unit: 'un' },
-      { id: 'el-15', name: 'Fone bluetooth Redmi', category: 'Eletrônicos', stock: 1, price: 35.00, unit: 'un' },
-      { id: 'el-16', name: 'Fone bluetooth h\'maston', category: 'Eletrônicos', stock: 2, price: 50.00, unit: 'un' },
-      { id: 'el-17', name: 'Cabo stereo', category: 'Eletrônicos', stock: 1, price: 18.00, unit: 'un' },
-      { id: 'el-18', name: 'Conversor Usbc otg', category: 'Eletrônicos', stock: 2, price: 20.00, unit: 'un' },
-      { id: 'el-19', name: 'Cabo hdmi', category: 'Eletrônicos', stock: 1, price: 20.00, unit: 'un' },
-      { id: 'el-20', name: 'Suporte tv', category: 'Eletrônicos', stock: 3, price: 25.00, unit: 'un' },
-      { id: 'el-21', name: 'Video Game', category: 'Eletrônicos', stock: 1, price: 120.00, unit: 'un' },
+      { price: 15, id: "el-1", stock: 31, unit: "un", category: "Eletrônicos", name: "Capinha Variadas" },
+      { id: "el-2", price: 15, name: "Cabo Usb v8", category: "Eletrônicos", stock: 5, unit: "un" },
+      { category: "Eletrônicos", price: 15, unit: "un", id: "el-3", name: "Cabo usbc/usbc", stock: 4 },
+      { price: 15, category: "Eletrônicos", stock: 5, unit: "un", name: "Cabo usbc/Lightning", id: "el-4" },
+      { category: "Eletrônicos", price: 15, unit: "un", name: "Cabo usb/Lightning", id: "el-5", stock: 3 },
+      { category: "Eletrônicos", name: "Cabo Usb/USBC", id: "el-6", unit: "un", stock: 2, price: 15 },
+      { unit: "un", category: "Eletrônicos", price: 35, name: "Carregador com cabo tipo c", stock: 6, id: "el-7" },
+      { unit: "un", name: "Carregador com cabo v8", category: "Eletrônicos", id: "el-8", stock: 3, price: 20 },
+      { id: "el-9", category: "Eletrônicos", price: 20, unit: "un", stock: 3, name: "Carregador com cabo Lightning" },
+      { id: "el-10", name: "Fonte carregador usb c", category: "Eletrônicos", price: 35, stock: 1, unit: "un" },
+      { price: 20, id: "el-11", stock: 4, unit: "un", category: "Eletrônicos", name: "Fonte carregador USB" },
+      { category: "Eletrônicos", unit: "un", price: 22, id: "el-12", name: "Fone de ouvido usbc (R$ 22)", stock: 1 },
+      { category: "Eletrônicos", id: "el-13", price: 25, stock: 1, name: "Fone de ouvido usbc (R$ 25)", unit: "un" },
+      { unit: "un", category: "Eletrônicos", stock: 4, name: "Fone de ouvido plug antigo redondo", price: 10, id: "el-14" },
+      { id: "el-15", category: "Eletrônicos", unit: "un", stock: 1, price: 35, name: "Fone bluetooth Redmi" },
+      { price: 50, category: "Eletrônicos", stock: 2, unit: "un", name: "Fone bluetooth h'maston", id: "el-16" },
+      { name: "Cabo stereo", id: "el-17", unit: "un", stock: 1, category: "Eletrônicos", price: 18 },
+      { price: 20, stock: 2, id: "el-18", name: "Conversor Usbc otg", category: "Eletrônicos", unit: "un" },
+      { unit: "un", stock: 1, price: 20, name: "Cabo hdmi", category: "Eletrônicos", id: "el-19" },
+      { unit: "un", stock: 3, price: 25, name: "Suporte tv", category: "Eletrônicos", id: "el-20" },
+      { price: 120, unit: "un", name: "Video Game", id: "el-21", category: "Eletrônicos", stock: 1 },
+      { id: "br-1", stock: 2, unit: "un", price: 15, name: "Moto brinquedo", category: "Brinquedos" },
+      { price: 8, category: "Brinquedos", unit: "un", id: "br-2", name: "Cobrinha", stock: 2 },
+      { unit: "un", name: "Kit ferramenta", id: "br-3", stock: 2, category: "Brinquedos", price: 16 },
+      { name: "Boneca pretty", category: "Brinquedos", unit: "un", stock: 2, price: 10, id: "br-4" },
+      { name: "Kit medico", id: "br-5", unit: "un", stock: 1, category: "Brinquedos", price: 15 },
+      { category: "Brinquedos", price: 15, stock: 2, id: "br-6", name: "Bayblade", unit: "un" },
+      { id: "br-7", price: 30, category: "Brinquedos", stock: 2, name: "Soldados", unit: "un" },
+      { price: 20, stock: 1, id: "br-8", category: "Brinquedos", unit: "un", name: "Formula 1" },
+      { price: 10, id: "br-9", category: "Brinquedos", stock: 2, unit: "un", name: "Laila boneca" },
+      { price: 20, category: "Brinquedos", stock: 3, name: "Moto Miniatura", id: "br-10", unit: "un" },
+      { id: "br-11", price: 20, stock: 1, name: "Carrinho Miniatura", category: "Brinquedos", unit: "un" },
+      { price: 25, category: "Brinquedos", id: "br-12", stock: 1, unit: "un", name: "Roda lançadora carrinho" },
+      { price: 20, stock: 3, unit: "un", id: "br-13", name: "Boneca zoe", category: "Brinquedos" },
+      { id: "br-14", price: 20, unit: "un", category: "Brinquedos", name: "Boneca Mel", stock: 3 },
+      { category: "Brinquedos", name: "Boneca Tiny", id: "br-15", unit: "un", stock: 1, price: 25 },
+      { id: "br-16", category: "Brinquedos", price: 15, unit: "un", stock: 1, name: "Boneca Brink" },
+      { name: "Squish", stock: 1, unit: "un", price: 30, category: "Brinquedos", id: "br-17" },
+      { price: 12, category: "Brinquedos", stock: 4, name: "Cubo Magico", unit: "un", id: "br-18" },
+      { unit: "un", name: "Tinta Cabelo maluco", category: "Brinquedos", id: "br-19", stock: 3, price: 15 },
+      { unit: "un", stock: 7, name: 'Bola "futsal"', price: 16, id: "br-20", category: "Brinquedos" },
+      { unit: "un", name: "Bola Futebol", stock: 2, id: "br-21", price: 25, category: "Brinquedos" },
+      { id: "br-22", name: "Dinosfera", price: 25, category: "Brinquedos", stock: 1, unit: "un" },
+      { price: 40, id: "br-23", stock: 6, category: "Brinquedos", unit: "un", name: "Copo termico" },
+      { id: "br-24", name: "Bladeburst", price: 15, stock: 1, category: "Brinquedos", unit: "un" },
+      { id: "gr-1", name: "Resma papel A4 comum (75g)", price: 28, category: "Insumos Gráfica", stock: 1, unit: "un" },
+      { id: "gr-2", name: "Papel fotografico A4", price: 35, stock: 2, unit: "un", category: "Insumos Gráfica" },
+      { price: 40, stock: 1, id: "gr-3", category: "Insumos Gráfica", name: "Papel fotográfico A4 adesivo", unit: "un" },
+      { price: 50, stock: 1, name: "Pouch film Identidade", category: "Insumos Gráfica", id: "gr-4", unit: "cx" },
+      { category: "Insumos Gráfica", price: 45, unit: "cx", id: "gr-5", name: "Pouch film Título de Eleitor", stock: 1 },
+      { price: 2, stock: 6, unit: "un", name: "Pouch film A4", id: "gr-6", category: "Insumos Gráfica" },
+      { unit: "un", category: "Insumos Gráfica", name: "Cartolina Branca", stock: 94, price: 3, id: "gr-7" },
+      { id: "gr-8", category: "Insumos Gráfica", price: 3, stock: 5, unit: "un", name: "Cartolina Colorida (Azul, Amarelo, Rosa)" },
+      { name: "Agendamento Carteira de Identidade (RG / CIN)", id: "srv-1", unit: "serv", category: "Serviços", stock: 9999, price: 5 },
+      { name: "Plastificação Identidade / Documento", unit: "un", stock: 9999, category: "Serviços", id: "srv-2", price: 5 },
+      { unit: "un", stock: 9999, price: 8, category: "Serviços", id: "srv-3", name: "Encadernação até 100 fls" },
+      { price: 1.5, category: "Serviços", stock: 9999, name: "Digitalização de Documento", unit: "doc", id: "srv-4" },
+      { id: "item-1794264056913", unit: "un", name: "Impressão Avulsa", category: "Serviços", stock: 9999, price: 1 },
+      { category: "Serviços", id: "item-1794339613347", price: 0.5, name: "Xerox Avulsa", stock: 99999, unit: "un" },
+      { unit: "un", id: "item-1794408398042", name: "Papel de Presente", category: "Insumos Gráfica", stock: 9997, price: 2 }
+    ];
 
-      // Brinquedos
-      { id: 'br-1', name: 'Moto brinquedo', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
-      { id: 'br-2', name: 'Cobrinha', category: 'Brinquedos', stock: 2, price: 8.00, unit: 'un' },
-      { id: 'br-3', name: 'Kit ferramenta', category: 'Brinquedos', stock: 2, price: 16.00, unit: 'un' },
-      { id: 'br-4', name: 'Boneca pretty', category: 'Brinquedos', stock: 2, price: 10.00, unit: 'un' },
-      { id: 'br-5', name: 'Kit medico', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
-      { id: 'br-6', name: 'Beyblade', category: 'Brinquedos', stock: 2, price: 15.00, unit: 'un' },
-      { id: 'br-7', name: 'Soldados', category: 'Brinquedos', stock: 2, price: 30.00, unit: 'un' },
-      { id: 'br-8', name: 'Formula 1', category: 'Brinquedos', stock: 1, price: 20.00, unit: 'un' },
-      { id: 'br-9', name: 'Laila boneca', category: 'Brinquedos', stock: 2, price: 10.00, unit: 'un' },
-      { id: 'br-10', name: 'Moto Miniatura', category: 'Brinquedos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'br-11', name: 'Carrinho Miniatura', category: 'Brinquedos', stock: 1, price: 20.00, unit: 'un' },
-      { id: 'br-12', name: 'Roda lançadora carrinho', category: 'Brinquedos', stock: 1, price: 25.00, unit: 'un' },
-      { id: 'br-13', name: 'Boneca zoe', category: 'Brinquedos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'br-14', name: 'Boneca Mel', category: 'Brinquedos', stock: 3, price: 20.00, unit: 'un' },
-      { id: 'br-15', name: 'Boneca Tiny', category: 'Brinquedos', stock: 2, price: 25.00, unit: 'un' },
-      { id: 'br-16', name: 'Boneca Brink', category: 'Brinquedos', stock: 1, price: 15.00, unit: 'un' },
-      { id: 'br-17', name: 'Squish', category: 'Brinquedos', stock: 1, price: 30.00, unit: 'un' },
-      { id: 'br-18', name: 'Cubo Magico', category: 'Brinquedos', stock: 5, price: 12.00, unit: 'un' },
-      { id: 'br-19', name: 'Tinta Cabelo maluco', category: 'Brinquedos', stock: 3, price: 15.00, unit: 'un' },
-      { id: 'br-20', name: 'Bola Futsal', category: 'Brinquedos', stock: 7, price: 16.00, unit: 'un' },
-      { id: 'br-21', name: 'Bola Futebol', category: 'Brinquedos', stock: 2, price: 25.00, unit: 'un' },
-      { id: 'br-22', name: 'Dinosfera', category: 'Brinquedos', stock: 1, price: 25.00, unit: 'un' },
-      { id: 'br-23', name: 'Copo termico', category: 'Brinquedos', stock: 7, price: 35.00, unit: 'un' },
-      { id: 'br-24', name: 'Bladeburst', category: 'Brinquedos', stock: 1, price: 15.00, unit: 'un' },
+    const INITIAL_SALES = [
+      { id: "V-198741", timestamp: 1794414806031, timeStr: "13:33", dateStr: "2026-11-11", items: [{ itemId: "br-5", name: "Kit medico", category: "Brinquedos", price: 15, qty: 1, unit: "un" }], total: 15, paymentMethod: "PIX" },
+      { items: [{ unit: "un", name: "Papel de Presente", itemId: "item-1794408398042", qty: 2, price: 2, category: "Insumos Gráfica" }], timeStr: "11:47", id: "V-844896", timestamp: 1794408443101, paymentMethod: "PIX", total: 4, dateStr: "2026-11-11" },
+      { paymentMethod: "PIX", items: [{ category: "Serviços", price: 1, unit: "pág", itemId: "quick-print-1794408213728", qty: 1, isPrintJob: true, printType: "pb", pages: 1, name: "Impressão P&B (1 págs)" }], dateStr: "2026-11-11", total: 1, timeStr: "11:43", timestamp: 1794408220038, id: "V-914805" },
+      { timestamp: 1794403989239, timeStr: "10:33", total: 5, id: "V-615804", dateStr: "2026-11-11", paymentMethod: "Dinheiro", items: [{ unit: "serv", qty: 1, name: "Agendamento Carteira de Identidade (RG / CIN)", category: "Serviços", price: 5, itemId: "srv-1" }] },
+      { paymentMethod: "Dinheiro", timestamp: 1794403456660, id: "V-428786", timeStr: "10:24", total: 4, items: [{ category: "Serviços", pages: 2, name: "Impressão Colorida (2 págs)", printType: "color", isPrintJob: true, itemId: "quick-print-1794403451218", price: 2, unit: "pág", qty: 2 }], dateStr: "2026-11-11" },
+      { timestamp: 1794350003057, items: [{ itemId: "br-18", name: "Cubo Magico", price: 12, unit: "un", qty: 1, category: "Brinquedos" }], timeStr: "19:33", id: "V-677407", paymentMethod: "PIX", total: 12, dateStr: "2026-11-10" },
+      { dateStr: "2026-11-10", total: 40, timestamp: 1794346716151, items: [{ category: "Brinquedos", qty: 1, unit: "un", price: 40, name: "Copo termico", itemId: "br-23" }], paymentMethod: "PIX", id: "V-983349", timeStr: "18:38" },
+      { items: [{ category: "Brinquedos", itemId: "br-15", name: "Boneca Tiny", price: 25, qty: 1, unit: "un" }], timeStr: "18:38", paymentMethod: "PIX", dateStr: "2026-11-10", timestamp: 1794346680862, total: 25, id: "V-256892" },
+      { timeStr: "16:40", paymentMethod: "Dinheiro", id: "V-998125", total: 1, dateStr: "2026-11-10", timestamp: 1794339647387, items: [{ category: "Serviços", name: "Xerox Avulsa", price: 0.5, unit: "un", qty: 2, itemId: "item-1794339613347" }] },
+      { total: 4, id: "V-540210", dateStr: "2026-11-10", paymentMethod: "Dinheiro", timestamp: 1794318987191, timeStr: "10:56", items: [{ name: "Impressão P&B (4 págs)", category: "Serviços", price: 1, unit: "pág", itemId: "quick-print-1794318972382", qty: 4 }] },
+      { timeStr: "19:41", timestamp: 1794264115981, items: [{ price: 1, qty: 9, category: "Serviços", unit: "pág", itemId: "quick-print-1794264111392", name: "Impressão P&B (9 págs)" }], dateStr: "2026-11-09", paymentMethod: "Dinheiro", total: 9, id: "V-102361" },
+      { timestamp: 1794264101793, dateStr: "2026-11-09", items: [{ qty: 1, itemId: "quick-print-1794264097206", category: "Serviços", price: 1, unit: "pág", name: "Impressão P&B (1 págs)" }], paymentMethod: "Dinheiro", id: "V-247085", timeStr: "19:41", total: 1 },
+      { total: 35, id: "V-453029", paymentMethod: "Dinheiro", dateStr: "2026-11-09", items: [{ category: "Serviços", qty: 35, unit: "un", price: 1, name: "Impressão Avulsa", itemId: "item-1794264056913" }], timeStr: "19:41", timestamp: 1794264084560 },
+      { paymentMethod: "PIX", items: [{ name: "Agendamento Carteira de Identidade (RG / CIN)", unit: "serv", price: 5, itemId: "srv-1", qty: 1, category: "Serviços" }], id: "V-646421", timeStr: "19:40", total: 5, dateStr: "2026-11-09", timestamp: 1794264019711 },
+      { paymentMethod: "PIX", dateStr: "2026-11-09", total: 14, timestamp: 1794263970787, items: [{ category: "Serviços", qty: 5, price: 2, unit: "pág", name: "Impressão Colorida (5 págs)", itemId: "quick-print-1794263865291" }, { qty: 1, category: "Serviços", unit: "pág", itemId: "quick-print-1794263908439", name: "Impressão P&B (2 págs)", price: 1 }, { price: 3, name: "Cartolina Branca", itemId: "gr-7", category: "Insumos Gráfica", unit: "un", qty: 1 }], timeStr: "19:39", id: "V-515480" }
+    ];
 
-      // Estoque Gráfica & Insumos
-      { id: 'gr-1', name: 'Resma papel A4 comum (75g)', category: 'Insumos Gráfica', stock: 1, price: 28.00, unit: 'un' },
-      { id: 'gr-2', name: 'Papel fotografico A4', category: 'Insumos Gráfica', stock: 2, price: 35.00, unit: 'un' },
-      { id: 'gr-3', name: 'Papel fotográfico A4 adesivo', category: 'Insumos Gráfica', stock: 1, price: 40.00, unit: 'un' },
-      { id: 'gr-4', name: 'Pouch film RG / Identidade', category: 'Insumos Gráfica', stock: 1, price: 50.00, unit: 'cx' },
-      { id: 'gr-5', name: 'Pouch film Título Eleitor', category: 'Insumos Gráfica', stock: 1, price: 45.00, unit: 'cx' },
-      { id: 'gr-6', name: 'Pouch film A4', category: 'Insumos Gráfica', stock: 6, price: 2.00, unit: 'un' },
-      { id: 'gr-7', name: 'Cartolina Branca', category: 'Insumos Gráfica', stock: 95, price: 1.50, unit: 'un' },
-      { id: 'gr-8', name: 'Cartolina Colorida (Azul/Amarelo/Rosa)', category: 'Insumos Gráfica', stock: 5, price: 1.80, unit: 'un' },
-
-      // Serviços Gráficos Fixos
-      { id: 'srv-1', name: 'Agendamento Carteira de Identidade (RG / CIN)', category: 'Serviços', stock: 9999, price: 35.00, unit: 'serv' },
-      { id: 'srv-2', name: 'Plastificação Identidade / Documento', category: 'Serviços', stock: 9999, price: 5.00, unit: 'un' },
-      { id: 'srv-3', name: 'Encadernação até 100 fls', category: 'Serviços', stock: 9999, price: 8.00, unit: 'un' },
-      { id: 'srv-4', name: 'Digitalização de Documento', category: 'Serviços', stock: 9999, price: 1.50, unit: 'doc' }
+    const INITIAL_OS_LIST = [
+      { id: "OS-1794338512760", createdAt: 1794338512760, clientName: "Fabiano Alves da Silva", motherName: "Severina Alves da Silva", birthDate: "1984-12-11", cpf: "068.215.814-36", phone: "84999999999", status: "Agendando" },
+      { id: "OS-1794338578954", createdAt: 1794338578954, clientName: "Ruana Carla Mendes Carneiro", motherName: "Rosângela Maria Mendes da Penha", birthDate: "1994-07-18", cpf: "106.700.134-47", phone: "84987404122", status: "Agendando" },
+      { id: "OS-1794338654536", createdAt: 1794338654536, clientName: "Priscila Karen Ferreira de Lima", motherName: "Francineide Ferreira de Lima", birthDate: "1993-12-01", cpf: "115.423.114-38", phone: "84999999999", status: "Agendando" },
+      { id: "OS-1794338702650", createdAt: 1794338702650, clientName: "Deyvid Luiz do Monte Weber", motherName: "Paula Cristina do Monte", birthDate: "2022-03-11", cpf: "180.814.974-20", phone: "84987891064", status: "Agendando" },
+      { id: "OS-1794338821326", createdAt: 1794338821326, clientName: "Kaline Patricia de Melo Silva", motherName: "Adriana Patricia de Melo", birthDate: "1994-11-26", cpf: "70783812469", phone: "84987005165", status: "Agendando" },
+      { id: "OS-1794339011169", createdAt: 1794339011169, clientName: "Jeisson do Nascimento Silva", motherName: "Sandra do Nascimento", birthDate: "1998-12-18", cpf: "12376448441", phone: "84987005156", status: "Agendando" },
+      { id: "OS-1794339203532", createdAt: 1794339203532, clientName: "Sebastião Cordeiro da Silva", motherName: "Raimunda Cordeiro da Silva", birthDate: "1958-11-20", cpf: "56686595420", phone: "84987005165", status: "Agendando" },
+      { id: "OS-1794339274975", createdAt: 1794339274975, clientName: "Creusa Antonia da Silva", motherName: "Antonia Machado da Silva", birthDate: "1962-04-10", cpf: "05745827467", phone: "84987005165", status: "Agendando" },
+      { id: "OS-1794339412810", createdAt: 1794339412810, clientName: "Amadeu Augusto dos Santos", motherName: "Alice Martins dos Santos", birthDate: "1964-05-28", cpf: "73715662468", phone: "84999999999", status: "Agendando" },
+      { id: "OS-1794339547384", createdAt: 1794339547384, clientName: "Marcia Maria Alves de Assis", motherName: "Sheila Alves da Silva", birthDate: "1996-06-10", cpf: "01696101441", phone: "84998190564", status: "Agendando" }
     ];
 
     const INITIAL_DISCOUNTS = {
-      pb: [
-        { min: 1, max: 10, price: 0.50 },
-        { min: 11, max: 50, price: 0.40 },
-        { min: 51, max: 100, price: 0.30 },
-        { min: 101, max: 9999, price: 0.25 }
-      ],
       color: [
-        { min: 1, max: 10, price: 1.50 },
-        { min: 11, max: 50, price: 1.20 },
-        { min: 51, max: 100, price: 1.00 },
-        { min: 101, max: 9999, price: 0.80 }
+        { min: 1, max: 10, price: 2 },
+        { min: 11, max: 50, price: 1.5 },
+        { min: 51, max: 100, price: 1 },
+        { min: 101, max: 9999, price: 0.8 }
+      ],
+      pb: [
+        { min: 1, max: 10, price: 1 },
+        { min: 11, max: 50, price: 0.8 },
+        { min: 51, max: 100, price: 0.5 },
+        { min: 101, max: 9999, price: 0.25 }
       ]
     };
 
-    // Firebase Hardcoded Configuration
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBuAt884Vt3M6ALGWCNaQ9w-3iwi_Tj4no",
       authDomain: "print-tech-529d0.firebaseapp.com",
@@ -757,36 +779,41 @@
       }
 
       loadLocalStorage() {
-        const storedItems = localStorage.getItem('printtech_v3_items');
-        const storedSales = localStorage.getItem('printtech_v3_sales');
-        const storedOS = localStorage.getItem('printtech_v3_os');
-        const storedDiscounts = localStorage.getItem('printtech_v3_discounts');
+        const storedItems = localStorage.getItem('printtech_v4_items');
+        const storedSales = localStorage.getItem('printtech_v4_sales');
+        const storedOS = localStorage.getItem('printtech_v4_os');
+        const storedDiscounts = localStorage.getItem('printtech_v4_discounts');
 
         if (storedItems) {
           try { this.items = JSON.parse(storedItems); } catch(e) { this.items = [...INITIAL_STOCK_LIST]; }
         } else {
           this.items = [...INITIAL_STOCK_LIST];
-          this.saveLocalStorage();
         }
 
         if (storedSales) {
-          try { this.sales = JSON.parse(storedSales); } catch(e) { this.sales = []; }
+          try { this.sales = JSON.parse(storedSales); } catch(e) { this.sales = [...INITIAL_SALES]; }
+        } else {
+          this.sales = [...INITIAL_SALES];
         }
 
         if (storedOS) {
-          try { this.osList = JSON.parse(storedOS); } catch(e) { this.osList = []; }
+          try { this.osList = JSON.parse(storedOS); } catch(e) { this.osList = [...INITIAL_OS_LIST]; }
+        } else {
+          this.osList = [...INITIAL_OS_LIST];
         }
 
         if (storedDiscounts) {
           try { this.discounts = JSON.parse(storedDiscounts); } catch(e) { this.discounts = INITIAL_DISCOUNTS; }
         }
+
+        this.saveLocalStorage();
       }
 
       saveLocalStorage() {
-        localStorage.setItem('printtech_v3_items', JSON.stringify(this.items));
-        localStorage.setItem('printtech_v3_sales', JSON.stringify(this.sales));
-        localStorage.setItem('printtech_v3_os', JSON.stringify(this.osList));
-        localStorage.setItem('printtech_v3_discounts', JSON.stringify(this.discounts));
+        localStorage.setItem('printtech_v4_items', JSON.stringify(this.items));
+        localStorage.setItem('printtech_v4_sales', JSON.stringify(this.sales));
+        localStorage.setItem('printtech_v4_os', JSON.stringify(this.osList));
+        localStorage.setItem('printtech_v4_discounts', JSON.stringify(this.discounts));
       }
 
       checkMigrationPrompt() {
@@ -796,7 +823,6 @@
         }
       }
 
-      // Initialize Firebase Firestore without Auth requirement
       initFirebase() {
         try {
           if (typeof firebase !== 'undefined' && firebase.apps) {
@@ -823,7 +849,6 @@
                     this.setCloudStatus(true, 'Nuvem Conectada');
                   }
                 } else {
-                  // Document doesn't exist yet, seed cloud from local
                   this.pushLocalToCloud();
                 }
               }, (err) => {
@@ -930,7 +955,6 @@
         reader.readAsText(file);
       }
 
-      // UI Helpers
       setDefaultDateFilter() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('report-date-filter').value = today;
@@ -1005,7 +1029,7 @@
             return t.price;
           }
         }
-        return tiers.length > 0 ? tiers[tiers.length - 1].price : (type === 'pb' ? 0.50 : 1.50);
+        return tiers.length > 0 ? tiers[tiers.length - 1].price : (type === 'pb' ? 1.00 : 2.00);
       }
 
       calcQuickPrint() {
@@ -1273,19 +1297,15 @@
       checkout() {
         if (this.cart.length === 0) return;
 
-        // Deduct inventory items & paper insumos automatically
         this.cart.forEach(cartItem => {
-          // Direct item stock deduction
           const directItem = this.items.find(i => i.id === cartItem.itemId);
           if (directItem && directItem.category !== 'Serviços') {
             directItem.stock = Math.max(0, directItem.stock - cartItem.qty);
           }
 
-          // Insumo deduction for print jobs
           if (cartItem.isPrintJob && cartItem.pages) {
             const paperResma = this.items.find(i => i.id === 'gr-1');
             if (paperResma) {
-              // Deduct paper sheets (500 fls per resma ratio)
               const resmaUsage = cartItem.pages / 500;
               paperResma.stock = Math.max(0, Number((paperResma.stock - resmaUsage).toFixed(2)));
             }
@@ -1312,42 +1332,61 @@
         this.renderAll();
       }
 
-      // TAB 2: Agendamentos Identidade (OS)
+      // TAB 2: Agendamentos Identidade (Fila de Espera por Ordem de Chegada)
+      getOSTimestamp(os) {
+        if (os.createdAt) return os.createdAt;
+        if (os.dateTime) {
+          const t = new Date(os.dateTime).getTime();
+          if (!isNaN(t)) return t;
+        }
+        if (os.id && os.id.startsWith('OS-')) {
+          const num = parseInt(os.id.replace('OS-', ''));
+          if (!isNaN(num)) return num;
+        }
+        return 0;
+      }
+
       renderOSList() {
         const container = document.getElementById('os-list-container');
         if (!container) return;
 
-        // Strictly sorted by nearest appointment date/time first
-        const sorted = [...this.osList].sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+        // Strictly sorted by oldest request timestamp first (Queue order / Ordem de solicitação)
+        const sorted = [...this.osList].sort((a, b) => this.getOSTimestamp(a) - this.getOSTimestamp(b));
 
         if (sorted.length === 0) {
           container.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500 space-y-2">
               <i class="fa-solid fa-id-card text-4xl"></i>
-              <p class="text-sm">Nenhum agendamento de RG registrado.</p>
+              <p class="text-sm">Nenhum registro na fila do RG no momento.</p>
             </div>
           `;
         } else {
-          container.innerHTML = sorted.map(os => {
-            const dt = new Date(os.dateTime);
+          container.innerHTML = sorted.map((os, queueIndex) => {
+            const ts = this.getOSTimestamp(os);
+            const dt = ts ? new Date(ts) : new Date();
             const dateStr = dt.toLocaleDateString('pt-BR');
             const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const birthStr = os.birthDate ? new Date(os.birthDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada';
+            const birthStr = os.birthDate ? os.birthDate.split('-').reverse().join('/') : 'Não informada';
 
-            const statusColor = os.status === 'Agendando' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+            const statusColor = os.status === 'Concluído' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                                'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
             return `
-              <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-amber-500/40 transition-all">
+              <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-amber-500/40 transition-all relative">
                 <div>
                   <div class="flex items-center justify-between gap-2 border-b border-slate-700/60 pb-2">
-                    <span class="text-xs px-2.5 py-0.5 rounded-full font-bold border ${statusColor}">${os.status}</span>
-                    <span class="text-xs font-mono text-slate-300 flex items-center gap-1">
-                      <i class="fa-regular fa-calendar-days text-amber-400"></i> ${dateStr} às ${timeStr}
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs bg-slate-900 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-md font-extrabold font-mono">
+                        #${queueIndex + 1} na Fila
+                      </span>
+                      <span class="text-[11px] px-2 py-0.5 rounded-full font-bold border ${statusColor}">${os.status || 'Agendando'}</span>
+                    </div>
+                    <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1" title="Data/Hora de Entrada na Fila">
+                      <i class="fa-regular fa-clock text-amber-400"></i> ${dateStr} ${timeStr}
                     </span>
                   </div>
 
-                  <div class="mt-3 space-y-1.5 text-xs">
+                  <div class="mt-3 space-y-1 text-xs">
                     <h3 class="font-bold text-sm text-slate-100 flex items-center gap-1.5">
                       <i class="fa-solid fa-user text-amber-400"></i> ${os.clientName}
                     </h3>
@@ -1361,8 +1400,8 @@
                 </div>
 
                 <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
-                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Enviar WhatsApp com Lembrete">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp / Doc Lista
+                  <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Avisar Conclusão via WhatsApp">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Avisar no WhatsApp
                   </button>
 
                   <div class="flex items-center gap-1">
@@ -1383,17 +1422,16 @@
 
         if (osId) {
           const os = this.osList.find(o => o.id === osId);
-          document.getElementById('modal-os-title').innerText = 'Editar Solicitação de RG';
+          document.getElementById('modal-os-title').innerText = 'Editar Registro de RG';
           document.getElementById('os-id').value = os.id;
           document.getElementById('os-client-name').value = os.clientName;
           document.getElementById('os-mother-name').value = os.motherName || '';
           document.getElementById('os-birth-date').value = os.birthDate || '';
           document.getElementById('os-cpf').value = os.cpf || '';
           document.getElementById('os-phone').value = os.phone;
-          document.getElementById('os-datetime').value = os.dateTime;
           document.getElementById('os-status').value = os.status || 'Agendando';
         } else {
-          document.getElementById('modal-os-title').innerText = 'Nova Solicitação de RG';
+          document.getElementById('modal-os-title').innerText = 'Novo Registro na Fila de RG';
           document.getElementById('os-id').value = '';
           document.getElementById('os-status').value = 'Agendando';
         }
@@ -1411,55 +1449,48 @@
         const birthDate = document.getElementById('os-birth-date').value;
         const cpf = document.getElementById('os-cpf').value;
         const phone = document.getElementById('os-phone').value;
-        const dateTime = document.getElementById('os-datetime').value;
         const status = document.getElementById('os-status').value;
 
         if (id) {
           const os = this.osList.find(o => o.id === id);
-          if (os) Object.assign(os, { clientName, motherName, birthDate, cpf, phone, dateTime, status });
+          if (os) Object.assign(os, { clientName, motherName, birthDate, cpf, phone, status });
         } else {
           this.osList.push({
             id: 'OS-' + Date.now(),
-            clientName, motherName, birthDate, cpf, phone, dateTime, status
+            createdAt: Date.now(),
+            clientName,
+            motherName,
+            birthDate,
+            cpf,
+            phone,
+            status
           });
         }
 
         this.saveAll();
         this.closeOSModal();
         this.renderAll();
-        this.showToast('Agendamento salvo com sucesso!');
+        this.showToast('Registro de RG salvo na fila com sucesso!');
       }
 
       deleteOS(osId) {
         this.osList = this.osList.filter(o => o.id !== osId);
         this.saveAll();
         this.renderAll();
-        this.showToast('Agendamento removido.');
+        this.showToast('Registro removido da fila.');
       }
 
       sendWhatsAppReminder(osId) {
         const os = this.osList.find(o => o.id === osId);
         if (!os) return;
 
-        const dt = new Date(os.dateTime);
-        const dateStr = dt.toLocaleDateString('pt-BR');
-        const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        const birthStr = os.birthDate ? new Date(os.birthDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'Não informada';
         const cleanPhone = os.phone.replace(/\D/g, '');
 
-        const message = `*SOLICITAÇÃO DE AGENDAMENTO RG / CIN - PRINT-TECH*\n\n` +
-          `👤 *Solicitante:* ${os.clientName}\n` +
-          `👩‍👦 *Nome da Mãe:* ${os.motherName || 'Não informado'}\n` +
-          `🎂 *Data de Nascimento:* ${birthStr}\n` +
-          `🪪 *CPF:* ${os.cpf || 'Não informado'}\n` +
-          `📱 *Telefone:* ${os.phone}\n` +
-          `📅 *Horário do Atendimento:* ${dateStr} às ${timeStr}\n` +
-          `📌 *Status:* *${os.status}*\n\n` +
-          `⚠️ *Documentos OBRIGATÓRIOS para o atendimento:* \n` +
-          `1. Certidão de Nascimento ou Casamento (Original e cópia)\n` +
-          `2. CPF\n` +
-          `3. Comprovante de Residência Atualizado\n\n` +
-          `Agradecemos a preferência!`;
+        // Standardized WhatsApp message template (clean text, no emojis, no document redundancy)
+        const message = `Olá, ${os.clientName}!\n\n` +
+          `Seu agendamento da Carteira de Identidade (CIN/RG) foi concluído com sucesso.\n\n` +
+          `Você já pode passar aqui na Print-Tech para retirar o seu comprovante de agendamento.\n\n` +
+          `Ficamos no seu aguardo.`;
 
         const encoded = encodeURIComponent(message);
         window.open(`https://wa.me/55${cleanPhone}?text=${encoded}`, '_blank');
@@ -1482,7 +1513,6 @@
         tbody.innerHTML = filtered.map(item => {
           const isService = item.category === 'Serviços';
 
-          // Status indicator badges
           let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Normal</span>';
           if (!isService) {
             if (item.stock <= 1) {
@@ -1652,7 +1682,6 @@
         if (saleIndex === -1) return;
 
         const sale = this.sales[saleIndex];
-        // Revert stock
         sale.items.forEach(cartItem => {
           const directItem = this.items.find(i => i.id === cartItem.itemId);
           if (directItem && directItem.category !== 'Serviços') {
@@ -1715,17 +1744,18 @@
       closeResetModal() { document.getElementById('modal-reset').classList.add('hidden'); }
 
       confirmReset() {
-        localStorage.removeItem('printtech_v3_items');
-        localStorage.removeItem('printtech_v3_sales');
-        localStorage.removeItem('printtech_v3_os');
+        localStorage.removeItem('printtech_v4_items');
+        localStorage.removeItem('printtech_v4_sales');
+        localStorage.removeItem('printtech_v4_os');
         this.items = [...INITIAL_STOCK_LIST];
-        this.sales = [];
-        this.osList = [];
+        this.sales = [...INITIAL_SALES];
+        this.osList = [...INITIAL_OS_LIST];
+        this.discounts = INITIAL_DISCOUNTS;
         this.cart = [];
         this.saveAll();
         this.closeResetModal();
         this.renderAll();
-        this.showToast('Estoque inicial restaurado!');
+        this.showToast('Dados restaurados do backup oficial!');
       }
     }
 
