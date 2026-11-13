@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Print-Tech Balcão - Gestão Gráfica & Vendas</title>
+  <title>Print-Tech Balcão - Gestão Gráfica, Estoque & Caixa</title>
 
   <!-- Apple Touch Icon para iOS -->
   <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/printer.png">
-  
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <!-- Font Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,14 +39,14 @@
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
 
-  <!-- Firebase COMPAT SDK v10.7.1 (Standard App & Firestore ONLY - No Auth needed) -->
+  <!-- Firebase COMPAT SDK v10.7.1 (Apenas App & Firestore - Sem Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
 
-  <!-- TOP HEADER / STATUS BAR -->
-  <header class="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md">
+  <!-- ==================== TOP HEADER / STATUS BAR ==================== -->
+  <header class="bg-slate-800/95 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <!-- Logo & System Title -->
       <div class="flex items-center gap-3">
@@ -57,25 +57,25 @@
           <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
             PRINT-TECH <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30 ml-1">Balcão Pro</span>
           </h1>
-          <p class="text-xs text-slate-400 hidden sm:block">Mossoró / RN &bull; Xerox, Eletrônicos & Agendamentos RG</p>
+          <p class="text-xs text-slate-400 hidden sm:block">Mossoró / RN &bull; Xerox, Variedades & Agendamentos RG</p>
         </div>
       </div>
 
       <!-- Quick Status & Tools -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Status Indicator Pill -->
-        <div id="cloud-status-pill" class="bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50 flex items-center gap-2" title="Status de Sincronização em Tempo Real">
+        <!-- Cloud Status Pill -->
+        <div id="cloud-status-pill" class="bg-slate-900/70 px-3 py-1.5 rounded-xl border border-slate-700/60 flex items-center gap-2" title="Status de Sincronização em Tempo Real">
           <div id="cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
-          <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Verificando...</span>
+          <span id="cloud-status-text" class="text-xs font-semibold text-amber-400">Conectando...</span>
         </div>
 
         <!-- Today's Total Cash Header Pill -->
-        <div class="bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50 hidden sm:flex items-center gap-2">
+        <div class="bg-slate-900/70 px-3 py-1.5 rounded-xl border border-slate-700/60 hidden sm:flex items-center gap-2">
           <span class="text-xs text-slate-400 font-medium">Caixa Hoje:</span>
           <span id="header-today-total" class="text-sm font-bold text-emerald-400">R$ 0,00</span>
         </div>
 
-        <!-- Quick Action Buttons -->
+        <!-- Backup & Restore Action Buttons -->
         <div class="flex items-center gap-1">
           <button onclick="app.exportJSONBackup()" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Exportar Backup (.json)">
             <i class="fa-solid fa-download"></i>
@@ -86,7 +86,7 @@
             <input type="file" accept=".json" onchange="app.importJSONBackup(event)" class="hidden">
           </label>
 
-          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Restaurar Dados Iniciais do Backup">
+          <button onclick="app.openResetModal()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 rounded-xl transition-colors" title="Restaurar Dados Oficiais do Backup">
             <i class="fa-solid fa-rotate-left"></i>
           </button>
         </div>
@@ -94,16 +94,16 @@
     </div>
   </header>
 
-  <!-- Migration Banner -->
+  <!-- Migration / Sync Banner -->
   <div id="migration-banner" class="hidden bg-gradient-to-r from-amber-600 via-indigo-600 to-purple-600 text-white px-4 py-2.5 shadow-xl border-b border-amber-500/40">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="flex items-center gap-2.5">
         <i class="fa-solid fa-cloud-arrow-up text-amber-200 text-base shrink-0"></i>
-        <span><strong>Dados detectados no dispositivo!</strong> Clique no botão para sincronizar vendas, estoque e fila do RG com o banco de dados.</span>
+        <span><strong>Dados locais prontos!</strong> Envie a base atualizada (estoque, insumos, vendas e fila RG) para sincronizar com a nuvem.</span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <button onclick="app.pushLocalToCloud()" class="bg-white text-slate-900 font-bold px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
-          📤 Sincronizar com a Nuvem
+        <button onclick="app.pushLocalToCloud(true)" class="bg-white text-slate-900 font-bold px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all shadow-md">
+          Sincronizar com a Nuvem
         </button>
         <button onclick="document.getElementById('migration-banner').classList.add('hidden')" class="text-white/80 hover:text-white font-semibold px-2 py-1">
           Ignorar
@@ -112,8 +112,8 @@
     </div>
   </div>
 
-  <!-- NAVIGATION TABS -->
-  <nav class="bg-slate-800/50 border-b border-slate-700/60 px-4">
+  <!-- ==================== NAVIGATION TABS ==================== -->
+  <nav class="bg-slate-800/60 border-b border-slate-700/60 px-4">
     <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-2 overflow-x-auto py-2">
       <button onclick="app.switchTab('pos')" id="tab-btn-pos" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
         <i class="fa-solid fa-cash-register"></i>
@@ -122,86 +122,89 @@
 
       <button onclick="app.switchTab('os')" id="tab-btn-os" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
         <i class="fa-solid fa-id-card text-amber-400"></i>
-        Fila de Espera RG / CIN
+        Fila RG / CIN
         <span id="badge-os-count" class="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">0</span>
       </button>
 
       <button onclick="app.switchTab('inventory')" id="tab-btn-inventory" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
-        <i class="fa-solid fa-boxes-stacked"></i>
+        <i class="fa-solid fa-boxes-stacked text-indigo-400"></i>
         Estoque & Insumos
-        <span id="badge-total-items" class="ml-1 text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">0</span>
+        <span id="badge-low-stock" class="hidden text-xs bg-rose-500/20 text-rose-400 border border-rose-500/40 px-2 py-0.5 rounded-full font-bold" title="Itens no mínimo ou críticos">0</span>
       </button>
 
       <button onclick="app.switchTab('discounts')" id="tab-btn-discounts" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
         <i class="fa-solid fa-percent text-emerald-400"></i>
-        Tabela de Desconto por Volume
+        Desconto Volume
       </button>
 
       <button onclick="app.switchTab('reports')" id="tab-btn-reports" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 transition-all whitespace-nowrap">
-        <i class="fa-solid fa-chart-pie"></i>
-        Fechamento de Caixa
+        <i class="fa-solid fa-piggy-bank text-emerald-400"></i>
+        Caixa & Caixinhas
       </button>
     </div>
   </nav>
 
-  <!-- MAIN CONTAINER -->
+  <!-- ==================== MAIN CONTAINER ==================== -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- ==================== TAB 1: PDV & BALCÃO ==================== -->
     <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
+
       <!-- Catalog & Volume Calculator Column (8 Cols) -->
       <div class="lg:col-span-7 xl:col-span-8 space-y-4">
-        
+
         <!-- Fast Volume Discount Printing Calculator -->
         <div class="bg-slate-800/90 p-4 rounded-2xl border border-indigo-500/40 shadow-lg space-y-3">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
               <i class="fa-solid fa-calculator"></i>
               Calculadora Rápida de Impressão por Volume
             </h3>
-            <span class="text-[11px] text-slate-400">Desconto automático por quantidade</span>
+            <span class="text-[11px] text-slate-400">Desconto por faixa + baixa automática de papel</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-            <div class="sm:col-span-5">
-              <label class="block text-xs text-slate-400 mb-1">Tipo de Impressão / Cópia</label>
+            <div class="sm:col-span-4">
+              <label class="block text-xs text-slate-400 mb-1">Tipo de Impressão</label>
               <select id="quick-print-type" onchange="app.calcQuickPrint()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
-                <option value="pb">Impressão / Cópia P&B A4</option>
-                <option value="color">Impressão / Cópia Colorida A4</option>
+                <option value="pb">Impressão / Cópia P&B</option>
+                <option value="color">Impressão / Cópia Colorida</option>
               </select>
             </div>
-            
-            <div class="sm:col-span-3">
-              <label class="block text-xs text-slate-400 mb-1">Qtd Páginas</label>
-              <input type="number" id="quick-print-qty" min="1" value="10" oninput="app.calcQuickPrint()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-center text-white focus:outline-none focus:border-indigo-500">
+
+            <div class="sm:col-span-4">
+              <label class="block text-xs text-slate-400 mb-1">Papel Utilizado (Baixa)</label>
+              <select id="quick-print-paper" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-amber-300 focus:outline-none focus:border-indigo-500">
+                <!-- Populated dynamically with internal paper supplies -->
+              </select>
             </div>
 
-            <div class="sm:col-span-4 flex items-center gap-2">
-              <div class="flex-1 text-right">
-                <span class="block text-[10px] text-slate-400">Unit.: <strong id="quick-print-unit" class="text-emerald-400">R$ 1,00</strong></span>
-                <span id="quick-print-total" class="text-sm font-extrabold text-white">R$ 10,00</span>
+            <div class="sm:col-span-2">
+              <label class="block text-xs text-slate-400 mb-1">Páginas</label>
+              <input type="number" id="quick-print-qty" min="1" value="1" oninput="app.calcQuickPrint()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-xs font-bold text-center text-white focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div class="sm:col-span-2 flex items-center justify-between sm:justify-end gap-2">
+              <div class="text-right">
+                <span class="block text-[10px] text-slate-400">Unit: <strong id="quick-print-unit" class="text-emerald-400">R$ 1,00</strong></span>
+                <span id="quick-print-total" class="text-sm font-extrabold text-white">R$ 1,00</span>
               </div>
-              <button onclick="app.addQuickPrintToCart()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl shadow-md transition-all" title="Adicionar à Comanda">
+              <button onclick="app.addQuickPrintToCart()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-xl shadow-md transition-all shrink-0" title="Adicionar à Comanda">
                 <i class="fa-solid fa-circle-plus text-lg"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Search & Category Filters -->
+        <!-- Search & Dynamic Sale/Service Category Filters -->
         <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-          <div class="relative w-full md:w-64">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-400 text-xs"></i>
+          <div class="relative w-full md:w-64 shrink-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
             <input type="text" id="pos-search" oninput="app.filterPOSCatalog()" placeholder="Buscar produto ou serviço..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
           </div>
 
-          <div class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-            <button onclick="app.setPOSCategory('all')" id="cat-btn-all" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all">Todos</button>
-            <button onclick="app.setPOSCategory('Eletrônicos')" id="cat-btn-Eletrônicos" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Eletrônicos</button>
-            <button onclick="app.setPOSCategory('Brinquedos')" id="cat-btn-Brinquedos" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Brinquedos</button>
-            <button onclick="app.setPOSCategory('Insumos Gráfica')" id="cat-btn-Insumos Gráfica" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Insumos</button>
-            <button onclick="app.setPOSCategory('Serviços')" id="cat-btn-Serviços" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-700/60 text-slate-300 hover:bg-slate-700 transition-all">Serviços</button>
+          <div id="pos-category-pills" class="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+            <!-- Dynamically populated with 'sale' and 'service' categories only -->
           </div>
         </div>
 
@@ -213,8 +216,8 @@
 
       <!-- Cart / Checkout Panel (4 Cols) -->
       <div class="lg:col-span-5 xl:col-span-4 flex flex-col">
-        <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl sticky top-24 flex flex-col h-[calc(100vh-140px)] max-h-[780px]">
-          
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl sticky top-20 flex flex-col h-[calc(100vh-110px)] max-h-[780px]">
+
           <div class="flex items-center justify-between pb-4 border-b border-slate-700/70">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-cart-shopping text-indigo-400"></i>
@@ -232,7 +235,7 @@
 
           <!-- Checkout & Change Area -->
           <div class="pt-4 border-t border-slate-700/70 space-y-4 bg-slate-800/90">
-            
+
             <!-- Payment Method Picker -->
             <div>
               <label class="block text-xs font-medium text-slate-400 mb-2">Forma de Pagamento</label>
@@ -282,9 +285,9 @@
 
     <!-- ==================== TAB 2: AGENDAMENTOS RG / CIN (FILA DE ESPERA) ==================== -->
     <section id="tab-os" class="tab-content hidden space-y-6">
-      
+
       <!-- Top Action Bar -->
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col lg:flex-row justify-between items-center gap-4">
         <div>
           <h2 class="font-bold text-lg text-slate-100 flex items-center gap-2">
             <i class="fa-solid fa-id-card text-amber-400"></i>
@@ -293,9 +296,19 @@
           <p class="text-xs text-slate-400">Organizados por ordem de solicitação (primeiros a dar entrada ficam no topo da fila)</p>
         </div>
 
-        <button onclick="app.openOSModal()" class="w-full md:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
-          <i class="fa-solid fa-plus-circle"></i> Novo Registro na Fila
-        </button>
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <input type="text" id="os-search" oninput="app.renderOSList()" placeholder="Buscar nome ou CPF..." class="flex-1 lg:w-52 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500">
+
+          <select id="os-status-filter" onchange="app.renderOSList()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+            <option value="Agendando">Na Fila (Agendando)</option>
+            <option value="Concluído">Concluídos</option>
+            <option value="all">Todos</option>
+          </select>
+
+          <button onclick="app.openOSModal()" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-600/20 transition-all">
+            <i class="fa-solid fa-plus-circle"></i> Novo Registro na Fila
+          </button>
+        </div>
       </div>
 
       <!-- OS Cards Grid -->
@@ -305,32 +318,76 @@
 
     </section>
 
-    <!-- ==================== TAB 3: CONTROLE DE ESTOQUE ==================== -->
+    <!-- ==================== TAB 3: CONTROLE DE ESTOQUE, CATEGORIAS & INSUMOS ==================== -->
     <section id="tab-inventory" class="tab-content hidden space-y-6">
-      
-      <!-- Action Controls -->
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div class="relative flex-1 md:w-64">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-400 text-xs"></i>
-            <input type="text" id="inventory-search" oninput="app.renderInventory()" placeholder="Buscar no estoque..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+
+      <!-- 4 Financial Stock Overview Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 font-medium">Capital Investido (Mercadoria)</p>
+            <i class="fa-solid fa-tag text-blue-400 text-xs"></i>
+          </div>
+          <h3 id="inv-stat-invested" class="text-xl font-extrabold text-blue-400 mt-1">R$ 0,00</h3>
+          <span class="text-[11px] text-slate-500 mt-1 block">Custo est. (-52% markup) / editável</span>
+        </div>
+
+        <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 font-medium">Capital em Insumos (Interno)</p>
+            <i class="fa-solid fa-layer-group text-amber-400 text-xs"></i>
+          </div>
+          <h3 id="inv-stat-supplies" class="text-xl font-extrabold text-amber-400 mt-1">R$ 0,00</h3>
+          <span class="text-[11px] text-slate-500 mt-1 block">Saldo proporcional de pacotes</span>
+        </div>
+
+        <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/80 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 font-medium">Potencial de Faturamento</p>
+            <i class="fa-solid fa-sack-dollar text-indigo-400 text-xs"></i>
+          </div>
+          <h3 id="inv-stat-potential" class="text-xl font-extrabold text-indigo-400 mt-1">R$ 0,00</h3>
+          <span class="text-[11px] text-slate-500 mt-1 block">Venda total dos produtos em loja</span>
+        </div>
+
+        <div class="bg-slate-800/90 p-4 rounded-2xl border border-emerald-500/30 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 font-medium">Lucro Bruto Projetado</p>
+            <i class="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+          </div>
+          <h3 id="inv-stat-profit" class="text-xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h3>
+          <span class="text-[11px] text-slate-500 mt-1 block">Potencial menos capital investido</span>
+        </div>
+      </div>
+
+      <!-- Action Controls & Filters -->
+      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col xl:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+          <div class="relative flex-1 min-w-[200px] sm:w-60">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="inventory-search" oninput="app.renderInventory()" placeholder="Buscar produto ou insumo..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
           </div>
 
           <select id="inventory-cat-filter" onchange="app.renderInventory()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-            <option value="all">Todas as Categorias</option>
-            <option value="Eletrônicos">Eletrônicos</option>
-            <option value="Brinquedos">Brinquedos</option>
-            <option value="Insumos Gráfica">Insumos Gráfica</option>
-            <option value="Serviços">Serviços</option>
+            <!-- Populated dynamically from this.categories -->
           </select>
+
+          <label class="inline-flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 cursor-pointer select-none">
+            <input type="checkbox" id="inventory-low-only" onchange="app.renderInventory()" class="rounded text-rose-500 bg-slate-800 border-slate-600">
+            <span>Só Estoque Mínimo/Crítico</span>
+          </label>
         </div>
 
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <button onclick="app.sendSupplierWhatsAppList()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20">
-            <i class="fa-brands fa-whatsapp text-sm"></i> Copiar Lista Reposição
+        <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-end">
+          <button onclick="app.openCategoryModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold px-3 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 border border-slate-600 transition-all">
+            <i class="fa-solid fa-folder-plus text-amber-400"></i> Categorias
           </button>
-          
-          <button onclick="app.openItemModal()" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
+
+          <button onclick="app.sendSupplierWhatsAppList()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all">
+            <i class="fa-brands fa-whatsapp text-sm"></i> Lista Reposição
+          </button>
+
+          <button onclick="app.openItemModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
             <i class="fa-solid fa-plus-circle"></i> Cadastrar Item
           </button>
         </div>
@@ -342,11 +399,11 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                <th class="py-3.5 px-4">Item / Serviço</th>
+                <th class="py-3.5 px-4">Item / Insumo / Serviço</th>
                 <th class="py-3.5 px-4">Categoria</th>
                 <th class="py-3.5 px-4 text-center">Status</th>
-                <th class="py-3.5 px-4 text-center">Qtd Estoque</th>
-                <th class="py-3.5 px-4">Preço (R$)</th>
+                <th class="py-3.5 px-4 text-center">Saldo / Mínimo</th>
+                <th class="py-3.5 px-4">Venda / Custo</th>
                 <th class="py-3.5 px-4 text-center">Ajuste Rápido</th>
                 <th class="py-3.5 px-4 text-right">Ações</th>
               </tr>
@@ -362,9 +419,9 @@
 
     <!-- ==================== TAB 4: TABELA DE DESCONTO POR VOLUME ==================== -->
     <section id="tab-discounts" class="tab-content hidden space-y-6">
-      
+
       <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700 pb-3">
           <div>
             <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-percent text-emerald-400"></i>
@@ -373,7 +430,7 @@
             <p class="text-xs text-slate-400">Altere as faixas e valores por página para cálculo automático na comanda do balcão.</p>
           </div>
 
-          <button onclick="app.saveDiscountsFromUI()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+          <button onclick="app.saveDiscountsFromUI()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
             <i class="fa-solid fa-floppy-disk"></i> Salvar Tabela
           </button>
         </div>
@@ -403,47 +460,205 @@
 
     </section>
 
-    <!-- ==================== TAB 5: FECHAMENTO DE CAIXA ==================== -->
+    <!-- ==================== TAB 5: FECHAMENTO DE CAIXA & CAIXINHAS INTELIGENTES ==================== -->
     <section id="tab-reports" class="tab-content hidden space-y-6">
-      
-      <!-- Date Filter & Actions -->
-      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-          <label class="text-sm font-semibold text-slate-300">Filtrar Data:</label>
-          <input type="date" id="report-date-filter" onchange="app.renderReports()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+
+      <!-- Period Selector & Actions -->
+      <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col lg:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <button onclick="app.setReportPeriod('today')" id="period-btn-today" class="period-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition-all">
+            Hoje
+          </button>
+          <button onclick="app.setReportPeriod('week')" id="period-btn-week" class="period-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 text-slate-300 border border-slate-700 hover:border-slate-500 transition-all">
+            Esta Semana (Seg–Dom)
+          </button>
+          <button onclick="app.setReportPeriod('month')" id="period-btn-month" class="period-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 text-slate-300 border border-slate-700 hover:border-slate-500 transition-all">
+            Este Mês
+          </button>
+          <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1">
+            <span class="text-[11px] text-slate-400">Dia:</span>
+            <input type="date" id="report-date-filter" onchange="app.setReportPeriod('date')" class="bg-transparent text-xs text-slate-100 focus:outline-none">
+          </div>
         </div>
 
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <button onclick="app.exportCSV()" class="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-slate-600">
-            <i class="fa-solid fa-file-csv"></i> Exportar CSV
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
+          <button onclick="app.openExpenseModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-600/20 transition-all">
+            <i class="fa-solid fa-minus-circle"></i> Lançar Saída / Despesa
           </button>
-          <button onclick="app.openCloseCashModal()" class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 transition-all">
+          <button onclick="app.exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-3.5 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-slate-600">
+            <i class="fa-solid fa-file-csv"></i> CSV
+          </button>
+          <button onclick="app.openCloseCashModal()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/20 transition-all">
             <i class="fa-solid fa-lock"></i> Fechar Caixa
           </button>
         </div>
       </div>
 
-      <!-- Financial Overview Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- Active Period Label -->
+      <div class="flex items-center justify-between px-1">
+        <span id="report-period-label" class="text-xs font-semibold text-indigo-300 flex items-center gap-2">
+          <i class="fa-regular fa-calendar-check"></i> Exibindo resultados de Hoje
+        </span>
+        <span id="report-ticket-avg" class="text-xs text-slate-400">Ticket Médio: R$ 0,00</span>
+      </div>
+
+      <!-- Financial Overview Cards (4 Cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
-          <p class="text-xs text-slate-400 font-medium">Faturamento Total</p>
+          <p class="text-xs text-slate-400 font-medium">Faturamento Bruto</p>
           <h3 id="report-total-revenue" class="text-2xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h3>
-          <span id="report-sales-count" class="text-xs text-slate-500 mt-1 block">0 vendas</span>
+          <span id="report-sales-count" class="text-xs text-slate-500 mt-1 block">0 vendas no período</span>
         </div>
 
         <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
-          <p class="text-xs text-slate-400 font-medium">Total em PIX</p>
-          <h3 id="report-pix-total" class="text-xl font-bold text-teal-400 mt-1">R$ 0,00</h3>
+          <p class="text-xs text-slate-400 font-medium">Saídas / Despesas</p>
+          <h3 id="report-expenses-total" class="text-2xl font-extrabold text-rose-400 mt-1">R$ 0,00</h3>
+          <span id="report-expenses-count" class="text-xs text-slate-500 mt-1 block">0 saídas registradas</span>
         </div>
 
-        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
-          <p class="text-xs text-slate-400 font-medium">Total em Cartão</p>
-          <h3 id="report-card-total" class="text-xl font-bold text-indigo-400 mt-1">R$ 0,00</h3>
+        <div class="bg-slate-800/80 p-5 rounded-2xl border border-emerald-500/30">
+          <p class="text-xs text-slate-400 font-medium">Saldo Líquido do Período</p>
+          <h3 id="report-net-total" class="text-2xl font-extrabold text-white mt-1">R$ 0,00</h3>
+          <span class="text-xs text-slate-500 mt-1 block">Entradas menos saídas</span>
         </div>
 
-        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/70">
-          <p class="text-xs text-slate-400 font-medium">Total em Dinheiro</p>
-          <h3 id="report-cash-total" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
+        <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-col justify-between">
+          <p class="text-xs text-slate-400 font-medium">Origem da Receita</p>
+          <div class="space-y-1.5 mt-2 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-400"></span> Produtos:</span>
+              <strong id="report-source-products" class="text-indigo-300">R$ 0,00</strong>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Serviços:</span>
+              <strong id="report-source-services" class="text-amber-300">R$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Methods Breakdown -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-slate-800/70 p-4 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Recebido em PIX</p>
+            <h4 id="report-pix-total" class="text-lg font-extrabold text-teal-400 mt-0.5">R$ 0,00</h4>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/70 p-4 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Recebido em Dinheiro</p>
+            <h4 id="report-cash-total" class="text-lg font-extrabold text-amber-400 mt-0.5">R$ 0,00</h4>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <i class="fa-solid fa-money-bill-wave"></i>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/70 p-4 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Recebido em Cartão</p>
+            <h4 id="report-card-total" class="text-lg font-extrabold text-indigo-400 mt-0.5">R$ 0,00</h4>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <i class="fa-solid fa-credit-card"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SMART CAIXINHAS PANEL ==================== -->
+      <div class="bg-gradient-to-br from-slate-800/95 to-slate-900 border border-indigo-500/40 rounded-2xl p-5 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
+          <div>
+            <h3 class="font-bold text-base text-white flex items-center gap-2">
+              <i class="fa-solid fa-piggy-bank text-emerald-400"></i>
+              Caixinhas Inteligentes — Guia de Separação Financeira
+            </h3>
+            <p class="text-xs text-slate-400">Cálculo automático baseado no markup de 52% dos produtos e margem operacional dos serviços gráficos.</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="caixinha-distributed-badge" class="hidden text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
+              <i class="fa-solid fa-check-double mr-1"></i> Período já distribuído
+            </span>
+            <button onclick="app.markPeriodDistributed()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all">
+              <i class="fa-solid fa-check-circle"></i> Marcar Período como Distribuído
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Caixinha 1: Reinvestimento -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-blue-500/30 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-blue-300 uppercase tracking-wide">1. Compra de Estoque</span>
+              <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 text-xs"><i class="fa-solid fa-boxes-packing"></i></span>
+            </div>
+            <h4 id="caixinha-reinvest-val" class="text-2xl font-extrabold text-blue-400">R$ 0,00</h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              <strong>65,8%</strong> das vendas de produtos (reposição de mercadoria) + <strong>20%</strong> dos serviços (papel, tinta, pouch film).
+            </p>
+          </div>
+
+          <!-- Caixinha 2: Reserva de Emergência -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/30 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-300 uppercase tracking-wide">2. Reserva Emergência</span>
+              <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs"><i class="fa-solid fa-shield-halved"></i></span>
+            </div>
+            <h4 id="caixinha-reserve-val" class="text-2xl font-extrabold text-amber-400">R$ 0,00</h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              <strong>10%</strong> do lucro bruto dos produtos + <strong>15%</strong> dos serviços para manutenção de equipamentos e imprevistos.
+            </p>
+          </div>
+
+          <!-- Caixinha 3: Lucro / Pró-Labore -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-emerald-500/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-emerald-300 uppercase tracking-wide">3. Lucro / Pró-Labore</span>
+              <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs"><i class="fa-solid fa-wallet"></i></span>
+            </div>
+            <h4 id="caixinha-profit-val" class="text-2xl font-extrabold text-emerald-400">R$ 0,00</h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              Restante líquido livre (<strong>~30,8%</strong> dos produtos + <strong>65%</strong> dos serviços, descontadas eventuais saídas).
+            </p>
+          </div>
+        </div>
+
+        <!-- Recent Distributions History -->
+        <div id="distributions-history-box" class="hidden pt-2 border-t border-slate-800">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Últimos Repasses Registrados nas Caixinhas:</p>
+          <div id="distributions-history-list" class="space-y-1.5 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Expenses / Sangrias List (Shown when there are expenses in period or overall) -->
+      <div id="expenses-section-card" class="bg-slate-800/80 border border-slate-700/70 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5 hidden">
+        <h3 class="font-bold text-slate-100 flex items-center gap-2 text-sm">
+          <i class="fa-solid fa-arrow-trend-down text-rose-400"></i>
+          Saídas / Despesas Lançadas no Período
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th class="py-2.5 px-4">Data / Hora</th>
+                <th class="py-2.5 px-4">Descrição da Saída</th>
+                <th class="py-2.5 px-4">Origem</th>
+                <th class="py-2.5 px-4 text-right">Valor</th>
+                <th class="py-2.5 px-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-history-body" class="divide-y divide-slate-700/50 text-xs">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -451,14 +666,14 @@
       <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl overflow-hidden shadow-xl space-y-3 p-5">
         <h3 class="font-bold text-slate-100 flex items-center gap-2">
           <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
-          Histórico de Vendas do Dia
+          Histórico de Vendas do Período
         </h3>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-700/80 bg-slate-900/60 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                <th class="py-3 px-4">Hora</th>
+                <th class="py-3 px-4">Data / Hora</th>
                 <th class="py-3 px-4">Itens / Serviços</th>
                 <th class="py-3 px-4">Pagamento</th>
                 <th class="py-3 px-4 text-right">Valor Total</th>
@@ -477,7 +692,7 @@
   </main>
 
   <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-    Print-Tech Balcão &bull; Sistema Integrado de Balcão e Gestão Gráfica
+    Print-Tech Balcão &bull; Sistema Integrado de Balcão, Controle de Insumos e Gestão Financeira
   </footer>
 
   <!-- ==================== MODALS ==================== -->
@@ -536,52 +751,205 @@
     </div>
   </div>
 
-  <!-- Modal Cadastrar/Editar Item -->
+  <!-- Modal Cadastrar/Editar Item (Adaptativo por Tipo de Categoria) -->
   <div id="modal-item" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 id="modal-item-title" class="font-bold text-lg text-slate-100">Cadastrar Item / Serviço</h3>
+        <h3 id="modal-item-title" class="font-bold text-lg text-slate-100">Cadastrar Item / Insumo</h3>
         <button onclick="app.closeItemModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <form id="item-form" onsubmit="app.saveItem(event)" class="space-y-4">
         <input type="hidden" id="item-id">
-        
+
         <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Nome do Produto ou Serviço *</label>
-          <input type="text" id="item-name" required placeholder="Ex: Capinha Silicone" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Nome do Produto, Insumo ou Serviço *</label>
+          <input type="text" id="item-name" required placeholder="Ex: Capinha Silicone / Resma Papel A4" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Categoria *</label>
-            <select id="item-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-              <option value="Eletrônicos">Eletrônicos</option>
-              <option value="Brinquedos">Brinquedos</option>
-              <option value="Insumos Gráfica">Insumos Gráfica</option>
-              <option value="Serviços">Serviços</option>
+            <select id="item-category" onchange="app.onItemCategoryChange()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+              <!-- Populated dynamically -->
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Unidade</label>
-            <input type="text" id="item-unit" placeholder="un, cx, fls" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-medium text-slate-300 mb-1">Unidade de Medida</label>
+            <input type="text" id="item-unit" placeholder="un, fls, serv" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Qtd em Estoque</label>
-            <input type="number" id="item-stock" step="any" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        <!-- Fields for SALE items (Revenda) -->
+        <div id="item-fields-sale" class="space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Qtd. em Estoque *</label>
+              <input type="number" id="item-stock-sale" step="any" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Estoque Mínimo (Alerta)</label>
+              <input type="number" id="item-min-sale" step="any" min="0" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            </div>
           </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Preço de Venda (R$) *</label>
+              <input type="number" id="item-price-sale" step="0.01" min="0" oninput="app.autoCalcItemCost()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-medium text-slate-300">Custo Compra (R$)</label>
+                <button type="button" onclick="app.autoCalcItemCost(true)" class="text-[10px] text-indigo-400 hover:text-indigo-300 underline">Calc. -52%</button>
+              </div>
+              <input type="number" id="item-cost-sale" step="0.01" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-blue-300 font-semibold focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Fields for INTERNAL items (Insumos Gráfica) -->
+        <div id="item-fields-internal" class="hidden space-y-4 bg-slate-900/60 p-3.5 rounded-xl border border-amber-500/30">
+          <p class="text-[11px] text-amber-300 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-box-open"></i> Controle por Embalagem & Saldo Fracionado
+          </p>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Qtd. na Embalagem Fechada *</label>
+              <input type="number" id="item-units-per-pack" step="1" min="1" value="100" placeholder="Ex: 500, 100, 50" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-amber-300 font-bold focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Saldo Atual (Unid. Soltas) *</label>
+              <input type="number" id="item-stock-internal" step="any" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Estoque Mínimo (Unidades)</label>
+              <input type="number" id="item-min-internal" step="1" min="0" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Valor da Embalagem (R$)</label>
+              <input type="number" id="item-pack-price" step="0.01" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Fields for SERVICE items (Serviços) -->
+        <div id="item-fields-service" class="hidden space-y-4 bg-slate-900/60 p-3.5 rounded-xl border border-indigo-500/30">
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Preço de Venda (R$)</label>
-            <input type="number" id="item-price" step="0.01" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-medium text-slate-300 mb-1">Preço Cobrado pelo Serviço (R$) *</label>
+            <input type="number" id="item-price-service" step="0.01" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-medium text-slate-300 mb-1">Insumo Vinculado (Baixa Automática)</label>
+              <select id="item-linked-supply" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                <!-- Populated dynamically with internal items -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Qtd. por Serviço</label>
+              <input type="number" id="item-supply-qty" step="any" min="0" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold focus:outline-none focus:border-indigo-500">
+            </div>
           </div>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="app.closeItemModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-indigo-600/20">Salvar Item</button>
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-indigo-600/20">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Gerenciador de Categorias Sazonais -->
+  <div id="modal-categories" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-folder-tree text-amber-400"></i>
+          Gerenciar Categorias
+        </h3>
+        <button onclick="app.closeCategoryModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <!-- Create New Category Form -->
+      <form onsubmit="app.createCategory(event)" class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 space-y-3">
+        <p class="text-xs font-bold text-indigo-300">Nova Categoria (Ex: Natal, Volta às Aulas)</p>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <input type="text" id="new-cat-name" required placeholder="Nome da categoria..." class="sm:col-span-6 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+          <select id="new-cat-type" class="sm:col-span-4 bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="sale">Venda no Balcão</option>
+            <option value="internal">Uso Interno (Insumos)</option>
+          </select>
+          <button type="submit" class="sm:col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs">
+            Criar
+          </button>
+        </div>
+      </form>
+
+      <!-- Existing Categories List -->
+      <div id="categories-manager-list" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Safe Migration Box when deleting a category with items -->
+      <div id="category-delete-migrate-box" class="hidden bg-rose-950/50 border border-rose-500/40 p-3.5 rounded-xl space-y-2.5">
+        <p id="category-delete-msg" class="text-xs text-rose-200 font-medium"></p>
+        <div class="flex items-center gap-2">
+          <select id="category-migrate-target" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white"></select>
+          <button onclick="app.confirmDeleteCategoryWithMigration()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">
+            Mover e Excluir
+          </button>
+          <button onclick="app.cancelDeleteCategory()" class="text-xs text-slate-400 hover:text-white px-2">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Lançar Saída / Despesa -->
+  <div id="modal-expense" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-minus-circle text-amber-400"></i>
+          Lançar Saída / Despesa
+        </h3>
+        <button onclick="app.closeExpenseModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <form onsubmit="app.saveExpense(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Descrição da Saída *</label>
+          <input type="text" id="expense-desc" required placeholder="Ex: Compra tinta preta, Lanche, Troco..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Valor (R$) *</label>
+            <input type="number" id="expense-amount" step="0.01" min="0.01" required placeholder="0,00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-rose-400 font-bold focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Saiu de onde?</label>
+            <select id="expense-method" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+              <option value="Dinheiro">Dinheiro (Gaveta)</option>
+              <option value="PIX">PIX / Conta</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Data</label>
+          <input type="date" id="expense-date" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="app.closeExpenseModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white">Cancelar</button>
+          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-5 py-2 rounded-xl text-sm shadow-lg shadow-amber-600/20">Registrar Saída</button>
         </div>
       </form>
     </div>
@@ -594,12 +962,13 @@
         <h3 class="font-bold text-lg text-slate-100">Fechamento de Caixa</h3>
         <button onclick="app.closeCloseCashModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <p class="text-xs text-slate-300">Confirma o fechamento do caixa do dia?</p>
-      
+      <p class="text-xs text-slate-300">Resumo consolidado do período selecionado:</p>
+
       <div class="bg-slate-900 p-4 rounded-xl space-y-2 text-sm border border-slate-700">
-        <div class="flex justify-between"><span class="text-slate-400">Data:</span> <span id="close-modal-date" class="font-bold"></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Período:</span> <span id="close-modal-date" class="font-bold text-right"></span></div>
         <div class="flex justify-between"><span class="text-slate-400">Total Vendas:</span> <span id="close-modal-count" class="font-bold"></span></div>
-        <div class="flex justify-between text-base border-t border-slate-800 pt-2"><span class="text-slate-300 font-bold">Total Faturado:</span> <span id="close-modal-total" class="font-bold text-emerald-400"></span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Saídas / Despesas:</span> <span id="close-modal-expenses" class="font-bold text-rose-400"></span></div>
+        <div class="flex justify-between text-base border-t border-slate-800 pt-2"><span class="text-slate-300 font-bold">Saldo Líquido:</span> <span id="close-modal-total" class="font-bold text-emerald-400"></span></div>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
@@ -613,9 +982,9 @@
   <div id="modal-reset" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-rose-400 flex items-center gap-2">
-        <i class="fa-solid fa-triangle-exclamation"></i> Restaurar Dados Iniciais?
+        <i class="fa-solid fa-triangle-exclamation"></i> Restaurar Dados Oficiais?
       </h3>
-      <p class="text-xs text-slate-300">Esta ação recarregará a base de dados fornecida no último backup JSON (itens, histórico de vendas e fila do RG).</p>
+      <p class="text-xs text-slate-300">Esta ação recarregará a base completa do backup de 13/11/2026 com a contagem atualizada dos insumos (500 fls A4, 70 fotográfico, 45 adesivo, 95 pouch RG, 60 pouch título, 2 pouch A4).</p>
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="app.closeResetModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:bg-slate-700/50">Cancelar</button>
         <button onclick="app.confirmReset()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-xl text-sm">Sim, Restaurar</button>
@@ -626,115 +995,152 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- APPLICATION ENGINE & DATABASE SCRIPT -->
+  <!-- ==================== APPLICATION ENGINE & DATABASE SCRIPT ==================== -->
   <script>
-    // Embed original data from backup_printtech_2026-11-11.json
+    // Categorias Padrão
+    const DEFAULT_CATEGORIES = [
+      { id: 'cat-eletronicos', name: 'Eletrônicos', type: 'sale' },
+      { id: 'cat-brinquedos', name: 'Brinquedos', type: 'sale' },
+      { id: 'cat-papelaria', name: 'Papelaria', type: 'sale' },
+      { id: 'cat-insumos', name: 'Insumos Gráfica', type: 'internal' },
+      { id: 'cat-servicos', name: 'Serviços', type: 'service' }
+    ];
+
+    // Seed Completo (Backup 13/11/2026 + Contagem Atualizada dos Insumos e Papelaria)
     const INITIAL_STOCK_LIST = [
-      { price: 15, id: "el-1", stock: 31, unit: "un", category: "Eletrônicos", name: "Capinha Variadas" },
-      { id: "el-2", price: 15, name: "Cabo Usb v8", category: "Eletrônicos", stock: 5, unit: "un" },
-      { category: "Eletrônicos", price: 15, unit: "un", id: "el-3", name: "Cabo usbc/usbc", stock: 4 },
-      { price: 15, category: "Eletrônicos", stock: 5, unit: "un", name: "Cabo usbc/Lightning", id: "el-4" },
-      { category: "Eletrônicos", price: 15, unit: "un", name: "Cabo usb/Lightning", id: "el-5", stock: 3 },
-      { category: "Eletrônicos", name: "Cabo Usb/USBC", id: "el-6", unit: "un", stock: 2, price: 15 },
-      { unit: "un", category: "Eletrônicos", price: 35, name: "Carregador com cabo tipo c", stock: 6, id: "el-7" },
-      { unit: "un", name: "Carregador com cabo v8", category: "Eletrônicos", id: "el-8", stock: 3, price: 20 },
-      { id: "el-9", category: "Eletrônicos", price: 20, unit: "un", stock: 3, name: "Carregador com cabo Lightning" },
-      { id: "el-10", name: "Fonte carregador usb c", category: "Eletrônicos", price: 35, stock: 1, unit: "un" },
-      { price: 20, id: "el-11", stock: 4, unit: "un", category: "Eletrônicos", name: "Fonte carregador USB" },
-      { category: "Eletrônicos", unit: "un", price: 22, id: "el-12", name: "Fone de ouvido usbc (R$ 22)", stock: 1 },
-      { category: "Eletrônicos", id: "el-13", price: 25, stock: 1, name: "Fone de ouvido usbc (R$ 25)", unit: "un" },
-      { unit: "un", category: "Eletrônicos", stock: 4, name: "Fone de ouvido plug antigo redondo", price: 10, id: "el-14" },
-      { id: "el-15", category: "Eletrônicos", unit: "un", stock: 1, price: 35, name: "Fone bluetooth Redmi" },
-      { price: 50, category: "Eletrônicos", stock: 2, unit: "un", name: "Fone bluetooth h'maston", id: "el-16" },
-      { name: "Cabo stereo", id: "el-17", unit: "un", stock: 1, category: "Eletrônicos", price: 18 },
-      { price: 20, stock: 2, id: "el-18", name: "Conversor Usbc otg", category: "Eletrônicos", unit: "un" },
-      { unit: "un", stock: 1, price: 20, name: "Cabo hdmi", category: "Eletrônicos", id: "el-19" },
-      { unit: "un", stock: 3, price: 25, name: "Suporte tv", category: "Eletrônicos", id: "el-20" },
-      { price: 120, unit: "un", name: "Video Game", id: "el-21", category: "Eletrônicos", stock: 1 },
-      { id: "br-1", stock: 2, unit: "un", price: 15, name: "Moto brinquedo", category: "Brinquedos" },
-      { price: 8, category: "Brinquedos", unit: "un", id: "br-2", name: "Cobrinha", stock: 2 },
-      { unit: "un", name: "Kit ferramenta", id: "br-3", stock: 2, category: "Brinquedos", price: 16 },
-      { name: "Boneca pretty", category: "Brinquedos", unit: "un", stock: 2, price: 10, id: "br-4" },
-      { name: "Kit medico", id: "br-5", unit: "un", stock: 1, category: "Brinquedos", price: 15 },
-      { category: "Brinquedos", price: 15, stock: 2, id: "br-6", name: "Bayblade", unit: "un" },
-      { id: "br-7", price: 30, category: "Brinquedos", stock: 2, name: "Soldados", unit: "un" },
-      { price: 20, stock: 1, id: "br-8", category: "Brinquedos", unit: "un", name: "Formula 1" },
-      { price: 10, id: "br-9", category: "Brinquedos", stock: 2, unit: "un", name: "Laila boneca" },
-      { price: 20, category: "Brinquedos", stock: 3, name: "Moto Miniatura", id: "br-10", unit: "un" },
-      { id: "br-11", price: 20, stock: 1, name: "Carrinho Miniatura", category: "Brinquedos", unit: "un" },
-      { price: 25, category: "Brinquedos", id: "br-12", stock: 1, unit: "un", name: "Roda lançadora carrinho" },
-      { price: 20, stock: 3, unit: "un", id: "br-13", name: "Boneca zoe", category: "Brinquedos" },
-      { id: "br-14", price: 20, unit: "un", category: "Brinquedos", name: "Boneca Mel", stock: 3 },
-      { category: "Brinquedos", name: "Boneca Tiny", id: "br-15", unit: "un", stock: 1, price: 25 },
-      { id: "br-16", category: "Brinquedos", price: 15, unit: "un", stock: 1, name: "Boneca Brink" },
-      { name: "Squish", stock: 1, unit: "un", price: 30, category: "Brinquedos", id: "br-17" },
-      { price: 12, category: "Brinquedos", stock: 4, name: "Cubo Magico", unit: "un", id: "br-18" },
-      { unit: "un", name: "Tinta Cabelo maluco", category: "Brinquedos", id: "br-19", stock: 3, price: 15 },
-      { unit: "un", stock: 7, name: 'Bola "futsal"', price: 16, id: "br-20", category: "Brinquedos" },
-      { unit: "un", name: "Bola Futebol", stock: 2, id: "br-21", price: 25, category: "Brinquedos" },
-      { id: "br-22", name: "Dinosfera", price: 25, category: "Brinquedos", stock: 1, unit: "un" },
-      { price: 40, id: "br-23", stock: 6, category: "Brinquedos", unit: "un", name: "Copo termico" },
-      { id: "br-24", name: "Bladeburst", price: 15, stock: 1, category: "Brinquedos", unit: "un" },
-      { id: "gr-1", name: "Resma papel A4 comum (75g)", price: 28, category: "Insumos Gráfica", stock: 1, unit: "un" },
-      { id: "gr-2", name: "Papel fotografico A4", price: 35, stock: 2, unit: "un", category: "Insumos Gráfica" },
-      { price: 40, stock: 1, id: "gr-3", category: "Insumos Gráfica", name: "Papel fotográfico A4 adesivo", unit: "un" },
-      { price: 50, stock: 1, name: "Pouch film Identidade", category: "Insumos Gráfica", id: "gr-4", unit: "cx" },
-      { category: "Insumos Gráfica", price: 45, unit: "cx", id: "gr-5", name: "Pouch film Título de Eleitor", stock: 1 },
-      { price: 2, stock: 6, unit: "un", name: "Pouch film A4", id: "gr-6", category: "Insumos Gráfica" },
-      { unit: "un", category: "Insumos Gráfica", name: "Cartolina Branca", stock: 94, price: 3, id: "gr-7" },
-      { id: "gr-8", category: "Insumos Gráfica", price: 3, stock: 5, unit: "un", name: "Cartolina Colorida (Azul, Amarelo, Rosa)" },
-      { name: "Agendamento Carteira de Identidade (RG / CIN)", id: "srv-1", unit: "serv", category: "Serviços", stock: 9999, price: 5 },
-      { name: "Plastificação Identidade / Documento", unit: "un", stock: 9999, category: "Serviços", id: "srv-2", price: 5 },
-      { unit: "un", stock: 9999, price: 8, category: "Serviços", id: "srv-3", name: "Encadernação até 100 fls" },
-      { price: 1.5, category: "Serviços", stock: 9999, name: "Digitalização de Documento", unit: "doc", id: "srv-4" },
-      { id: "item-1794264056913", unit: "un", name: "Impressão Avulsa", category: "Serviços", stock: 9999, price: 1 },
-      { category: "Serviços", id: "item-1794339613347", price: 0.5, name: "Xerox Avulsa", stock: 99999, unit: "un" },
-      { unit: "un", id: "item-1794408398042", name: "Papel de Presente", category: "Insumos Gráfica", stock: 9997, price: 2 }
+      // Eletrônicos (25 itens)
+      { id: "el-1", name: "Capinha Variadas", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 31, minStock: 1, unit: "un" },
+      { id: "el-2", name: "Cabo USB V8", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 4, minStock: 1, unit: "un" },
+      { id: "el-3", name: "Cabo USB-C / USB-C", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 6, minStock: 1, unit: "un" },
+      { id: "el-4", name: "Cabo usbc/Lightning", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 5, minStock: 1, unit: "un" },
+      { id: "el-5", name: "Cabo usb/Lightning", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-6", name: "Cabo Usb/USBC", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-7", name: "Carregador USB-C", category: "Eletrônicos", price: 35, costPrice: 23.03, stock: 5, minStock: 1, unit: "un" },
+      { id: "el-8", name: "Carregador com cabo v8", category: "Eletrônicos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-9", name: "Carregador com cabo Lightning", category: "Eletrônicos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-10", name: "Fonte carregador usb c", category: "Eletrônicos", price: 35, costPrice: 23.03, stock: 1, minStock: 1, unit: "un" },
+      { id: "el-11", name: "Fonte carregador USB", category: "Eletrônicos", price: 20, costPrice: 13.16, stock: 3, minStock: 1, unit: "un" },
+      { id: "el-12", name: "Fone de ouvido USB-C", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-14", name: "Fone de ouvido plug antigo redondo", category: "Eletrônicos", price: 10, costPrice: 6.58, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-15", name: "Fone bluetooth Redmi", category: "Eletrônicos", price: 40, costPrice: 26.32, stock: 1, minStock: 1, unit: "un" },
+      { id: "el-16", name: "Fone bluetooth h'maston", category: "Eletrônicos", price: 50, costPrice: 32.89, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-17", name: "Cabo stereo", category: "Eletrônicos", price: 18, costPrice: 11.84, stock: 1, minStock: 1, unit: "un" },
+      { id: "el-18", name: "Conversor Usbc otg", category: "Eletrônicos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-19", name: "Cabo hdmi", category: "Eletrônicos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "el-20", name: "Suporte tv", category: "Eletrônicos", price: 25, costPrice: 16.45, stock: 3, minStock: 1, unit: "un" },
+      { id: "el-21", name: "Video Game", category: "Eletrônicos", price: 120, costPrice: 78.95, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794571808604", name: "Mini Video Game", category: "Eletrônicos", price: 20, costPrice: 13.16, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794571884558", name: "Fone Bluetooth A’GOLD", category: "Eletrônicos", price: 45, costPrice: 29.61, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794571916176", name: "Fone Bluetooth Hmaston ", category: "Eletrônicos", price: 35, costPrice: 23.03, stock: 2, minStock: 1, unit: "un" },
+      { id: "item-1794571974219", name: "Fone Gamer com Mic", category: "Eletrônicos", price: 25, costPrice: 16.45, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794572021735", name: "Fone plug Lightning ", category: "Eletrônicos", price: 15, costPrice: 9.87, stock: 3, minStock: 1, unit: "un" },
+
+      // Brinquedos (28 itens)
+      { id: "br-1", name: "Moto brinquedo", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-2", name: "Cobrinha", category: "Brinquedos", price: 8, costPrice: 5.26, stock: 1, minStock: 1, unit: "un" },
+      { id: "br-3", name: "Kit ferramenta", category: "Brinquedos", price: 16, costPrice: 10.53, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-4", name: "Boneca pretty", category: "Brinquedos", price: 10, costPrice: 6.58, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-6", name: "Bayblade", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-9", name: "Laila boneca", category: "Brinquedos", price: 10, costPrice: 6.58, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-10", name: "Moto Miniatura", category: "Brinquedos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-11", name: "Carrinho Miniatura", category: "Brinquedos", price: 20, costPrice: 13.16, stock: 1, minStock: 1, unit: "un" },
+      { id: "br-12", name: "Roda lançadora carrinho", category: "Brinquedos", price: 25, costPrice: 16.45, stock: 1, minStock: 1, unit: "un" },
+      { id: "br-13", name: "Boneca zoe", category: "Brinquedos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "br-14", name: "Boneca Mel", category: "Brinquedos", price: 20, costPrice: 13.16, stock: 3, minStock: 1, unit: "un" },
+      { id: "br-16", name: "Boneca Brink", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 1, minStock: 1, unit: "un" },
+      { id: "br-18", name: "Cubo Magico", category: "Brinquedos", price: 12, costPrice: 7.89, stock: 4, minStock: 1, unit: "un" },
+      { id: "br-19", name: "Tinta Cabelo maluco", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 3, minStock: 1, unit: "un" },
+      { id: "br-20", name: 'Bola "futsal"', category: "Brinquedos", price: 16, costPrice: 10.53, stock: 6, minStock: 1, unit: "un" },
+      { id: "br-21", name: "Bola Futebol", category: "Brinquedos", price: 25, costPrice: 16.45, stock: 0, minStock: 1, unit: "un" },
+      { id: "br-23", name: "Copo termico", category: "Brinquedos", price: 40, costPrice: 26.32, stock: 6, minStock: 1, unit: "un" },
+      { id: "br-24", name: "Bladeburst", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794570916499", name: "Animais Fazendinha ", category: "Brinquedos", price: 20, costPrice: 13.16, stock: 2, minStock: 1, unit: "un" },
+      { id: "item-1794570952771", name: "Mini Soldados ", category: "Brinquedos", price: 20, costPrice: 13.16, stock: 3, minStock: 1, unit: "un" },
+      { id: "item-1794570985707", name: "Trator Laranja", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 0, minStock: 1, unit: "un" },
+      { id: "item-1794571023259", name: "Yoyo", category: "Brinquedos", price: 5, costPrice: 3.29, stock: 12, minStock: 1, unit: "un" },
+      { id: "item-1794571056877", name: "Helicoptero Aero Girls", category: "Brinquedos", price: 25, costPrice: 16.45, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794571094919", name: "Lambreta Road Garagem", category: "Brinquedos", price: 25, costPrice: 16.45, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794572171124", name: "Tinta Cabelo Maluco", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 3, minStock: 1, unit: "un" },
+      { id: "item-1794572812853", name: "Boneca Zoe Sereia", category: "Brinquedos", price: 30, costPrice: 19.74, stock: 1, minStock: 1, unit: "un" },
+      { id: "item-1794572858526", name: "Mini Basquete SpiderMan", category: "Brinquedos", price: 15, costPrice: 9.87, stock: 2, minStock: 1, unit: "un" },
+      { id: "item-1794572868682", name: "Mini Futebol", category: "Brinquedos", price: 25, costPrice: 16.45, stock: 1, minStock: 1, unit: "un" },
+
+      // Papelaria (Venda direta no balcão)
+      { id: "gr-7", name: "Cartolina Branca", category: "Papelaria", price: 2, costPrice: 1.32, stock: 94, minStock: 10, unit: "un" },
+      { id: "gr-8", name: "Cartolina Colorida (Azul, Amarelo, Rosa)", category: "Papelaria", price: 2, costPrice: 1.32, stock: 5, minStock: 5, unit: "un" },
+      { id: "item-1794408398042", name: "Papel de Presente", category: "Papelaria", price: 2, costPrice: 1.32, stock: 9997, minStock: 10, unit: "un" },
+
+      // Insumos Gráfica (Uso Interno - Contagem exata informada pelo usuário)
+      { id: "gr-1", name: "Resma papel A4 comum (75g)", category: "Insumos Gráfica", price: 28, packPrice: 28, unitsPerPack: 500, stock: 500, minStock: 150, unit: "fls" },
+      { id: "gr-2", name: "Papel fotografico A4", category: "Insumos Gráfica", price: 35, packPrice: 35, unitsPerPack: 50, stock: 70, minStock: 20, unit: "fls" },
+      { id: "gr-3", name: "Papel fotográfico A4 adesivo", category: "Insumos Gráfica", price: 40, packPrice: 40, unitsPerPack: 50, stock: 45, minStock: 15, unit: "fls" },
+      { id: "gr-4", name: "Pouch film Identidade", category: "Insumos Gráfica", price: 50, packPrice: 50, unitsPerPack: 100, stock: 95, minStock: 20, unit: "un" },
+      { id: "gr-5", name: "Pouch film Título de Eleitor", category: "Insumos Gráfica", price: 45, packPrice: 45, unitsPerPack: 100, stock: 60, minStock: 20, unit: "un" },
+      { id: "gr-6", name: "Pouch film A4", category: "Insumos Gráfica", price: 2, packPrice: 120, unitsPerPack: 100, stock: 2, minStock: 10, unit: "un" },
+
+      // Serviços (Com vínculo automático de baixa de insumo)
+      { id: "srv-1", name: "Agendamento Carteira de Identidade (RG / CIN)", category: "Serviços", price: 5, stock: 9999, unit: "serv", linkedSupplyId: "", supplyQtyPerUnit: 0 },
+      { id: "srv-2", name: "Plastificação Documento A4", category: "Serviços", price: 5, stock: 9999, unit: "un", linkedSupplyId: "gr-6", supplyQtyPerUnit: 1 },
+      { id: "srv-4", name: "Digitalização de Documento", category: "Serviços", price: 1, stock: 9999, unit: "Un", linkedSupplyId: "", supplyQtyPerUnit: 0 },
+      { id: "item-1794264056913", name: "Impressão Avulsa", category: "Serviços", price: 1, stock: 9999, unit: "un", linkedSupplyId: "gr-1", supplyQtyPerUnit: 1 },
+      { id: "item-1794339613347", name: "Xerox Avulsa", category: "Serviços", price: 0.5, stock: 99999, unit: "un", linkedSupplyId: "gr-1", supplyQtyPerUnit: 1 },
+      { id: "item-1794491038569", name: "Plastificação Identidade", category: "Serviços", price: 2.5, stock: 9999, unit: "un", linkedSupplyId: "gr-4", supplyQtyPerUnit: 1 }
     ];
 
+    // Histórico Completo de 21 Vendas (Backup 13/11/2026)
     const INITIAL_SALES = [
-      { id: "V-198741", timestamp: 1794414806031, timeStr: "13:33", dateStr: "2026-11-11", items: [{ itemId: "br-5", name: "Kit medico", category: "Brinquedos", price: 15, qty: 1, unit: "un" }], total: 15, paymentMethod: "PIX" },
-      { items: [{ unit: "un", name: "Papel de Presente", itemId: "item-1794408398042", qty: 2, price: 2, category: "Insumos Gráfica" }], timeStr: "11:47", id: "V-844896", timestamp: 1794408443101, paymentMethod: "PIX", total: 4, dateStr: "2026-11-11" },
-      { paymentMethod: "PIX", items: [{ category: "Serviços", price: 1, unit: "pág", itemId: "quick-print-1794408213728", qty: 1, isPrintJob: true, printType: "pb", pages: 1, name: "Impressão P&B (1 págs)" }], dateStr: "2026-11-11", total: 1, timeStr: "11:43", timestamp: 1794408220038, id: "V-914805" },
-      { timestamp: 1794403989239, timeStr: "10:33", total: 5, id: "V-615804", dateStr: "2026-11-11", paymentMethod: "Dinheiro", items: [{ unit: "serv", qty: 1, name: "Agendamento Carteira de Identidade (RG / CIN)", category: "Serviços", price: 5, itemId: "srv-1" }] },
-      { paymentMethod: "Dinheiro", timestamp: 1794403456660, id: "V-428786", timeStr: "10:24", total: 4, items: [{ category: "Serviços", pages: 2, name: "Impressão Colorida (2 págs)", printType: "color", isPrintJob: true, itemId: "quick-print-1794403451218", price: 2, unit: "pág", qty: 2 }], dateStr: "2026-11-11" },
-      { timestamp: 1794350003057, items: [{ itemId: "br-18", name: "Cubo Magico", price: 12, unit: "un", qty: 1, category: "Brinquedos" }], timeStr: "19:33", id: "V-677407", paymentMethod: "PIX", total: 12, dateStr: "2026-11-10" },
-      { dateStr: "2026-11-10", total: 40, timestamp: 1794346716151, items: [{ category: "Brinquedos", qty: 1, unit: "un", price: 40, name: "Copo termico", itemId: "br-23" }], paymentMethod: "PIX", id: "V-983349", timeStr: "18:38" },
-      { items: [{ category: "Brinquedos", itemId: "br-15", name: "Boneca Tiny", price: 25, qty: 1, unit: "un" }], timeStr: "18:38", paymentMethod: "PIX", dateStr: "2026-11-10", timestamp: 1794346680862, total: 25, id: "V-256892" },
-      { timeStr: "16:40", paymentMethod: "Dinheiro", id: "V-998125", total: 1, dateStr: "2026-11-10", timestamp: 1794339647387, items: [{ category: "Serviços", name: "Xerox Avulsa", price: 0.5, unit: "un", qty: 2, itemId: "item-1794339613347" }] },
-      { total: 4, id: "V-540210", dateStr: "2026-11-10", paymentMethod: "Dinheiro", timestamp: 1794318987191, timeStr: "10:56", items: [{ name: "Impressão P&B (4 págs)", category: "Serviços", price: 1, unit: "pág", itemId: "quick-print-1794318972382", qty: 4 }] },
-      { timeStr: "19:41", timestamp: 1794264115981, items: [{ price: 1, qty: 9, category: "Serviços", unit: "pág", itemId: "quick-print-1794264111392", name: "Impressão P&B (9 págs)" }], dateStr: "2026-11-09", paymentMethod: "Dinheiro", total: 9, id: "V-102361" },
-      { timestamp: 1794264101793, dateStr: "2026-11-09", items: [{ qty: 1, itemId: "quick-print-1794264097206", category: "Serviços", price: 1, unit: "pág", name: "Impressão P&B (1 págs)" }], paymentMethod: "Dinheiro", id: "V-247085", timeStr: "19:41", total: 1 },
-      { total: 35, id: "V-453029", paymentMethod: "Dinheiro", dateStr: "2026-11-09", items: [{ category: "Serviços", qty: 35, unit: "un", price: 1, name: "Impressão Avulsa", itemId: "item-1794264056913" }], timeStr: "19:41", timestamp: 1794264084560 },
-      { paymentMethod: "PIX", items: [{ name: "Agendamento Carteira de Identidade (RG / CIN)", unit: "serv", price: 5, itemId: "srv-1", qty: 1, category: "Serviços" }], id: "V-646421", timeStr: "19:40", total: 5, dateStr: "2026-11-09", timestamp: 1794264019711 },
-      { paymentMethod: "PIX", dateStr: "2026-11-09", total: 14, timestamp: 1794263970787, items: [{ category: "Serviços", qty: 5, price: 2, unit: "pág", name: "Impressão Colorida (5 págs)", itemId: "quick-print-1794263865291" }, { qty: 1, category: "Serviços", unit: "pág", itemId: "quick-print-1794263908439", name: "Impressão P&B (2 págs)", price: 1 }, { price: 3, name: "Cartolina Branca", itemId: "gr-7", category: "Insumos Gráfica", unit: "un", qty: 1 }], timeStr: "19:39", id: "V-515480" }
+      { id: "V-684241", paymentMethod: "PIX", items: [{ itemId: "quick-print-1794514044849", category: "Serviços", price: 1, qty: 3, isPrintJob: true, pages: 3, name: "Impressão P&B (3 págs)", unit: "pág", printType: "pb" }], total: 3, timestamp: 1794514048421, timeStr: "17:07", dateStr: "2026-11-12" },
+      { timeStr: "17:04", dateStr: "2026-11-12", paymentMethod: "Dinheiro", timestamp: 1794513886637, items: [{ unit: "un", price: 0.5, category: "Serviços", itemId: "item-1794339613347", name: "Xerox Avulsa", qty: 2 }], total: 1, id: "V-395993" },
+      { dateStr: "2026-11-12", timeStr: "10:47", timestamp: 1794491260565, total: 2, items: [{ price: 0.5, itemId: "item-1794339613347", qty: 4, name: "Xerox Avulsa", category: "Serviços", unit: "un" }], paymentMethod: "Dinheiro", id: "V-974524" },
+      { dateStr: "2026-11-12", timeStr: "10:40", timestamp: 1794490835287, id: "V-937282", paymentMethod: "Dinheiro", total: 5, items: [{ name: "Agendamento Carteira de Identidade (RG / CIN)", itemId: "srv-1", price: 5, unit: "serv", category: "Serviços", qty: 1 }] },
+      { dateStr: "2026-11-12", timeStr: "10:40", timestamp: 1794490824069, paymentMethod: "Dinheiro", items: [{ pages: 6, itemId: "quick-print-1794490819119", printType: "pb", unit: "pág", qty: 6, price: 1, isPrintJob: true, name: "Impressão P&B (6 págs)", category: "Serviços" }], id: "V-198994", total: 6 },
+      { total: 3, items: [{ itemId: "item-1794339613347", qty: 6, category: "Serviços", unit: "un", price: 0.5, name: "Xerox Avulsa" }], id: "V-779529", paymentMethod: "Dinheiro", timestamp: 1794490810597, timeStr: "10:40", dateStr: "2026-11-12" },
+      { paymentMethod: "PIX", items: [{ qty: 1, unit: "un", category: "Brinquedos", name: "Kit medico", itemId: "br-5", price: 15 }], total: 15, timestamp: 1794414806031, id: "V-198741", timeStr: "13:33", dateStr: "2026-11-11" },
+      { paymentMethod: "PIX", timestamp: 1794408443101, id: "V-844896", items: [{ category: "Papelaria", name: "Papel de Presente", qty: 2, itemId: "item-1794408398042", price: 2, unit: "un" }], total: 4, dateStr: "2026-11-11", timeStr: "11:47" },
+      { paymentMethod: "PIX", dateStr: "2026-11-11", timestamp: 1794408220038, timeStr: "11:43", total: 1, items: [{ isPrintJob: true, itemId: "quick-print-1794408213728", qty: 1, price: 1, pages: 1, category: "Serviços", name: "Impressão P&B (1 págs)", unit: "pág", printType: "pb" }], id: "V-914805" },
+      { id: "V-615804", dateStr: "2026-11-11", total: 5, items: [{ qty: 1, itemId: "srv-1", unit: "serv", category: "Serviços", price: 5, name: "Agendamento Carteira de Identidade (RG / CIN)" }], timeStr: "10:33", paymentMethod: "Dinheiro", timestamp: 1794403989239 },
+      { paymentMethod: "Dinheiro", timeStr: "10:24", dateStr: "2026-11-11", items: [{ itemId: "quick-print-1794403451218", printType: "color", qty: 2, price: 2, pages: 2, name: "Impressão Colorida (2 págs)", isPrintJob: true, unit: "pág", category: "Serviços" }], total: 4, id: "V-428786", timestamp: 1794403456660 },
+      { timeStr: "19:33", dateStr: "2026-11-10", total: 12, items: [{ unit: "un", category: "Brinquedos", itemId: "br-18", qty: 1, name: "Cubo Magico", price: 12 }], paymentMethod: "PIX", id: "V-677407", timestamp: 1794350003057 },
+      { timestamp: 1794346716151, paymentMethod: "PIX", id: "V-983349", timeStr: "18:38", dateStr: "2026-11-10", items: [{ qty: 1, category: "Brinquedos", itemId: "br-23", unit: "un", name: "Copo termico", price: 40 }], total: 40 },
+      { items: [{ unit: "un", category: "Brinquedos", name: "Boneca Tiny", qty: 1, price: 25, itemId: "br-15" }], total: 25, id: "V-256892", paymentMethod: "PIX", timestamp: 1794346680862, dateStr: "2026-11-10", timeStr: "18:38" },
+      { paymentMethod: "Dinheiro", id: "V-998125", timeStr: "16:40", dateStr: "2026-11-10", items: [{ name: "Xerox Avulsa", price: 0.5, category: "Serviços", unit: "un", qty: 2, itemId: "item-1794339613347" }], total: 1, timestamp: 1794339647387 },
+      { timestamp: 1794318987191, paymentMethod: "Dinheiro", id: "V-540210", dateStr: "2026-11-10", timeStr: "10:56", items: [{ price: 1, name: "Impressão P&B (4 págs)", category: "Serviços", unit: "pág", itemId: "quick-print-1794318972382", qty: 4 }], total: 4 },
+      { timestamp: 1794264115981, total: 9, items: [{ category: "Serviços", qty: 9, unit: "pág", itemId: "quick-print-1794264111392", name: "Impressão P&B (9 págs)", price: 1 }], id: "V-102361", dateStr: "2026-11-09", timeStr: "19:41", paymentMethod: "Dinheiro" },
+      { timestamp: 1794264101793, timeStr: "19:41", dateStr: "2026-11-09", items: [{ qty: 1, unit: "pág", category: "Serviços", itemId: "quick-print-1794264097206", name: "Impressão P&B (1 págs)", price: 1 }], total: 1, paymentMethod: "Dinheiro", id: "V-247085" },
+      { id: "V-453029", items: [{ price: 1, name: "Impressão Avulsa", category: "Serviços", unit: "un", itemId: "item-1794264056913", qty: 35 }], total: 35, timestamp: 1794264084560, timeStr: "19:41", dateStr: "2026-11-09", paymentMethod: "Dinheiro" },
+      { items: [{ qty: 1, price: 5, name: "Agendamento Carteira de Identidade (RG / CIN)", category: "Serviços", itemId: "srv-1", unit: "serv" }], total: 5, id: "V-646421", paymentMethod: "PIX", timestamp: 1794264019711, timeStr: "19:40", dateStr: "2026-11-09" },
+      { items: [{ name: "Impressão Colorida (5 págs)", category: "Serviços", price: 2, unit: "pág", qty: 5, itemId: "quick-print-1794263865291" }, { itemId: "quick-print-1794263908439", qty: 1, price: 1, category: "Serviços", unit: "pág", name: "Impressão P&B (2 págs)" }, { unit: "un", qty: 1, category: "Papelaria", itemId: "gr-7", name: "Cartolina Branca", price: 3 }], total: 14, paymentMethod: "PIX", timestamp: 1794263970787, id: "V-515480", dateStr: "2026-11-09", timeStr: "19:39" }
     ];
 
+    // Fila Completa de 13 Agendamentos RG (Backup 13/11/2026)
     const INITIAL_OS_LIST = [
-      { id: "OS-1794338512760", createdAt: 1794338512760, clientName: "Fabiano Alves da Silva", motherName: "Severina Alves da Silva", birthDate: "1984-12-11", cpf: "068.215.814-36", phone: "84999999999", status: "Agendando" },
-      { id: "OS-1794338578954", createdAt: 1794338578954, clientName: "Ruana Carla Mendes Carneiro", motherName: "Rosângela Maria Mendes da Penha", birthDate: "1994-07-18", cpf: "106.700.134-47", phone: "84987404122", status: "Agendando" },
-      { id: "OS-1794338654536", createdAt: 1794338654536, clientName: "Priscila Karen Ferreira de Lima", motherName: "Francineide Ferreira de Lima", birthDate: "1993-12-01", cpf: "115.423.114-38", phone: "84999999999", status: "Agendando" },
-      { id: "OS-1794338702650", createdAt: 1794338702650, clientName: "Deyvid Luiz do Monte Weber", motherName: "Paula Cristina do Monte", birthDate: "2022-03-11", cpf: "180.814.974-20", phone: "84987891064", status: "Agendando" },
-      { id: "OS-1794338821326", createdAt: 1794338821326, clientName: "Kaline Patricia de Melo Silva", motherName: "Adriana Patricia de Melo", birthDate: "1994-11-26", cpf: "70783812469", phone: "84987005165", status: "Agendando" },
-      { id: "OS-1794339011169", createdAt: 1794339011169, clientName: "Jeisson do Nascimento Silva", motherName: "Sandra do Nascimento", birthDate: "1998-12-18", cpf: "12376448441", phone: "84987005156", status: "Agendando" },
-      { id: "OS-1794339203532", createdAt: 1794339203532, clientName: "Sebastião Cordeiro da Silva", motherName: "Raimunda Cordeiro da Silva", birthDate: "1958-11-20", cpf: "56686595420", phone: "84987005165", status: "Agendando" },
-      { id: "OS-1794339274975", createdAt: 1794339274975, clientName: "Creusa Antonia da Silva", motherName: "Antonia Machado da Silva", birthDate: "1962-04-10", cpf: "05745827467", phone: "84987005165", status: "Agendando" },
-      { id: "OS-1794339412810", createdAt: 1794339412810, clientName: "Amadeu Augusto dos Santos", motherName: "Alice Martins dos Santos", birthDate: "1964-05-28", cpf: "73715662468", phone: "84999999999", status: "Agendando" },
-      { id: "OS-1794339547384", createdAt: 1794339547384, clientName: "Marcia Maria Alves de Assis", motherName: "Sheila Alves da Silva", birthDate: "1996-06-10", cpf: "01696101441", phone: "84998190564", status: "Agendando" }
+      { cpf: "115.423.114-38", birthDate: "1993-12-01", dateTime: "2026-11-10T16:24", id: "OS-1794338654536", motherName: "Francineide Ferreira de Lima", phone: "84999999999", clientName: "Priscila Karen Ferreira de Lima", status: "Agendando" },
+      { dateTime: "2026-11-10T16:24", id: "OS-1794338702650", status: "Agendando", cpf: "180.814.974-20", clientName: "Deyvid Luiz do Monte Weber", phone: "84987891064", birthDate: "2022-03-11", motherName: "Paula Cristina do Monte" },
+      { cpf: "70783812469", clientName: "Kaline Patricia de Melo Silva", birthDate: "1994-11-26", dateTime: "2026-11-10T16:26", motherName: "Adriana Patricia de Melo", id: "OS-1794338821326", phone: "84987005165", status: "Agendando" },
+      { clientName: "Jeisson do Nascimento Silva", id: "OS-1794339011169", motherName: "Sandra do Nascimento", status: "Agendando", phone: "84987005156", birthDate: "1998-12-18", cpf: "12376448441", dateTime: "2026-11-10T16:30" },
+      { dateTime: "2026-11-10T16:33", id: "OS-1794339203532", cpf: "56686595420", motherName: "Raimunda Cordeiro da Silva", phone: "84987005165", status: "Agendando", clientName: "Sebastião Cordeiro da Silva", birthDate: "1958-11-20" },
+      { dateTime: "2026-11-10T16:34", motherName: "Antonia Machado da Silva", cpf: "05745827467", clientName: "Creusa Antonia da Silva", id: "OS-1794339274975", status: "Agendando", phone: "84987005165", birthDate: "1962-04-10" },
+      { motherName: "Alice Martins dos Santos", cpf: "73715662468", birthDate: "1964-05-28", phone: "849", id: "OS-1794339412810", dateTime: "2026-11-10T16:36", clientName: "Amadeu Augusto dos Santos", status: "Agendando" },
+      { status: "Agendando", birthDate: "1996-06-10", cpf: "01696101441", id: "OS-1794339547384", phone: "84998190564", dateTime: "2026-11-10T16:39", clientName: "Marcia Maria Alves de Assis", motherName: "Sheila Alves da Silva" },
+      { motherName: "Angelita Gomes da Silva", birthDate: "1975-05-06", clientName: "Jose Ribamar Gomes da Silva", phone: "84991409856", cpf: "538.879.803-87", status: "Agendando", createdAt: 1794488938117, id: "OS-1794488938117" },
+      { status: "Agendando", createdAt: 1794489040453, birthDate: "1965-07-18", id: "OS-1794489040453", cpf: "090.116.294-93", phone: "84991409856", motherName: "Antonia Severina da Conceição", clientName: "Maria das Neves da Conceição" },
+      { status: "Agendando", clientName: "Domecina Araujo dos Santos Dantas", cpf: "057.702.804-92", createdAt: 1794489128280, phone: "84991409856", motherName: "Olivia de Araujo", birthDate: "1944-03-25", id: "OS-1794489128280" },
+      { status: "Agendando", cpf: "850.826.194-20", phone: "84991409856", birthDate: "1972-01-20", id: "OS-1794489208626", clientName: "Sebastiana Araujo Dantas", createdAt: 1794489208626, motherName: "Domecina Araujo dos Santos Dantas" },
+      { clientName: "Francisco de Assis Fernandes da Silva", cpf: "024.700.728-59", status: "Agendando", motherName: "Rita de Cássia Confessor da Silva", birthDate: "1958-04-24", createdAt: 1794489352393, phone: "84991409856", id: "OS-1794489352393" }
     ];
 
     const INITIAL_DISCOUNTS = {
-      color: [
-        { min: 1, max: 10, price: 2 },
-        { min: 11, max: 50, price: 1.5 },
-        { min: 51, max: 100, price: 1 },
-        { min: 101, max: 9999, price: 0.8 }
-      ],
       pb: [
         { min: 1, max: 10, price: 1 },
         { min: 11, max: 50, price: 0.8 },
         { min: 51, max: 100, price: 0.5 },
         { min: 101, max: 9999, price: 0.25 }
+      ],
+      color: [
+        { min: 1, max: 10, price: 2 },
+        { min: 11, max: 50, price: 1.5 },
+        { min: 51, max: 100, price: 1 },
+        { min: 101, max: 9999, price: 0.8 }
       ]
     };
 
@@ -750,16 +1156,21 @@
 
     class PrintTechApp {
       constructor() {
+        this.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
         this.items = [];
         this.sales = [];
         this.osList = [];
-        this.discounts = INITIAL_DISCOUNTS;
+        this.discounts = JSON.parse(JSON.stringify(INITIAL_DISCOUNTS));
+        this.expenses = [];
+        this.distributions = [];
+
         this.cart = [];
         this.activeTab = 'pos';
         this.posCategory = 'all';
         this.selectedPayment = 'PIX';
-        
-        // Cloud Realtime State
+        this.reportPeriod = 'today';
+        this.pendingDeleteCategoryId = null;
+
         this.cloudConnected = false;
         this.isSyncingFromCloud = false;
         this.db = null;
@@ -767,10 +1178,117 @@
         this.init();
       }
 
+      // Helper para Data Local (Evita mudança de dia após 21h no fuso -03:00)
+      getLocalDateStr(dateObj = new Date()) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      // Função Crítica de Normalização e Migração Segura de Dados
+      normalizeAndMigrateState(rawData) {
+        const data = rawData || {};
+
+        // 1. Categorias
+        let cats = Array.isArray(data.categories) && data.categories.length > 0
+          ? JSON.parse(JSON.stringify(data.categories))
+          : JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+
+        // Garante que as categorias essenciais existam se faltarem
+        DEFAULT_CATEGORIES.forEach(defCat => {
+          if (!cats.some(c => c.name.toLowerCase() === defCat.name.toLowerCase())) {
+            cats.push({ ...defCat });
+          }
+        });
+
+        // 2. Itens (com migração automática de Papelaria e campos de embalagem/custo/vínculo)
+        const rawItems = Array.isArray(data.items) && data.items.length > 0
+          ? JSON.parse(JSON.stringify(data.items))
+          : JSON.parse(JSON.stringify(INITIAL_STOCK_LIST));
+
+        const stationeryIds = ['gr-7', 'gr-8', 'item-1794408398042'];
+        const stationeryNames = ['cartolina branca', 'cartolina colorida', 'papel de presente', 'envelope', 'eva'];
+
+        const normalizedItems = rawItems.map(item => {
+          const updated = { ...item };
+          const lowerName = (updated.name || '').toLowerCase();
+
+          // Migra papelaria de venda direta que estava em Insumos Gráfica
+          if (
+            updated.category === 'Insumos Gráfica' &&
+            (stationeryIds.includes(updated.id) || stationeryNames.some(s => lowerName.includes(s)))
+          ) {
+            updated.category = 'Papelaria';
+          }
+
+          const catObj = cats.find(c => c.name === updated.category);
+          const catType = catObj ? catObj.type : (updated.category === 'Serviços' ? 'service' : updated.category === 'Insumos Gráfica' ? 'internal' : 'sale');
+
+          if (catType === 'internal') {
+            if (!updated.unitsPerPack || updated.unitsPerPack <= 0) {
+              if (updated.id === 'gr-1' || lowerName.includes('resma')) updated.unitsPerPack = 500;
+              else if (lowerName.includes('fotogr')) updated.unitsPerPack = 50;
+              else if (lowerName.includes('pouch')) updated.unitsPerPack = 100;
+              else updated.unitsPerPack = 100;
+            }
+            if (updated.packPrice === undefined || updated.packPrice === null) {
+              updated.packPrice = updated.id === 'gr-6' ? 120 : (updated.price || 0);
+            }
+            if (updated.minStock === undefined || updated.minStock === null) {
+              if (updated.id === 'gr-1') updated.minStock = 150;
+              else if (updated.id === 'gr-2') updated.minStock = 20;
+              else if (updated.id === 'gr-3') updated.minStock = 15;
+              else if (updated.id === 'gr-4' || updated.id === 'gr-5') updated.minStock = 20;
+              else updated.minStock = 10;
+            }
+          } else if (catType === 'service') {
+            if (updated.linkedSupplyId === undefined) {
+              if (updated.id === 'srv-2') updated.linkedSupplyId = 'gr-6';
+              else if (updated.id === 'item-1794264056913' || updated.id === 'item-1794339613347') updated.linkedSupplyId = 'gr-1';
+              else if (updated.id === 'item-1794491038569') updated.linkedSupplyId = 'gr-4';
+              else updated.linkedSupplyId = '';
+            }
+            if (updated.supplyQtyPerUnit === undefined) {
+              updated.supplyQtyPerUnit = updated.linkedSupplyId ? 1 : 0;
+            }
+          } else {
+            // Produtos de revenda (sale)
+            if (updated.minStock === undefined || updated.minStock === null) {
+              updated.minStock = (updated.id === 'gr-7' || updated.id === 'item-1794408398042') ? 10 : updated.id === 'gr-8' ? 5 : 1;
+            }
+            if (updated.costPrice === undefined || updated.costPrice === null) {
+              updated.costPrice = Number(((updated.price || 0) / 1.52).toFixed(2));
+            }
+          }
+
+          return updated;
+        });
+
+        // Garante que os 3 pouch films (gr-4, gr-5, gr-6) existam caso algum backup antigo os tenha omitido
+        ['gr-4', 'gr-5', 'gr-6'].forEach(pouchId => {
+          if (!normalizedItems.some(i => i.id === pouchId)) {
+            const seedPouch = INITIAL_STOCK_LIST.find(s => s.id === pouchId);
+            if (seedPouch) normalizedItems.push({ ...seedPouch });
+          }
+        });
+
+        return {
+          categories: cats,
+          items: normalizedItems,
+          sales: Array.isArray(data.sales) ? data.sales : JSON.parse(JSON.stringify(INITIAL_SALES)),
+          osList: Array.isArray(data.osList) ? data.osList : JSON.parse(JSON.stringify(INITIAL_OS_LIST)),
+          discounts: data.discounts && data.discounts.pb && data.discounts.color ? data.discounts : JSON.parse(JSON.stringify(INITIAL_DISCOUNTS)),
+          expenses: Array.isArray(data.expenses) ? data.expenses : [],
+          distributions: Array.isArray(data.distributions) ? data.distributions : []
+        };
+      }
+
       init() {
         this.loadLocalStorage();
         this.setDefaultDateFilter();
         this.switchTab('pos');
+        this.populateQuickPrintPapers();
         this.calcQuickPrint();
         this.renderAll();
 
@@ -779,46 +1297,64 @@
       }
 
       loadLocalStorage() {
-        const storedItems = localStorage.getItem('printtech_v4_items');
-        const storedSales = localStorage.getItem('printtech_v4_sales');
-        const storedOS = localStorage.getItem('printtech_v4_os');
-        const storedDiscounts = localStorage.getItem('printtech_v4_discounts');
-
-        if (storedItems) {
-          try { this.items = JSON.parse(storedItems); } catch(e) { this.items = [...INITIAL_STOCK_LIST]; }
-        } else {
-          this.items = [...INITIAL_STOCK_LIST];
+        const storedState = localStorage.getItem('printtech_v5_state');
+        if (storedState) {
+          try {
+            const parsed = JSON.parse(storedState);
+            const normalized = this.normalizeAndMigrateState(parsed);
+            Object.assign(this, normalized);
+            this.saveLocalStorage();
+            return;
+          } catch (e) {
+            console.warn('Erro ao ler estado v5, tentando migrar v4...', e);
+          }
         }
 
-        if (storedSales) {
-          try { this.sales = JSON.parse(storedSales); } catch(e) { this.sales = [...INITIAL_SALES]; }
-        } else {
-          this.sales = [...INITIAL_SALES];
-        }
+        // Tenta migrar da versão v4 se existir no navegador
+        const v4Items = localStorage.getItem('printtech_v4_items');
+        const v4Sales = localStorage.getItem('printtech_v4_sales');
+        const v4OS = localStorage.getItem('printtech_v4_os');
+        const v4Discounts = localStorage.getItem('printtech_v4_discounts');
 
-        if (storedOS) {
-          try { this.osList = JSON.parse(storedOS); } catch(e) { this.osList = [...INITIAL_OS_LIST]; }
+        if (v4Items || v4Sales || v4OS) {
+          const migrated = this.normalizeAndMigrateState({
+            items: v4Items ? JSON.parse(v4Items) : INITIAL_STOCK_LIST,
+            sales: v4Sales ? JSON.parse(v4Sales) : INITIAL_SALES,
+            osList: v4OS ? JSON.parse(v4OS) : INITIAL_OS_LIST,
+            discounts: v4Discounts ? JSON.parse(v4Discounts) : INITIAL_DISCOUNTS
+          });
+          Object.assign(this, migrated);
         } else {
-          this.osList = [...INITIAL_OS_LIST];
-        }
-
-        if (storedDiscounts) {
-          try { this.discounts = JSON.parse(storedDiscounts); } catch(e) { this.discounts = INITIAL_DISCOUNTS; }
+          const fresh = this.normalizeAndMigrateState({
+            categories: DEFAULT_CATEGORIES,
+            items: INITIAL_STOCK_LIST,
+            sales: INITIAL_SALES,
+            osList: INITIAL_OS_LIST,
+            discounts: INITIAL_DISCOUNTS,
+            expenses: [],
+            distributions: []
+          });
+          Object.assign(this, fresh);
         }
 
         this.saveLocalStorage();
       }
 
       saveLocalStorage() {
-        localStorage.setItem('printtech_v4_items', JSON.stringify(this.items));
-        localStorage.setItem('printtech_v4_sales', JSON.stringify(this.sales));
-        localStorage.setItem('printtech_v4_os', JSON.stringify(this.osList));
-        localStorage.setItem('printtech_v4_discounts', JSON.stringify(this.discounts));
+        const payload = {
+          categories: this.categories,
+          items: this.items,
+          sales: this.sales,
+          osList: this.osList,
+          discounts: this.discounts,
+          expenses: this.expenses,
+          distributions: this.distributions
+        };
+        localStorage.setItem('printtech_v5_state', JSON.stringify(payload));
       }
 
       checkMigrationPrompt() {
-        const hasData = this.sales.length > 0 || this.osList.length > 0;
-        if (hasData) {
+        if (this.sales.length > 0 || this.osList.length > 0) {
           document.getElementById('migration-banner')?.classList.remove('hidden');
         }
       }
@@ -831,34 +1367,31 @@
             }
             this.db = firebase.firestore();
 
-            // Real-time synchronization on document 'mainState'
             this.db.collection("print_tech_data").doc("mainState")
               .onSnapshot((doc) => {
                 if (doc.exists) {
                   const data = doc.data();
                   if (data) {
                     this.isSyncingFromCloud = true;
-                    if (data.items) this.items = data.items;
-                    if (data.sales) this.sales = data.sales;
-                    if (data.osList) this.osList = data.osList;
-                    if (data.discounts) this.discounts = data.discounts;
-
+                    const normalized = this.normalizeAndMigrateState(data);
+                    Object.assign(this, normalized);
                     this.saveLocalStorage();
+                    this.populateQuickPrintPapers();
                     this.renderAll();
                     this.isSyncingFromCloud = false;
                     this.setCloudStatus(true, 'Nuvem Conectada');
                   }
                 } else {
-                  this.pushLocalToCloud();
+                  this.pushLocalToCloud(false);
                 }
               }, (err) => {
-                console.warn("Firestore error:", err);
+                console.warn("Firestore snapshot warning:", err);
                 this.setCloudStatus(false, 'Modo Local (LocalStorage)');
               });
           } else {
             this.setCloudStatus(false, 'Modo Local (LocalStorage)');
           }
-        } catch(e) {
+        } catch (e) {
           console.warn("Firebase Init Exception:", e);
           this.setCloudStatus(false, 'Modo Local (LocalStorage)');
         }
@@ -878,24 +1411,29 @@
         }
       }
 
-      pushLocalToCloud() {
+      pushLocalToCloud(showFeedback = false) {
         this.saveLocalStorage();
         if (this.db) {
           this.db.collection("print_tech_data").doc("mainState").set({
+            categories: this.categories,
             items: this.items,
             sales: this.sales,
             osList: this.osList,
             discounts: this.discounts,
+            expenses: this.expenses,
+            distributions: this.distributions,
             updatedAt: Date.now()
           }).then(() => {
             this.setCloudStatus(true, 'Nuvem Conectada');
-            this.showToast('Dados sincronizados com a Nuvem!');
-            document.getElementById('migration-banner')?.classList.add('hidden');
+            if (showFeedback) {
+              this.showToast('Dados sincronizados com a Nuvem!');
+              document.getElementById('migration-banner')?.classList.add('hidden');
+            }
           }).catch(err => {
             console.warn("Push to cloud error:", err);
-            this.showToast('Nuvem offline. Salvo localmente.', 'warning');
+            if (showFeedback) this.showToast('Nuvem offline. Salvo localmente.', 'warning');
           });
-        } else {
+        } else if (showFeedback) {
           this.showToast('Modo Local ativo. Salvo no navegador.', 'warning');
         }
       }
@@ -903,7 +1441,7 @@
       saveAll() {
         this.saveLocalStorage();
         if (!this.isSyncingFromCloud && this.cloudConnected && this.db) {
-          this.pushLocalToCloud();
+          this.pushLocalToCloud(false);
         }
       }
 
@@ -912,10 +1450,13 @@
         const data = {
           appName: 'Print-Tech Balcão',
           exportDate: new Date().toISOString(),
+          categories: this.categories,
           items: this.items,
           sales: this.sales,
           osList: this.osList,
-          discounts: this.discounts
+          discounts: this.discounts,
+          expenses: this.expenses,
+          distributions: this.distributions
         };
 
         const str = JSON.stringify(data, null, 2);
@@ -923,7 +1464,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `backup_printtech_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `backup_printtech_${this.getLocalDateStr()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -940,24 +1481,24 @@
         reader.onload = (event) => {
           try {
             const imported = JSON.parse(event.target.result);
-            if (imported.items) this.items = imported.items;
-            if (imported.sales) this.sales = imported.sales;
-            if (imported.osList) this.osList = imported.osList;
-            if (imported.discounts) this.discounts = imported.discounts;
-
+            const normalized = this.normalizeAndMigrateState(imported);
+            Object.assign(this, normalized);
             this.saveAll();
+            this.populateQuickPrintPapers();
             this.renderAll();
-            this.showToast('Backup JSON importado!');
-          } catch(err) {
+            this.showToast('Backup JSON importado e migrado com sucesso!');
+          } catch (err) {
             this.showToast('Arquivo JSON inválido!', 'error');
           }
         };
         reader.readAsText(file);
+        e.target.value = '';
       }
 
       setDefaultDateFilter() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('report-date-filter').value = today;
+        const today = this.getLocalDateStr();
+        const dateFilter = document.getElementById('report-date-filter');
+        if (dateFilter) dateFilter.value = today;
       }
 
       switchTab(tabId) {
@@ -970,7 +1511,7 @@
 
         const activeContent = document.getElementById(`tab-${tabId}`);
         const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-        
+
         if (activeContent) activeContent.classList.remove('hidden');
         if (activeBtn) {
           activeBtn.classList.remove('text-slate-400');
@@ -982,6 +1523,7 @@
 
       renderAll() {
         this.updateHeaderMetrics();
+        this.renderPOSCategoryPills();
         this.renderPOSCatalog();
         this.renderCart();
         this.renderOSList();
@@ -1011,17 +1553,60 @@
         }, 3000);
       }
 
+      getCategoryType(catName) {
+        const found = this.categories.find(c => c.name === catName);
+        if (found) return found.type;
+        if (catName === 'Serviços') return 'service';
+        if (catName === 'Insumos Gráfica') return 'internal';
+        return 'sale';
+      }
+
       updateHeaderMetrics() {
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = this.getLocalDateStr();
         const todaySales = this.sales.filter(s => s.dateStr === todayStr);
         const total = todaySales.reduce((acc, s) => acc + s.total, 0);
 
         document.getElementById('header-today-total').innerText = this.formatCurrency(total);
-        document.getElementById('badge-total-items').innerText = this.items.length;
         document.getElementById('badge-os-count').innerText = this.osList.filter(o => o.status === 'Agendando').length;
+
+        const lowStockCount = this.items.filter(i => {
+          const type = this.getCategoryType(i.category);
+          if (type === 'service') return false;
+          return i.stock <= (i.minStock ?? 1);
+        }).length;
+
+        const lowBadge = document.getElementById('badge-low-stock');
+        if (lowBadge) {
+          if (lowStockCount > 0) {
+            lowBadge.innerText = lowStockCount;
+            lowBadge.classList.remove('hidden');
+          } else {
+            lowBadge.classList.add('hidden');
+          }
+        }
       }
 
-      // Volume Discount Engine
+      // ==================== TAB 1: PDV & VOLUME CALCULATOR ====================
+      populateQuickPrintPapers() {
+        const select = document.getElementById('quick-print-paper');
+        if (!select) return;
+
+        const currentVal = select.value || 'gr-1';
+        const internalSupplies = this.items.filter(i => this.getCategoryType(i.category) === 'internal');
+
+        select.innerHTML = internalSupplies.map(s => `
+          <option value="${s.id}" ${s.id === currentVal ? 'selected' : ''}>
+            ${s.name} (${s.stock} ${s.unit})
+          </option>
+        `).join('') + `<option value="">Não descontar insumo</option>`;
+
+        if (internalSupplies.some(s => s.id === currentVal)) {
+          select.value = currentVal;
+        } else if (internalSupplies.some(s => s.id === 'gr-1')) {
+          select.value = 'gr-1';
+        }
+      }
+
       getTierPrice(type, qty) {
         const tiers = this.discounts[type] || [];
         for (let t of tiers) {
@@ -1045,8 +1630,13 @@
       addQuickPrintToCart() {
         const type = document.getElementById('quick-print-type').value;
         const qty = parseInt(document.getElementById('quick-print-qty').value) || 1;
+        const paperSelect = document.getElementById('quick-print-paper');
+        const supplyId = paperSelect ? paperSelect.value : 'gr-1';
+        const supplyObj = this.items.find(i => i.id === supplyId);
+
         const unitPrice = this.getTierPrice(type, qty);
-        const label = type === 'pb' ? `Impressão P&B (${qty} págs)` : `Impressão Colorida (${qty} págs)`;
+        const paperShort = supplyObj && supplyObj.id !== 'gr-1' ? ` - ${supplyObj.name}` : '';
+        const label = (type === 'pb' ? `Impressão P&B (${qty} págs)` : `Impressão Colorida (${qty} págs)`) + paperShort;
 
         this.cart.push({
           itemId: 'quick-print-' + Date.now(),
@@ -1057,7 +1647,8 @@
           unit: 'pág',
           isPrintJob: true,
           printType: type,
-          pages: qty
+          pages: qty,
+          supplyId: supplyId
         });
 
         this.renderCart();
@@ -1071,8 +1662,8 @@
         const renderTiers = (type) => {
           return this.discounts[type].map((t, idx) => `
             <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400 w-16 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max}:</span>
-              <div class="flex-1 flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
+              <span class="text-xs text-slate-400 w-20 font-mono">${t.min} a ${t.max >= 9000 ? '100+' : t.max}:</span>
+              <div class="flex-1 flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5">
                 <span class="text-xs text-slate-400">R$</span>
                 <input type="number" step="0.05" value="${t.price}" onchange="app.updateDiscountPrice('${type}', ${idx}, this.value)" class="w-full bg-transparent text-xs font-bold text-emerald-400 focus:outline-none">
               </div>
@@ -1097,18 +1688,36 @@
         this.showToast('Tabela de descontos salva com sucesso!');
       }
 
-      // TAB 1: POS Catalog
+      renderPOSCategoryPills() {
+        const container = document.getElementById('pos-category-pills');
+        if (!container) return;
+
+        // Apenas categorias de venda ('sale') ou serviços ('service') aparecem no PDV
+        const visibleCategories = this.categories.filter(c => c.type === 'sale' || c.type === 'service');
+        if (this.posCategory !== 'all' && !visibleCategories.some(c => c.name === this.posCategory)) {
+          this.posCategory = 'all';
+        }
+
+        const allBtnClass = this.posCategory === 'all'
+          ? 'bg-indigo-600 text-white'
+          : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700';
+
+        let html = `<button onclick="app.setPOSCategory('all')" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold ${allBtnClass} transition-all whitespace-nowrap">Todos</button>`;
+
+        html += visibleCategories.map(cat => {
+          const isActive = this.posCategory === cat.name;
+          const btnClass = isActive
+            ? 'bg-indigo-600 text-white'
+            : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700';
+          return `<button onclick="app.setPOSCategory('${cat.name.replace(/'/g, "\\'")}')" class="pos-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold ${btnClass} transition-all whitespace-nowrap">${cat.name}</button>`;
+        }).join('');
+
+        container.innerHTML = html;
+      }
+
       setPOSCategory(cat) {
         this.posCategory = cat;
-        document.querySelectorAll('.pos-cat-btn').forEach(btn => {
-          btn.classList.remove('bg-indigo-600', 'text-white');
-          btn.classList.add('bg-slate-700/60', 'text-slate-300');
-        });
-        const activeBtn = document.getElementById(`cat-btn-${cat}`);
-        if (activeBtn) {
-          activeBtn.classList.remove('bg-slate-700/60', 'text-slate-300');
-          activeBtn.classList.add('bg-indigo-600', 'text-white');
-        }
+        this.renderPOSCategoryPills();
         this.renderPOSCatalog();
       }
 
@@ -1119,29 +1728,37 @@
         if (!grid) return;
 
         const query = (document.getElementById('pos-search')?.value || '').toLowerCase();
-        
+
         const filtered = this.items.filter(item => {
+          const catType = this.getCategoryType(item.category);
+          // Oculta insumos internos no PDV
+          if (catType === 'internal') return false;
+
           const matchesCat = this.posCategory === 'all' || item.category === this.posCategory;
           const matchesSearch = item.name.toLowerCase().includes(query);
           return matchesCat && matchesSearch;
         });
 
         grid.innerHTML = filtered.map(item => {
-          const isService = item.category === 'Serviços';
-          
+          const catType = this.getCategoryType(item.category);
+          const isService = catType === 'service';
+          const minStock = item.minStock ?? 1;
+          const isLow = !isService && item.stock <= minStock;
+
           return `
-            <div onclick="app.addToCart('${item.id}')" class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-indigo-500/60 p-3.5 rounded-2xl cursor-pointer transition-all duration-150 flex flex-col justify-between group shadow-sm">
+            <div onclick="app.addToCart('${item.id}')" class="bg-slate-800/80 hover:bg-slate-800 border ${!isService && item.stock <= 0 ? 'border-rose-500/40 opacity-60' : 'border-slate-700/80 hover:border-indigo-500/60'} p-3.5 rounded-2xl cursor-pointer transition-all duration-150 flex flex-col justify-between group shadow-sm">
               <div>
                 <div class="flex items-center justify-between gap-2">
                   <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold ${
-                    isService ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
-                    item.category === 'Eletrônicos' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 
+                    isService ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                    item.category === 'Eletrônicos' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                     item.category === 'Brinquedos' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
+                    item.category === 'Papelaria' ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20' :
                     'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                   }">
                     ${item.category}
                   </span>
-                  <span class="text-xs ${item.stock <= 2 && !isService ? 'text-amber-400 font-bold' : 'text-slate-400'} font-medium">
+                  <span class="text-xs ${isLow ? 'text-amber-400 font-bold' : 'text-slate-400'} font-medium">
                     ${isService ? 'Disponível' : `Estoque: ${item.stock} ${item.unit}`}
                   </span>
                 </div>
@@ -1156,21 +1773,22 @@
               </div>
             </div>
           `;
-        }).join('') || `<div class="col-span-full py-8 text-center text-slate-500 text-sm">Nenhum item encontrado.</div>`;
+        }).join('') || `<div class="col-span-full py-8 text-center text-slate-500 text-sm">Nenhum item encontrado para venda.</div>`;
       }
 
       addToCart(itemId) {
         const item = this.items.find(i => i.id === itemId);
         if (!item) return;
 
-        if (item.category !== 'Serviços' && item.stock <= 0) {
+        const catType = this.getCategoryType(item.category);
+        if (catType === 'sale' && item.stock <= 0) {
           this.showToast(`Estoque esgotado para: ${item.name}`, 'warning');
           return;
         }
 
         const existing = this.cart.find(c => c.itemId === itemId);
         if (existing) {
-          if (item.category !== 'Serviços' && existing.qty + 1 > item.stock) {
+          if (catType === 'sale' && existing.qty + 1 > item.stock) {
             this.showToast(`Limite de estoque atingido para ${item.name}`, 'warning');
             return;
           }
@@ -1192,12 +1810,13 @@
       updateCartQty(index, delta) {
         const cartItem = this.cart[index];
         const originalItem = this.items.find(i => i.id === cartItem.itemId);
+        const catType = originalItem ? this.getCategoryType(originalItem.category) : 'service';
 
         const newQty = cartItem.qty + delta;
         if (newQty <= 0) {
           this.cart.splice(index, 1);
         } else {
-          if (originalItem && originalItem.category !== 'Serviços' && newQty > originalItem.stock) {
+          if (originalItem && catType === 'sale' && newQty > originalItem.stock) {
             this.showToast(`Estoque máximo disponível: ${originalItem.stock}`, 'warning');
             return;
           }
@@ -1263,7 +1882,7 @@
           container.innerHTML = this.cart.map((item, idx) => `
             <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 flex flex-col gap-2">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-xs text-slate-200 truncate max-w-[170px]">${item.name}</span>
+                <span class="font-bold text-xs text-slate-200 truncate max-w-[190px]">${item.name}</span>
                 <button onclick="app.updateCartQty(${idx}, -999)" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-xmark"></i></button>
               </div>
 
@@ -1297,19 +1916,37 @@
       checkout() {
         if (this.cart.length === 0) return;
 
-        this.cart.forEach(cartItem => {
+        const finalizedItems = this.cart.map(cartItem => {
+          const snapshot = { ...cartItem };
           const directItem = this.items.find(i => i.id === cartItem.itemId);
-          if (directItem && directItem.category !== 'Serviços') {
-            directItem.stock = Math.max(0, directItem.stock - cartItem.qty);
-          }
 
-          if (cartItem.isPrintJob && cartItem.pages) {
-            const paperResma = this.items.find(i => i.id === 'gr-1');
-            if (paperResma) {
-              const resmaUsage = cartItem.pages / 500;
-              paperResma.stock = Math.max(0, Number((paperResma.stock - resmaUsage).toFixed(2)));
+          if (cartItem.isPrintJob) {
+            // Impressão rápida via calculadora
+            const targetSupplyId = cartItem.supplyId || 'gr-1';
+            const supply = this.items.find(i => i.id === targetSupplyId);
+            if (supply) {
+              const pagesUsed = cartItem.pages || cartItem.qty || 1;
+              supply.stock = Math.max(0, Number((supply.stock - pagesUsed).toFixed(2)));
+              snapshot.deductedSupplyId = supply.id;
+              snapshot.deductedQty = pagesUsed;
+            }
+          } else if (directItem) {
+            const catType = this.getCategoryType(directItem.category);
+            if (catType === 'sale') {
+              directItem.stock = Math.max(0, Number((directItem.stock - cartItem.qty).toFixed(2)));
+            } else if (catType === 'service' && directItem.linkedSupplyId) {
+              const supply = this.items.find(i => i.id === directItem.linkedSupplyId);
+              const perUnit = directItem.supplyQtyPerUnit || 1;
+              const totalSupplyUsed = cartItem.qty * perUnit;
+              if (supply && totalSupplyUsed > 0) {
+                supply.stock = Math.max(0, Number((supply.stock - totalSupplyUsed).toFixed(2)));
+                snapshot.deductedSupplyId = supply.id;
+                snapshot.deductedQty = totalSupplyUsed;
+              }
             }
           }
+
+          return snapshot;
         });
 
         const now = new Date();
@@ -1317,22 +1954,23 @@
           id: 'V-' + Math.floor(100000 + Math.random() * 900000),
           timestamp: now.getTime(),
           timeStr: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-          dateStr: now.toISOString().split('T')[0],
-          items: [...this.cart],
-          total: this.cart.reduce((acc, i) => acc + (i.price * i.qty), 0),
+          dateStr: this.getLocalDateStr(now),
+          items: finalizedItems,
+          total: finalizedItems.reduce((acc, i) => acc + (i.price * i.qty), 0),
           paymentMethod: this.selectedPayment
         };
 
         this.sales.unshift(saleRecord);
         this.saveAll();
 
-        this.showToast('Venda finalizada com sucesso!');
+        this.showToast('Venda finalizada e estoque/insumos atualizados!');
         this.cart = [];
         document.getElementById('cash-received-input').value = '';
+        this.populateQuickPrintPapers();
         this.renderAll();
       }
 
-      // TAB 2: Agendamentos Identidade (Fila de Espera por Ordem de Chegada)
+      // ==================== TAB 2: AGENDAMENTOS IDENTIDADE (FILA DE ESPERA) ====================
       getOSTimestamp(os) {
         if (os.createdAt) return os.createdAt;
         if (os.dateTime) {
@@ -1350,35 +1988,58 @@
         const container = document.getElementById('os-list-container');
         if (!container) return;
 
-        // Strictly sorted by oldest request timestamp first (Queue order / Ordem de solicitação)
-        const sorted = [...this.osList].sort((a, b) => this.getOSTimestamp(a) - this.getOSTimestamp(b));
+        const searchQuery = (document.getElementById('os-search')?.value || '').toLowerCase();
+        const statusFilter = document.getElementById('os-status-filter')?.value || 'Agendando';
 
-        if (sorted.length === 0) {
+        // Ordena toda a base por ordem de chegada antes de filtrar para manter a posição real na fila
+        const sortedAll = [...this.osList].sort((a, b) => this.getOSTimestamp(a) - this.getOSTimestamp(b));
+
+        let queueCounter = 0;
+        const enriched = sortedAll.map(os => {
+          if ((os.status || 'Agendando') === 'Agendando') {
+            queueCounter++;
+            return { ...os, queuePos: queueCounter };
+          }
+          return { ...os, queuePos: null };
+        });
+
+        const filtered = enriched.filter(os => {
+          const matchesStatus = statusFilter === 'all' || (os.status || 'Agendando') === statusFilter;
+          const matchesSearch = (os.clientName || '').toLowerCase().includes(searchQuery) ||
+                                (os.cpf || '').toLowerCase().includes(searchQuery);
+          return matchesStatus && matchesSearch;
+        });
+
+        if (filtered.length === 0) {
           container.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500 space-y-2">
               <i class="fa-solid fa-id-card text-4xl"></i>
-              <p class="text-sm">Nenhum registro na fila do RG no momento.</p>
+              <p class="text-sm">Nenhum registro encontrado nesta visualização.</p>
             </div>
           `;
         } else {
-          container.innerHTML = sorted.map((os, queueIndex) => {
+          container.innerHTML = filtered.map(os => {
             const ts = this.getOSTimestamp(os);
             const dt = ts ? new Date(ts) : new Date();
             const dateStr = dt.toLocaleDateString('pt-BR');
             const timeStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const birthStr = os.birthDate ? os.birthDate.split('-').reverse().join('/') : 'Não informada';
+            const isDone = os.status === 'Concluído';
 
-            const statusColor = os.status === 'Concluído' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                                'bg-amber-500/10 text-amber-400 border-amber-500/30';
+            const statusColor = isDone
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+              : 'bg-amber-500/10 text-amber-400 border-amber-500/30';
 
             return `
               <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg hover:border-amber-500/40 transition-all relative">
                 <div>
                   <div class="flex items-center justify-between gap-2 border-b border-slate-700/60 pb-2">
                     <div class="flex items-center gap-2">
-                      <span class="text-xs bg-slate-900 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-md font-extrabold font-mono">
-                        #${queueIndex + 1} na Fila
-                      </span>
+                      ${os.queuePos ? `
+                        <span class="text-xs bg-slate-900 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-md font-extrabold font-mono">
+                          #${os.queuePos} na Fila
+                        </span>
+                      ` : ''}
                       <span class="text-[11px] px-2 py-0.5 rounded-full font-bold border ${statusColor}">${os.status || 'Agendando'}</span>
                     </div>
                     <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1" title="Data/Hora de Entrada na Fila">
@@ -1399,19 +2060,34 @@
                   </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
+                <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between gap-1">
                   <button onclick="app.sendWhatsAppReminder('${os.id}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30" title="Avisar Conclusão via WhatsApp">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> Avisar no WhatsApp
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Avisar WhatsApp
                   </button>
 
                   <div class="flex items-center gap-1">
-                    <button onclick="app.openOSModal('${os.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="app.deleteOS('${os.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-trash-can"></i></button>
+                    ${!isDone ? `
+                      <button onclick="app.toggleOSStatus('${os.id}')" class="p-1.5 text-slate-400 hover:text-emerald-400 rounded-lg hover:bg-slate-700/50" title="Marcar como Concluído">
+                        <i class="fa-solid fa-circle-check"></i>
+                      </button>
+                    ` : ''}
+                    <button onclick="app.openOSModal('${os.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-700/50" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="app.deleteOS('${os.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
                   </div>
                 </div>
               </div>
             `;
           }).join('');
+        }
+      }
+
+      toggleOSStatus(osId) {
+        const os = this.osList.find(o => o.id === osId);
+        if (os) {
+          os.status = os.status === 'Concluído' ? 'Agendando' : 'Concluído';
+          this.saveAll();
+          this.renderAll();
+          this.showToast(`Status alterado para: ${os.status}`);
         }
       }
 
@@ -1485,8 +2161,6 @@
         if (!os) return;
 
         const cleanPhone = os.phone.replace(/\D/g, '');
-
-        // Standardized WhatsApp message template (clean text, no emojis, no document redundancy)
         const message = `Olá, ${os.clientName}!\n\n` +
           `Seu agendamento da Carteira de Identidade (CIN/RG) foi concluído com sucesso.\n\n` +
           `Você já pode passar aqui na Print-Tech para retirar o seu comprovante de agendamento.\n\n` +
@@ -1496,54 +2170,178 @@
         window.open(`https://wa.me/55${cleanPhone}?text=${encoded}`, '_blank');
       }
 
-      // TAB 3: Controle de Estoque
+      // ==================== TAB 3: CONTROLE DE ESTOQUE, INSUMOS & CATEGORIAS ====================
+      renderInventoryFinancialStats() {
+        let investedMerchandise = 0;
+        let investedSupplies = 0;
+        let potentialRevenue = 0;
+
+        this.items.forEach(item => {
+          const type = this.getCategoryType(item.category);
+          const stock = Math.max(0, Number(item.stock) || 0);
+
+          if (type === 'sale') {
+            const cost = item.costPrice !== undefined ? Number(item.costPrice) : (item.price / 1.52);
+            investedMerchandise += stock * cost;
+            potentialRevenue += stock * (Number(item.price) || 0);
+          } else if (type === 'internal') {
+            const perPack = item.unitsPerPack || 1;
+            const packCost = item.packPrice !== undefined ? Number(item.packPrice) : (Number(item.price) || 0);
+            investedSupplies += (stock / perPack) * packCost;
+          }
+        });
+
+        const projectedProfit = Math.max(0, potentialRevenue - investedMerchandise);
+
+        document.getElementById('inv-stat-invested').innerText = this.formatCurrency(investedMerchandise);
+        document.getElementById('inv-stat-supplies').innerText = this.formatCurrency(investedSupplies);
+        document.getElementById('inv-stat-potential').innerText = this.formatCurrency(potentialRevenue);
+        document.getElementById('inv-stat-profit').innerText = this.formatCurrency(projectedProfit);
+      }
+
+      renderInventoryCategoryFilter() {
+        const select = document.getElementById('inventory-cat-filter');
+        if (!select) return;
+        const current = select.value || 'all';
+
+        select.innerHTML = `<option value="all">Todas as Categorias</option>` +
+          this.categories.map(c => {
+            const suffix = c.type === 'internal' ? ' (Uso Interno)' : c.type === 'service' ? ' (Serviços)' : '';
+            return `<option value="${c.name}">${c.name}${suffix}</option>`;
+          }).join('');
+
+        if (current === 'all' || this.categories.some(c => c.name === current)) {
+          select.value = current;
+        }
+      }
+
       renderInventory() {
+        this.renderInventoryFinancialStats();
+        this.renderInventoryCategoryFilter();
+
         const tbody = document.getElementById('inventory-table-body');
         if (!tbody) return;
 
         const query = (document.getElementById('inventory-search')?.value || '').toLowerCase();
         const catFilter = document.getElementById('inventory-cat-filter')?.value || 'all';
+        const lowOnly = document.getElementById('inventory-low-only')?.checked || false;
 
         const filtered = this.items.filter(item => {
+          const type = this.getCategoryType(item.category);
+          const minStock = item.minStock ?? 1;
           const matchesSearch = item.name.toLowerCase().includes(query);
           const matchesCat = catFilter === 'all' || item.category === catFilter;
-          return matchesSearch && matchesCat;
+          const matchesLow = !lowOnly || (type !== 'service' && item.stock <= minStock);
+          return matchesSearch && matchesCat && matchesLow;
         });
 
         tbody.innerHTML = filtered.map(item => {
-          const isService = item.category === 'Serviços';
+          const type = this.getCategoryType(item.category);
+          const isService = type === 'service';
+          const isInternal = type === 'internal';
+          const minStock = item.minStock ?? 1;
 
+          // Status badge baseado no Estoque Mínimo Individual
           let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Normal</span>';
           if (!isService) {
-            if (item.stock <= 1) {
-              statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Crítico</span>';
-            } else if (item.stock <= 3) {
+            if (item.stock <= minStock) {
+              statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Crítico / Mín.</span>';
+            } else if (item.stock <= minStock * 1.4 && minStock > 1) {
               statusBadge = '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Atenção</span>';
             }
           }
 
+          // Sub-info para serviços vinculados ou uso interno
+          let subNameHtml = '';
+          if (isInternal) {
+            subNameHtml = `<span class="block text-[11px] text-amber-400/90 mt-0.5">Uso Interno &bull; Embalagem c/ ${item.unitsPerPack || 1} ${item.unit}</span>`;
+          } else if (isService && item.linkedSupplyId) {
+            const linked = this.items.find(s => s.id === item.linkedSupplyId);
+            if (linked) {
+              subNameHtml = `<span class="block text-[11px] text-indigo-300/90 mt-0.5"><i class="fa-solid fa-link mr-1"></i>Abate ${item.supplyQtyPerUnit || 1} ${linked.unit} de ${linked.name}</span>`;
+            }
+          }
+
+          // Coluna Saldo / Mínimo
+          let stockColHtml = '';
+          if (isService) {
+            stockColHtml = `<span class="text-slate-400 font-bold">∞</span>`;
+          } else if (isInternal) {
+            const perPack = item.unitsPerPack || 1;
+            const equivPacks = (item.stock / perPack).toFixed(1).replace('.', ',');
+            stockColHtml = `
+              <div class="font-extrabold ${item.stock <= minStock ? 'text-rose-400' : 'text-slate-100'}">
+                ${item.stock} <span class="text-xs font-normal text-slate-400">${item.unit}</span>
+              </div>
+              <span class="block text-[10px] text-slate-400">~${equivPacks} emb. &bull; Mín: ${minStock}</span>
+            `;
+          } else {
+            stockColHtml = `
+              <div class="font-extrabold ${item.stock <= minStock ? 'text-rose-400' : 'text-slate-100'}">
+                ${item.stock} <span class="text-xs font-normal text-slate-400">${item.unit}</span>
+              </div>
+              <span class="block text-[10px] text-slate-500">Mín: ${minStock}</span>
+            `;
+          }
+
+          // Coluna Preço / Custo
+          let priceColHtml = '';
+          if (isInternal) {
+            const perPack = item.unitsPerPack || 1;
+            const packPrice = item.packPrice ?? item.price ?? 0;
+            const unitCost = packPrice / perPack;
+            priceColHtml = `
+              <div class="font-semibold text-amber-400 text-xs">Emb: ${this.formatCurrency(packPrice)}</div>
+              <span class="block text-[10px] text-slate-400">Unit: ${this.formatCurrency(unitCost)}</span>
+            `;
+          } else if (isService) {
+            priceColHtml = `<div class="font-semibold text-emerald-400">${this.formatCurrency(item.price)}</div>`;
+          } else {
+            const cost = item.costPrice ?? (item.price / 1.52);
+            priceColHtml = `
+              <div class="font-semibold text-emerald-400">${this.formatCurrency(item.price)}</div>
+              <span class="block text-[10px] text-blue-300">Custo: ${this.formatCurrency(cost)}</span>
+            `;
+          }
+
+          // Ajuste Rápido
+          let adjustColHtml = '<span class="text-xs text-slate-500">Serviço</span>';
+          if (isInternal) {
+            const perPack = item.unitsPerPack || 1;
+            adjustColHtml = `
+              <div class="inline-flex flex-wrap items-center justify-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700">
+                <button onclick="app.quickAdjustStock('${item.id}', -1)" class="text-[11px] font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800" title="Descontar 1 unidade">-1</button>
+                <button onclick="app.quickAdjustStock('${item.id}', 1)" class="text-[11px] font-bold px-1.5 py-0.5 rounded text-slate-300 hover:text-white hover:bg-slate-800" title="Adicionar 1 unidade">+1</button>
+                <button onclick="app.quickAdjustStock('${item.id}', ${perPack})" class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600 hover:text-white transition-colors" title="Adicionar 1 embalagem fechada (+${perPack})">
+                  +1 Emb. (+${perPack})
+                </button>
+              </div>
+            `;
+          } else if (!isService) {
+            adjustColHtml = `
+              <div class="inline-flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700">
+                <button onclick="app.quickAdjustStock('${item.id}', -1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800">-1</button>
+                <button onclick="app.quickAdjustStock('${item.id}', 1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+1</button>
+                <button onclick="app.quickAdjustStock('${item.id}', 5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+5</button>
+              </div>
+            `;
+          }
+
           return `
             <tr class="hover:bg-slate-700/30 transition-colors">
-              <td class="py-3.5 px-4 font-bold text-slate-100">${item.name}</td>
-              <td class="py-3.5 px-4 text-xs text-slate-400">${item.category}</td>
+              <td class="py-3.5 px-4">
+                <span class="font-bold text-slate-100 block">${item.name}</span>
+                ${subNameHtml}
+              </td>
+              <td class="py-3.5 px-4 text-xs text-slate-300">${item.category}</td>
               <td class="py-3.5 px-4 text-center">${isService ? '-' : statusBadge}</td>
-              <td class="py-3.5 px-4 text-center font-extrabold ${!isService && item.stock <= 2 ? 'text-amber-400' : 'text-slate-100'}">
-                ${isService ? '∞' : `${item.stock} <span class="text-xs font-normal text-slate-400">${item.unit}</span>`}
-              </td>
-              <td class="py-3.5 px-4 font-semibold text-emerald-400">${this.formatCurrency(item.price)}</td>
-              <td class="py-3.5 px-4 text-center">
-                ${!isService ? `
-                  <div class="inline-flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700">
-                    <button onclick="app.quickAdjustStock('${item.id}', -1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-800">-1</button>
-                    <button onclick="app.quickAdjustStock('${item.id}', 1)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+1</button>
-                    <button onclick="app.quickAdjustStock('${item.id}', 5)" class="text-xs font-bold px-1.5 py-0.5 rounded text-emerald-400 hover:bg-slate-800">+5</button>
-                  </div>
-                ` : '<span class="text-xs text-slate-500">Serviço</span>'}
-              </td>
+              <td class="py-3.5 px-4 text-center">${stockColHtml}</td>
+              <td class="py-3.5 px-4">${priceColHtml}</td>
+              <td class="py-3.5 px-4 text-center">${adjustColHtml}</td>
               <td class="py-3.5 px-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <button onclick="app.openItemModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-pen-to-square"></i></button>
-                  <button onclick="app.deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50"><i class="fa-solid fa-trash-can"></i></button>
+                  <button onclick="app.openItemModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-700/50" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button onclick="app.deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-700/50" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
               </td>
             </tr>
@@ -1554,30 +2352,39 @@
       quickAdjustStock(itemId, delta) {
         const item = this.items.find(i => i.id === itemId);
         if (item) {
-          item.stock = Math.max(0, item.stock + delta);
+          item.stock = Math.max(0, Number((item.stock + delta).toFixed(2)));
           this.saveAll();
+          this.populateQuickPrintPapers();
           this.renderAll();
-          this.showToast(`Estoque de ${item.name}: ${item.stock}`);
+          this.showToast(`Estoque de ${item.name}: ${item.stock} ${item.unit}`);
         }
       }
 
       deleteItem(itemId) {
         this.items = this.items.filter(i => i.id !== itemId);
         this.saveAll();
+        this.populateQuickPrintPapers();
         this.renderAll();
-        this.showToast('Item excluído.');
+        this.showToast('Item excluído do estoque.');
       }
 
       sendSupplierWhatsAppList() {
-        const lowStock = this.items.filter(i => i.category !== 'Serviços' && i.stock <= 3);
+        const lowStock = this.items.filter(i => {
+          const type = this.getCategoryType(i.category);
+          if (type === 'service') return false;
+          return i.stock <= (i.minStock ?? 1);
+        });
+
         if (lowStock.length === 0) {
-          this.showToast('Nenhum item com estoque baixo no momento.', 'warning');
+          this.showToast('Nenhum item no limite mínimo de reposição no momento.', 'warning');
           return;
         }
 
-        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH BALCÃO*\n\nOlá! Gostaria de cotar a reposição dos seguintes itens:\n\n";
+        let msg = "*PEDIDO DE REPOSIÇÃO - PRINT-TECH BALCÃO*\n\nOlá! Gostaria de cotar a reposição dos seguintes itens que atingiram o estoque mínimo:\n\n";
         lowStock.forEach(i => {
-          msg += `▫️ *${i.name}* (Qtd atual: ${i.stock} ${i.unit})\n`;
+          const type = this.getCategoryType(i.category);
+          const extra = type === 'internal' ? ` | Emb. padrão: ${i.unitsPerPack || 1} ${i.unit}` : '';
+          msg += `- *${i.name}* (Atual: ${i.stock} ${i.unit} / Mín: ${i.minStock ?? 1}${extra})\n`;
         });
         msg += "\nPor favor, informe disponibilidade e valores!";
 
@@ -1585,29 +2392,89 @@
         window.open(`https://wa.me/?text=${encoded}`, '_blank');
       }
 
+      // Modal Item (Adaptativo: Venda vs Uso Interno vs Serviços)
       openItemModal(itemId = null) {
         const modal = document.getElementById('modal-item');
         const form = document.getElementById('item-form');
         form.reset();
 
+        // Popula categorias
+        const catSelect = document.getElementById('item-category');
+        catSelect.innerHTML = this.categories.map(c => {
+          const label = c.type === 'internal' ? `${c.name} (Uso Interno)` : c.type === 'service' ? `${c.name} (Serviço)` : `${c.name} (Venda)`;
+          return `<option value="${c.name}">${label}</option>`;
+        }).join('');
+
+        // Popula insumos disponíveis para vínculo de serviço
+        const supplySelect = document.getElementById('item-linked-supply');
+        const internalSupplies = this.items.filter(i => this.getCategoryType(i.category) === 'internal');
+        supplySelect.innerHTML = `<option value="">Nenhum (Não descontar insumo)</option>` +
+          internalSupplies.map(s => `<option value="${s.id}">${s.name} (${s.unit})</option>`).join('');
+
         if (itemId) {
           const item = this.items.find(i => i.id === itemId);
-          document.getElementById('modal-item-title').innerText = 'Editar Item';
+          document.getElementById('modal-item-title').innerText = 'Editar Item / Insumo';
           document.getElementById('item-id').value = item.id;
           document.getElementById('item-name').value = item.name;
-          document.getElementById('item-category').value = item.category;
+          catSelect.value = item.category;
           document.getElementById('item-unit').value = item.unit || 'un';
-          document.getElementById('item-stock').value = item.stock;
-          document.getElementById('item-price').value = item.price;
+
+          // Preenche campos de Venda
+          document.getElementById('item-stock-sale').value = item.stock ?? 0;
+          document.getElementById('item-min-sale').value = item.minStock ?? 1;
+          document.getElementById('item-price-sale').value = item.price ?? 0;
+          document.getElementById('item-cost-sale').value = item.costPrice ?? Number(((item.price || 0) / 1.52).toFixed(2));
+
+          // Preenche campos de Uso Interno
+          document.getElementById('item-units-per-pack').value = item.unitsPerPack || 100;
+          document.getElementById('item-stock-internal').value = item.stock ?? 0;
+          document.getElementById('item-min-internal').value = item.minStock ?? 20;
+          document.getElementById('item-pack-price').value = item.packPrice ?? item.price ?? 0;
+
+          // Preenche campos de Serviço
+          document.getElementById('item-price-service').value = item.price ?? 0;
+          supplySelect.value = item.linkedSupplyId || '';
+          document.getElementById('item-supply-qty').value = item.supplyQtyPerUnit ?? 1;
         } else {
-          document.getElementById('modal-item-title').innerText = 'Cadastrar Item';
+          document.getElementById('modal-item-title').innerText = 'Cadastrar Novo Item / Insumo';
           document.getElementById('item-id').value = '';
+          catSelect.value = this.categories[0]?.name || 'Eletrônicos';
           document.getElementById('item-unit').value = 'un';
-          document.getElementById('item-stock').value = 1;
-          document.getElementById('item-price').value = 10.00;
+          document.getElementById('item-stock-sale').value = 1;
+          document.getElementById('item-min-sale').value = 1;
+          document.getElementById('item-price-sale').value = 15.00;
+          document.getElementById('item-cost-sale').value = 9.87;
+
+          document.getElementById('item-units-per-pack').value = 100;
+          document.getElementById('item-stock-internal').value = 100;
+          document.getElementById('item-min-internal').value = 20;
+          document.getElementById('item-pack-price').value = 30.00;
+
+          document.getElementById('item-price-service').value = 5.00;
+          supplySelect.value = '';
+          document.getElementById('item-supply-qty').value = 1;
         }
 
+        this.onItemCategoryChange();
         modal.classList.remove('hidden');
+      }
+
+      onItemCategoryChange() {
+        const catName = document.getElementById('item-category').value;
+        const type = this.getCategoryType(catName);
+
+        document.getElementById('item-fields-sale').classList.toggle('hidden', type !== 'sale');
+        document.getElementById('item-fields-internal').classList.toggle('hidden', type !== 'internal');
+        document.getElementById('item-fields-service').classList.toggle('hidden', type !== 'service');
+      }
+
+      autoCalcItemCost(force = false) {
+        const salePrice = parseFloat(document.getElementById('item-price-sale').value) || 0;
+        const costInput = document.getElementById('item-cost-sale');
+        const isNew = !document.getElementById('item-id').value;
+        if (isNew || force) {
+          costInput.value = (salePrice / 1.52).toFixed(2);
+        }
       }
 
       closeItemModal() { document.getElementById('modal-item').classList.add('hidden'); }
@@ -1615,54 +2482,396 @@
       saveItem(e) {
         e.preventDefault();
         const id = document.getElementById('item-id').value;
-        const name = document.getElementById('item-name').value;
+        const name = document.getElementById('item-name').value.trim();
         const category = document.getElementById('item-category').value;
-        const unit = document.getElementById('item-unit').value || 'un';
-        const stock = parseFloat(document.getElementById('item-stock').value) || 0;
-        const price = parseFloat(document.getElementById('item-price').value) || 0;
+        const unit = document.getElementById('item-unit').value.trim() || 'un';
+        const type = this.getCategoryType(category);
+
+        let payload = { name, category, unit };
+
+        if (type === 'internal') {
+          const unitsPerPack = parseInt(document.getElementById('item-units-per-pack').value) || 1;
+          const stock = parseFloat(document.getElementById('item-stock-internal').value) || 0;
+          const minStock = parseFloat(document.getElementById('item-min-internal').value) || 0;
+          const packPrice = parseFloat(document.getElementById('item-pack-price').value) || 0;
+          payload = {
+            ...payload,
+            unitsPerPack,
+            stock,
+            minStock,
+            packPrice,
+            price: packPrice
+          };
+        } else if (type === 'service') {
+          const price = parseFloat(document.getElementById('item-price-service').value) || 0;
+          const linkedSupplyId = document.getElementById('item-linked-supply').value || '';
+          const supplyQtyPerUnit = linkedSupplyId ? (parseFloat(document.getElementById('item-supply-qty').value) || 1) : 0;
+          payload = {
+            ...payload,
+            price,
+            stock: 9999,
+            linkedSupplyId,
+            supplyQtyPerUnit
+          };
+        } else {
+          const stock = parseFloat(document.getElementById('item-stock-sale').value) || 0;
+          const minStock = parseFloat(document.getElementById('item-min-sale').value) || 0;
+          const price = parseFloat(document.getElementById('item-price-sale').value) || 0;
+          const costRaw = parseFloat(document.getElementById('item-cost-sale').value);
+          const costPrice = !isNaN(costRaw) ? costRaw : Number((price / 1.52).toFixed(2));
+          payload = {
+            ...payload,
+            stock,
+            minStock,
+            price,
+            costPrice
+          };
+        }
 
         if (id) {
           const item = this.items.find(i => i.id === id);
-          if (item) Object.assign(item, { name, category, unit, stock, price });
+          if (item) Object.assign(item, payload);
         } else {
-          this.items.push({ id: 'item-' + Date.now(), name, category, unit, stock, price });
+          this.items.push({ id: 'item-' + Date.now(), ...payload });
         }
 
         this.saveAll();
         this.closeItemModal();
+        this.populateQuickPrintPapers();
         this.renderAll();
         this.showToast('Item salvo com sucesso!');
       }
 
-      // TAB 5: Fechamento de Caixa
+      // Gerenciador de Categorias Dinâmicas (Sazonais)
+      openCategoryModal() {
+        this.pendingDeleteCategoryId = null;
+        document.getElementById('category-delete-migrate-box').classList.add('hidden');
+        this.renderCategoriesManager();
+        document.getElementById('modal-categories').classList.remove('hidden');
+      }
+
+      closeCategoryModal() {
+        document.getElementById('modal-categories').classList.add('hidden');
+      }
+
+      renderCategoriesManager() {
+        const list = document.getElementById('categories-manager-list');
+        if (!list) return;
+
+        list.innerHTML = this.categories.map(cat => {
+          const itemCount = this.items.filter(i => i.category === cat.name).length;
+          const isProtected = cat.id === 'cat-servicos';
+          const badge = cat.type === 'internal'
+            ? '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">Uso Interno</span>'
+            : cat.type === 'service'
+            ? '<span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">Serviços</span>'
+            : '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Venda Balcão</span>';
+
+          return `
+            <div class="bg-slate-900/90 border border-slate-700/80 p-3 rounded-xl flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="font-bold text-xs text-slate-100 truncate">${cat.name}</span>
+                ${badge}
+                <span class="text-[11px] text-slate-500">(${itemCount} itens)</span>
+              </div>
+
+              ${!isProtected ? `
+                <div class="flex items-center gap-1 shrink-0">
+                  <button onclick="app.requestDeleteCategory('${cat.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800" title="Excluir Categoria">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                  </button>
+                </div>
+              ` : '<span class="text-[10px] text-slate-500">Padrão</span>'}
+            </div>
+          `;
+        }).join('');
+      }
+
+      createCategory(e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('new-cat-name');
+        const typeSelect = document.getElementById('new-cat-type');
+        const name = nameInput.value.trim();
+        const type = typeSelect.value;
+
+        if (!name) return;
+        if (this.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+          this.showToast('Já existe uma categoria com esse nome.', 'warning');
+          return;
+        }
+
+        this.categories.push({
+          id: 'cat-' + Date.now(),
+          name,
+          type
+        });
+
+        nameInput.value = '';
+        this.saveAll();
+        this.renderCategoriesManager();
+        this.renderAll();
+        this.showToast(`Categoria "${name}" criada!`);
+      }
+
+      requestDeleteCategory(catId) {
+        const cat = this.categories.find(c => c.id === catId);
+        if (!cat) return;
+
+        const itemsInCat = this.items.filter(i => i.category === cat.name);
+        if (itemsInCat.length === 0) {
+          this.categories = this.categories.filter(c => c.id !== catId);
+          this.saveAll();
+          this.renderCategoriesManager();
+          this.renderAll();
+          this.showToast(`Categoria "${cat.name}" excluída.`);
+        } else {
+          this.pendingDeleteCategoryId = catId;
+          const migrateBox = document.getElementById('category-delete-migrate-box');
+          const msg = document.getElementById('category-delete-msg');
+          const targetSelect = document.getElementById('category-migrate-target');
+
+          msg.innerText = `A categoria "${cat.name}" possui ${itemsInCat.length} item(ns). Escolha para qual categoria deseja movê-los antes de excluir:`;
+          targetSelect.innerHTML = this.categories
+            .filter(c => c.id !== catId)
+            .map(c => `<option value="${c.name}">${c.name}</option>`)
+            .join('');
+
+          migrateBox.classList.remove('hidden');
+        }
+      }
+
+      confirmDeleteCategoryWithMigration() {
+        if (!this.pendingDeleteCategoryId) return;
+        const cat = this.categories.find(c => c.id === this.pendingDeleteCategoryId);
+        const targetName = document.getElementById('category-migrate-target').value;
+
+        if (cat && targetName) {
+          this.items.forEach(item => {
+            if (item.category === cat.name) {
+              item.category = targetName;
+            }
+          });
+          this.categories = this.categories.filter(c => c.id !== this.pendingDeleteCategoryId);
+          this.pendingDeleteCategoryId = null;
+          document.getElementById('category-delete-migrate-box').classList.add('hidden');
+
+          this.saveAll();
+          this.renderCategoriesManager();
+          this.renderAll();
+          this.showToast(`Itens movidos para "${targetName}" e categoria excluída.`);
+        }
+      }
+
+      cancelDeleteCategory() {
+        this.pendingDeleteCategoryId = null;
+        document.getElementById('category-delete-migrate-box').classList.add('hidden');
+      }
+
+      // ==================== TAB 5: FECHAMENTO DE CAIXA & CAIXINHAS INTELIGENTES ====================
+      setReportPeriod(period) {
+        this.reportPeriod = period;
+        document.querySelectorAll('.period-btn').forEach(btn => {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-slate-900', 'text-slate-300', 'border', 'border-slate-700');
+        });
+
+        const activeBtn = document.getElementById(`period-btn-${period}`);
+        if (activeBtn) {
+          activeBtn.classList.remove('bg-slate-900', 'text-slate-300', 'border', 'border-slate-700');
+          activeBtn.classList.add('bg-indigo-600', 'text-white');
+        }
+
+        this.renderReports();
+      }
+
+      getPeriodBounds() {
+        const now = new Date();
+        const todayStr = this.getLocalDateStr(now);
+
+        if (this.reportPeriod === 'today') {
+          return {
+            key: `today:${todayStr}`,
+            label: `Hoje (${todayStr.split('-').reverse().join('/')})`,
+            startStr: todayStr,
+            endStr: todayStr
+          };
+        }
+
+        if (this.reportPeriod === 'week') {
+          // Segunda a Domingo da semana atual
+          const dayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg...
+          const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+          const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+          const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+
+          const startStr = this.getLocalDateStr(monday);
+          const endStr = this.getLocalDateStr(sunday);
+
+          return {
+            key: `week:${startStr}_${endStr}`,
+            label: `Esta Semana (${startStr.split('-').reverse().join('/')} a ${endStr.split('-').reverse().join('/')})`,
+            startStr,
+            endStr
+          };
+        }
+
+        if (this.reportPeriod === 'month') {
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+          const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          const startStr = this.getLocalDateStr(firstDay);
+          const endStr = this.getLocalDateStr(lastDay);
+          const monthName = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+          return {
+            key: `month:${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+            label: `Este Mês (${monthName})`,
+            startStr,
+            endStr
+          };
+        }
+
+        // Data específica
+        const picked = document.getElementById('report-date-filter')?.value || todayStr;
+        return {
+          key: `date:${picked}`,
+          label: `Data Específica (${picked.split('-').reverse().join('/')})`,
+          startStr: picked,
+          endStr: picked
+        };
+      }
+
       renderReports() {
-        const selectedDate = document.getElementById('report-date-filter').value;
-        const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
+        const bounds = this.getPeriodBounds();
+        document.getElementById('report-period-label').innerHTML = `<i class="fa-regular fa-calendar-check"></i> ${bounds.label}`;
 
-        const totalRevenue = salesForDate.reduce((acc, s) => acc + s.total, 0);
-        const pixTotal = salesForDate.filter(s => s.paymentMethod === 'PIX').reduce((acc, s) => acc + s.total, 0);
-        const cardTotal = salesForDate.filter(s => s.paymentMethod === 'Cartão').reduce((acc, s) => acc + s.total, 0);
-        const cashTotal = salesForDate.filter(s => s.paymentMethod === 'Dinheiro').reduce((acc, s) => acc + s.total, 0);
+        const filteredSales = this.sales.filter(s => s.dateStr >= bounds.startStr && s.dateStr <= bounds.endStr);
+        const filteredExpenses = this.expenses.filter(e => e.dateStr >= bounds.startStr && e.dateStr <= bounds.endStr);
 
+        const totalRevenue = filteredSales.reduce((acc, s) => acc + (s.total || 0), 0);
+        const totalExpenses = filteredExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+        const netTotal = totalRevenue - totalExpenses;
+        const ticketAvg = filteredSales.length > 0 ? totalRevenue / filteredSales.length : 0;
+
+        const pixTotal = filteredSales.filter(s => s.paymentMethod === 'PIX').reduce((acc, s) => acc + s.total, 0);
+        const cardTotal = filteredSales.filter(s => s.paymentMethod === 'Cartão').reduce((acc, s) => acc + s.total, 0);
+        const cashTotal = filteredSales.filter(s => s.paymentMethod === 'Dinheiro').reduce((acc, s) => acc + s.total, 0);
+
+        // Separa origem da receita: Revenda de Produtos vs Serviços Gráficos
+        let productRevenue = 0;
+        let serviceRevenue = 0;
+
+        filteredSales.forEach(sale => {
+          (sale.items || []).forEach(it => {
+            const lineTotal = (Number(it.price) || 0) * (Number(it.qty) || 1);
+            const catType = it.isPrintJob ? 'service' : this.getCategoryType(it.category);
+            if (catType === 'service') {
+              serviceRevenue += lineTotal;
+            } else {
+              productRevenue += lineTotal;
+            }
+          });
+        });
+
+        // Atualiza Cards Financeiros
         document.getElementById('report-total-revenue').innerText = this.formatCurrency(totalRevenue);
-        document.getElementById('report-pix-total').innerText = this.formatCurrency(pixTotal);
-        document.getElementById('report-card-total').innerText = this.formatCurrency(cardTotal);
-        document.getElementById('report-cash-total').innerText = this.formatCurrency(cashTotal);
-        document.getElementById('report-sales-count').innerText = `${salesForDate.length} vendas registradas`;
+        document.getElementById('report-sales-count').innerText = `${filteredSales.length} venda(s) no período`;
+        document.getElementById('report-ticket-avg').innerText = `Ticket Médio: ${this.formatCurrency(ticketAvg)}`;
 
+        document.getElementById('report-expenses-total').innerText = this.formatCurrency(totalExpenses);
+        document.getElementById('report-expenses-count').innerText = `${filteredExpenses.length} saída(s) registrada(s)`;
+
+        document.getElementById('report-net-total').innerText = this.formatCurrency(netTotal);
+        document.getElementById('report-source-products').innerText = this.formatCurrency(productRevenue);
+        document.getElementById('report-source-services').innerText = this.formatCurrency(serviceRevenue);
+
+        document.getElementById('report-pix-total').innerText = this.formatCurrency(pixTotal);
+        document.getElementById('report-cash-total').innerText = this.formatCurrency(cashTotal);
+        document.getElementById('report-card-total').innerText = this.formatCurrency(cardTotal);
+
+        // Cálculo Inteligente das 3 Caixinhas
+        // 1. Reinvestimento / Compra de Estoque: 65,8% (revenda / 1.52) dos produtos + 20% dos serviços
+        const reinvestVal = (productRevenue / 1.52) + (serviceRevenue * 0.20);
+        // 2. Reserva de Emergência: 10% do lucro bruto dos produtos + 15% dos serviços
+        const productGrossProfit = Math.max(0, productRevenue - (productRevenue / 1.52));
+        const reserveVal = (productGrossProfit * 0.10) + (serviceRevenue * 0.15);
+        // 3. Lucro / Pró-Labore: restante líquido (descontando eventuais despesas/saídas do período)
+        const profitVal = Math.max(0, totalRevenue - reinvestVal - reserveVal - totalExpenses);
+
+        document.getElementById('caixinha-reinvest-val').innerText = this.formatCurrency(reinvestVal);
+        document.getElementById('caixinha-reserve-val').innerText = this.formatCurrency(reserveVal);
+        document.getElementById('caixinha-profit-val').innerText = this.formatCurrency(profitVal);
+
+        // Verifica se este período já foi marcado como distribuído
+        const distBadge = document.getElementById('caixinha-distributed-badge');
+        const alreadyDist = this.distributions.find(d => d.periodKey === bounds.key);
+        if (distBadge) {
+          if (alreadyDist) {
+            distBadge.classList.remove('hidden');
+            distBadge.innerHTML = `<i class="fa-solid fa-check-double mr-1"></i> Distribuído (${this.formatCurrency(alreadyDist.totalDistributed)})`;
+          } else {
+            distBadge.classList.add('hidden');
+          }
+        }
+
+        // Histórico recente de repasses das caixinhas
+        const distBox = document.getElementById('distributions-history-box');
+        const distList = document.getElementById('distributions-history-list');
+        if (this.distributions.length > 0 && distBox && distList) {
+          distBox.classList.remove('hidden');
+          distList.innerHTML = this.distributions.slice(0, 5).map(d => `
+            <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/60 px-3 py-2 rounded-xl border border-slate-800">
+              <div>
+                <span class="font-bold text-slate-200">${d.periodLabel}</span>
+                <span class="text-slate-500 ml-2">em ${d.dateTimeStr}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-blue-400 font-semibold">Est: ${this.formatCurrency(d.reinvest)}</span>
+                <span class="text-amber-400 font-semibold">Res: ${this.formatCurrency(d.reserve)}</span>
+                <span class="text-emerald-400 font-semibold">Luc: ${this.formatCurrency(d.profit)}</span>
+                <button onclick="app.deleteDistribution('${d.id}')" class="text-slate-500 hover:text-rose-400" title="Remover registro"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            </div>
+          `).join('');
+        } else if (distBox) {
+          distBox.classList.add('hidden');
+        }
+
+        // Renderiza Tabela de Saídas / Despesas do Período
+        const expCard = document.getElementById('expenses-section-card');
+        const expBody = document.getElementById('expenses-history-body');
+        if (filteredExpenses.length > 0 && expCard && expBody) {
+          expCard.classList.remove('hidden');
+          expBody.innerHTML = filteredExpenses.map(exp => `
+            <tr class="hover:bg-slate-700/30">
+              <td class="py-2.5 px-4 font-mono text-slate-400">${exp.dateStr.split('-').reverse().join('/')} ${exp.timeStr || ''}</td>
+              <td class="py-2.5 px-4 font-medium text-slate-200">${exp.description}</td>
+              <td class="py-2.5 px-4 text-slate-300">${exp.method}</td>
+              <td class="py-2.5 px-4 text-right font-bold text-rose-400">- ${this.formatCurrency(exp.amount)}</td>
+              <td class="py-2.5 px-4 text-center">
+                <button onclick="app.deleteExpense('${exp.id}')" class="text-slate-400 hover:text-rose-400 font-semibold">Excluir</button>
+              </td>
+            </tr>
+          `).join('');
+        } else if (expCard) {
+          expCard.classList.add('hidden');
+        }
+
+        // Renderiza Tabela de Vendas do Período
         const tbody = document.getElementById('sales-history-body');
         if (!tbody) return;
 
-        tbody.innerHTML = salesForDate.map(sale => {
+        tbody.innerHTML = filteredSales.map(sale => {
           const itemsSummary = sale.items.map(i => `${i.qty}x ${i.name}`).join(', ');
           const payBadge = sale.paymentMethod === 'PIX' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                            sale.paymentMethod === 'Cartão' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
                            'bg-amber-500/10 text-amber-400 border-amber-500/20';
 
+          const dateShort = sale.dateStr ? sale.dateStr.split('-').slice(1).reverse().join('/') : '';
+
           return `
             <tr class="hover:bg-slate-700/30 transition-colors">
-              <td class="py-3 px-4 font-mono text-xs text-slate-400">${sale.timeStr}</td>
-              <td class="py-3 px-4 font-medium text-slate-200 max-w-xs truncate">${itemsSummary}</td>
+              <td class="py-3 px-4 font-mono text-xs text-slate-400 whitespace-nowrap">${dateShort} ${sale.timeStr}</td>
+              <td class="py-3 px-4 font-medium text-slate-200 max-w-xs truncate" title="${itemsSummary}">${itemsSummary}</td>
               <td class="py-3 px-4">
                 <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${payBadge}">${sale.paymentMethod}</span>
               </td>
@@ -1674,7 +2883,95 @@
               </td>
             </tr>
           `;
-        }).join('') || `<tr><td colspan="5" class="text-center py-8 text-slate-500">Nenhum lançamento nesta data.</td></tr>`;
+        }).join('') || `<tr><td colspan="5" class="text-center py-8 text-slate-500">Nenhum lançamento encontrado neste período.</td></tr>`;
+      }
+
+      markPeriodDistributed() {
+        const bounds = this.getPeriodBounds();
+        const reinvestText = document.getElementById('caixinha-reinvest-val').innerText;
+        const reserveText = document.getElementById('caixinha-reserve-val').innerText;
+        const profitText = document.getElementById('caixinha-profit-val').innerText;
+
+        const parseBRL = (str) => Number(str.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+        const reinvest = parseBRL(reinvestText);
+        const reserve = parseBRL(reserveText);
+        const profit = parseBRL(profitText);
+        const totalDistributed = reinvest + reserve + profit;
+
+        if (totalDistributed <= 0) {
+          this.showToast('Não há saldo positivo neste período para distribuir.', 'warning');
+          return;
+        }
+
+        const now = new Date();
+        const dateTimeStr = `${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+        this.distributions.unshift({
+          id: 'DIST-' + Date.now(),
+          periodKey: bounds.key,
+          periodLabel: bounds.label,
+          dateTimeStr,
+          reinvest,
+          reserve,
+          profit,
+          totalDistributed
+        });
+
+        this.saveAll();
+        this.renderReports();
+        this.showToast('Separação nas Caixinhas registrada com sucesso!');
+      }
+
+      deleteDistribution(distId) {
+        this.distributions = this.distributions.filter(d => d.id !== distId);
+        this.saveAll();
+        this.renderReports();
+        this.showToast('Registro de repasse removido.');
+      }
+
+      // Saídas / Sangrias / Despesas
+      openExpenseModal() {
+        document.getElementById('expense-desc').value = '';
+        document.getElementById('expense-amount').value = '';
+        document.getElementById('expense-method').value = 'Dinheiro';
+        document.getElementById('expense-date').value = this.getLocalDateStr();
+        document.getElementById('modal-expense').classList.remove('hidden');
+      }
+
+      closeExpenseModal() {
+        document.getElementById('modal-expense').classList.add('hidden');
+      }
+
+      saveExpense(e) {
+        e.preventDefault();
+        const description = document.getElementById('expense-desc').value.trim();
+        const amount = parseFloat(document.getElementById('expense-amount').value) || 0;
+        const method = document.getElementById('expense-method').value;
+        const dateStr = document.getElementById('expense-date').value || this.getLocalDateStr();
+        const now = new Date();
+
+        if (!description || amount <= 0) return;
+
+        this.expenses.unshift({
+          id: 'EXP-' + Date.now(),
+          description,
+          amount,
+          method,
+          dateStr,
+          timeStr: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        });
+
+        this.saveAll();
+        this.closeExpenseModal();
+        this.renderReports();
+        this.showToast('Saída / despesa registrada no caixa!');
+      }
+
+      deleteExpense(expId) {
+        this.expenses = this.expenses.filter(e => e.id !== expId);
+        this.saveAll();
+        this.renderReports();
+        this.showToast('Saída removida.');
       }
 
       cancelSale(saleId) {
@@ -1683,37 +2980,47 @@
 
         const sale = this.sales[saleIndex];
         sale.items.forEach(cartItem => {
+          // Restaura insumo se foi descontado na venda
+          if (cartItem.deductedSupplyId && cartItem.deductedQty) {
+            const supply = this.items.find(i => i.id === cartItem.deductedSupplyId);
+            if (supply) {
+              supply.stock = Number((supply.stock + cartItem.deductedQty).toFixed(2));
+            }
+          }
+
+          // Restaura estoque de produto de revenda
           const directItem = this.items.find(i => i.id === cartItem.itemId);
-          if (directItem && directItem.category !== 'Serviços') {
-            directItem.stock += cartItem.qty;
+          if (directItem && this.getCategoryType(directItem.category) === 'sale') {
+            directItem.stock = Number((directItem.stock + cartItem.qty).toFixed(2));
           }
         });
 
         this.sales.splice(saleIndex, 1);
         this.saveAll();
+        this.populateQuickPrintPapers();
         this.renderAll();
-        this.showToast('Venda estornada e estoque devolvido!');
+        this.showToast('Venda estornada e estoque/insumos devolvidos!');
       }
 
       exportCSV() {
-        const selectedDate = document.getElementById('report-date-filter').value;
-        const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
+        const bounds = this.getPeriodBounds();
+        const filteredSales = this.sales.filter(s => s.dateStr >= bounds.startStr && s.dateStr <= bounds.endStr);
 
-        if (salesForDate.length === 0) {
-          this.showToast('Nenhuma venda registrada na data para exportar.', 'warning');
+        if (filteredSales.length === 0) {
+          this.showToast('Nenhuma venda registrada no período para exportar.', 'warning');
           return;
         }
 
-        let csvContent = "data:text/csv;charset=utf-8,ID;Hora;Forma Pagamento;Itens;Total (R$)\n";
-        salesForDate.forEach(s => {
+        let csvContent = "data:text/csv;charset=utf-8,ID;Data;Hora;Forma Pagamento;Itens;Total (R$)\n";
+        filteredSales.forEach(s => {
           const itemsStr = s.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
-          csvContent += `${s.id};${s.timeStr};${s.paymentMethod};"${itemsStr}";${s.total.toFixed(2)}\n`;
+          csvContent += `${s.id};${s.dateStr};${s.timeStr};${s.paymentMethod};"${itemsStr}";${s.total.toFixed(2)}\n`;
         });
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `relatorio_caixa_${selectedDate}.csv`);
+        link.setAttribute("download", `relatorio_caixa_${bounds.startStr}_a_${bounds.endStr}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1721,13 +3028,17 @@
       }
 
       openCloseCashModal() {
-        const selectedDate = document.getElementById('report-date-filter').value;
-        const salesForDate = this.sales.filter(s => s.dateStr === selectedDate);
-        const total = salesForDate.reduce((acc, s) => acc + s.total, 0);
+        const bounds = this.getPeriodBounds();
+        const filteredSales = this.sales.filter(s => s.dateStr >= bounds.startStr && s.dateStr <= bounds.endStr);
+        const filteredExpenses = this.expenses.filter(e => e.dateStr >= bounds.startStr && e.dateStr <= bounds.endStr);
 
-        document.getElementById('close-modal-date').innerText = selectedDate.split('-').reverse().join('/');
-        document.getElementById('close-modal-count').innerText = `${salesForDate.length} vendas`;
-        document.getElementById('close-modal-total').innerText = this.formatCurrency(total);
+        const total = filteredSales.reduce((acc, s) => acc + s.total, 0);
+        const expTotal = filteredExpenses.reduce((acc, e) => acc + e.amount, 0);
+
+        document.getElementById('close-modal-date').innerText = bounds.label;
+        document.getElementById('close-modal-count').innerText = `${filteredSales.length} vendas (${this.formatCurrency(total)})`;
+        document.getElementById('close-modal-expenses').innerText = `- ${this.formatCurrency(expTotal)}`;
+        document.getElementById('close-modal-total').innerText = this.formatCurrency(total - expTotal);
 
         document.getElementById('modal-close-cash').classList.remove('hidden');
       }
@@ -1736,7 +3047,7 @@
 
       confirmCloseCash() {
         this.closeCloseCashModal();
-        this.showToast('Caixa do dia fechado!');
+        this.showToast('Fechamento de caixa confirmado!');
       }
 
       // Reset Modal
@@ -1744,18 +3055,23 @@
       closeResetModal() { document.getElementById('modal-reset').classList.add('hidden'); }
 
       confirmReset() {
-        localStorage.removeItem('printtech_v4_items');
-        localStorage.removeItem('printtech_v4_sales');
-        localStorage.removeItem('printtech_v4_os');
-        this.items = [...INITIAL_STOCK_LIST];
-        this.sales = [...INITIAL_SALES];
-        this.osList = [...INITIAL_OS_LIST];
-        this.discounts = INITIAL_DISCOUNTS;
+        localStorage.removeItem('printtech_v5_state');
+        const fresh = this.normalizeAndMigrateState({
+          categories: DEFAULT_CATEGORIES,
+          items: INITIAL_STOCK_LIST,
+          sales: INITIAL_SALES,
+          osList: INITIAL_OS_LIST,
+          discounts: INITIAL_DISCOUNTS,
+          expenses: [],
+          distributions: []
+        });
+        Object.assign(this, fresh);
         this.cart = [];
         this.saveAll();
         this.closeResetModal();
+        this.populateQuickPrintPapers();
         this.renderAll();
-        this.showToast('Dados restaurados do backup oficial!');
+        this.showToast('Dados oficiais restaurados!');
       }
     }
 
